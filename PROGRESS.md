@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-27 20:08
-**Overall completion:** 35% (16 / 46 tasks)
+**Last updated:** 2026-10-28 19:57
+**Overall completion:** 39% (18 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -12,13 +12,13 @@
 | 1 | Problem Definition & Business Understanding | 10 | 3 / 3 ✅ | T07–T09 |
 | 2 | Dataset & Data Understanding | 10 | 2 / 2 ✅ | T10–T11 |
 | 3 | Data Preprocessing & Cleaning | 10 | 4 / 4 ✅ | T12–T15 |
-| 4 | EDA | 10 | 1 / 6 | T16–T21 |
+| 4 | EDA | 10 | 3 / 6 | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 0 / 4 | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 0 / 6 | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 0 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **16 / 46** | |
+| | **Total** | **100** | **18 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,20 +28,24 @@
 
 ## NEXT TASK
 
-**T17 | Phase 4 – EDA | Numeric distributions and skew.**
-Open: `notebooks/03_eda.ipynb` (§2), `reports/figures/02_numeric_distributions.png`.
-Plot the distribution of every numeric column of the classic training half and write **one
-interpretation line per variable** — the wording of an insight, not the shape of a histogram.
-**Done when:** the figure is saved to `reports/figures/02_numeric_distributions.png` and one
-interpretation line exists for each numeric variable.
-**Carry in:** the numeric set is `age`, `balance`, `day`, `duration`, `campaign`, `pdays`, `previous`
-plus the derived `days_since_contact` (D23). Three traps are already measured and must not be
-re-discovered: **`previous`'s IQR is 0** (81.7% of rows are zeros), so any median/IQR rescale divides
-by zero; **`balance` is negative for 3,766 rows** (legitimate overdrafts), so `log1p` is undefined
-and `arcsinh` is the correct transform if one is shown at all; and **`duration` is the post-outcome
-leak (D05)** — it belongs in the figure, clearly labelled, but never in the model. Skews measured in
-T13 from the full frame are `previous` +41.85, `balance` +8.36, `campaign` +4.90, `duration` +3.14;
-T17 should report the training-half values rather than reuse those numbers (D28).
+**T19 | Phase 4 – EDA | Campaign and history features vs subscription rate.**
+Open: `notebooks/03_eda.ipynb` (§4), `reports/figures/04_campaign_vs_target.png`.
+Write the timing, contact-type and previous-outcome insights: how `month`, `day`, `contact`, `campaign`,
+`pdays`, `previous` and `poutcome` move the rate, and what a campaign planner should do with them.
+**Done when:** the figure is saved to `reports/figures/04_campaign_vs_target.png` and the timing,
+contact-type and previous-outcome insights are written.
+**Carry in:** T18 measured the three categorical columns T19 owns. `contact` — `cellular` **14.83%**
+(n = 23,465) and `telephone` **13.94%** (n = 2,317) are **not statistically distinguishable**
+(two-proportion z = 1.16, p = 0.25, and their intervals overlap), so the real split is **known channel
+vs `unknown` (4.11%, 28.72% of rows)**, not cellular vs telephone. `month` — `may` carries **30.59%** of
+all calls at **6.68%**, while the four best months (`mar` 50.90%, `dec` 47.19%, `sep` 45.23%, `oct`
+43.75%) are also the four smallest (178–592 rows, **4.46%** combined) and their internal ordering
+**flips** once never-contacted clients are separated, so read the group and not its order. The timing
+effect does survive that control (`mar` 50.00% against `may` 5.51% inside a 9.22% subset base), so it is
+not prior-success composition. `poutcome` — `success` **64.65%**, `other` 16.50%, `failure` 12.29%,
+`unknown` 9.22%. Two structural facts to handle: `month` carries **no year**, so its 12 levels pool
+every campaign in the file; and `pdays`/`previous` are degenerate on the same 29,584 rows (T17), so
+"days since last contact" must come from `days_since_contact` (D23), never raw `pdays`.
 
 ---
 
@@ -77,6 +81,10 @@ T17 should report the training-half values rather than reuse those numbers (D28)
 | D26 | 2026-10-27 | The split is **stratified on the target and shuffled**, taken **after** conversion, fitted with **nothing**, and written **per variant** (`train.csv`/`test.csv` + `_additional` twins). Row identity in the files is positional, and identical source rows are **reported, not removed** | Measured, not stylistic. The classic file is **ordered by campaign date** (`may 5` → `nov 17`) and its positive rate climbs from **2.99%** in the first row-order decile to **47.09%** in the last, so the obvious "first 80% is train" split would put **31.58%** positives in test against 11.70% overall — a 19.9pp swing, 20× the ±1pp this task is graded on. Shuffling is what stops the split being a date cut in disguise. Stratifying gets the actual result to within **0.0012pp**. Splitting after conversion keeps D22/D23/D24 intact; fitting nothing before the split keeps test statistics out of training; separate per-variant splits keep D19's two pipelines from sharing rows |
 | D27 | 2026-10-27 | The Phase 3 checkers must **measure the frames they are handed**, never read the numbers out of the report they are checking; a separate check holds report and data together | Found by fault injection, not review: an earlier `validate_split` read `report["positive_rate_test"]` and therefore **passed a test half with every positive stripped out** (0.00% positives), because the report still described the honest split. A checker that validates a *description* rather than the data cannot see the two disagree. Rates, shares and NaN counts are now recomputed from `train`/`test`/`df` on every check, and one new check fails if any reported figure drifts from its measurement by more than 1e-12 |
 | D28 | 2026-10-27 | EDA is computed on the **training half only**, and the evaluation baselines are **fixed from it**: accuracy 88.3018% (always-`no`), PR-AUC random baseline 0.1170, ROC-AUC 0.50, and **5 folds** for CV | The test half must stay unseen until T32 or it stops being a held-out set, so every Phase 4 number comes from `data/processed/train.csv`. The baselines are *derived here rather than assumed*: the accuracy baseline is the majority share, and PR-AUC's random baseline is the positive rate (11.70%), not 0.5 — a distinction that decides whether a reported 0.6 is 5× lift or chance. The fold count is measured, not inherited: 5-fold stratified CV puts **846–847 positives in every validation fold**, while 10 folds would halve that denominator for no gain |
+| D29 | 2026-10-27 | Correlations between a numeric column and the target **drop missing rows pairwise**; no column is median-filled to make a correlation computable | Measured, and it changed the answer. Median-filling `days_since_contact`'s 29,584 missing rows (81.8% of the column) gave **−0.0452**, while the honest pairwise value over the 6,584 rows that have one is **−0.1526** — an understatement of 3.4× that also mis-ranked the runner-up, and therefore the ratio the EDA quotes for the leak. Missingness here means "never contacted before", so filling it with a median invents contact dates that never happened |
+| D30 | 2026-10-27 | Every numeric-distribution panel is drawn over that column's **1st–99th percentile window** and states the **full range and the share of plotted values it shows**; few-valued integer columns get **one bin per distinct value**; the leak column is coloured and labelled | The tails are the finding, so silently clipping them would be dishonest, while drawing `balance` (min −8,019 to max 102,127) or `previous` (81.8% zeros) over its full range collapses the real distribution into one bar. Stating the window and the full range discloses both. The bin rule was corrected after looking at the rendered figure: 50 bins over `campaign`'s 16 values produced bars alternating with empty bins, and `campaign` showed fractional ticks until integer locators were applied |
+| D31 | 2026-10-28 | Categorical association is measured with **Cramér's V**; every segment reports its **n** and a **Wilson 95% interval**; the middle of the ranking is read as a **tie**, not an order | With a binary target the formula collapses to sqrt(χ²/n), which is the only reason 2- to 12-level columns can be compared at all — but V still rewards degrees of freedom, and `job` spends 11 of them to reach 0.1378 where `housing` reaches 0.1393 with 1, so printing `dof` beside V turns a spurious ordering into an honest tie. Wilson rather than the normal interval because `month = dec` rests on 178 rows and `default = yes` converts at 5.87%, where the normal form runs below zero. The intervals also govern what may be claimed: `dec`'s 39.99%–54.51% cannot be separated from `mar`, `sep` or `oct`, even though the group is plainly above the base rate |
+| D32 | 2026-10-28 | Prior contact is represented by **`previously_contacted`** (D21), never by `poutcome != unknown` | Measured, and the two differ on exactly **5 rows**: 6,584 rows have `previous > 0` with a valid `pdays`, but only 6,579 carry a known `poutcome`. All 5 orphans have prior contact and no recorded outcome (2 of them subscribed), while the reverse case never occurs, so the implication runs one way only. Using `poutcome` as the flag would silently drop 5 contacted clients; modelling both as separate "contacted" indicators would encode one fact twice |
 
 ---
 
@@ -110,8 +118,8 @@ Tick only after the deliverable is verified to exist and run.
 
 ### Phase 4 — EDA
 - [x] T16 | Rubric 4 | Target distribution and class imbalance chart | Output: `reports/figures/01_target_distribution.png` | Done when: figure saved and a one-line viva insight is written next to it — **done 2026-10-27** (figure 1707×677 costing 66 KB, one-sentence viva pull-quote immediately after it; 4,231 / 31,937 = 11.6982%, 7.55 : 1; re-verified by **39/39 independent checks** and **byte-identical across two fresh runs**)
-- [ ] T17 | Rubric 4 | Numeric distributions and skew | Output: `reports/figures/02_numeric_distributions.png` | Done when: one interpretation line exists per numeric variable
-- [ ] T18 | Rubric 4 | Categorical features vs subscription rate | Output: `reports/figures/03_categorical_vs_target.png` | Done when: best and worst segments are identified with actual rates
+- [x] T17 | Rubric 4 | Numeric distributions and skew | Output: `reports/figures/02_numeric_distributions.png` | Done when: one interpretation line exists per numeric variable — **done 2026-10-27** (figure 2459×1194 px costing 196 KB with all 8 panels; **one interpretation line for each of the 8 numeric variables**; `previous` and `pdays` both have **IQR 0** and are the **same 29,584 rows**; `duration` correlates **+0.3967**, which is **2.60×** the runner-up; **60/60 independent checks** and identical output content across two runs)
+- [x] T18 | Rubric 4 | Categorical features vs subscription rate | Output: `reports/figures/03_categorical_vs_target.png` | Done when: best and worst segments are identified with actual rates — **done 2026-10-28** (all **44 levels** of the nine `object` columns measured with `n`, share, lift and **Wilson 95% intervals**; best `poutcome = success` **64.65%** (779/1,205) against worst `contact = unknown` **4.11%** (427/10,386), a **15.7×** gap; figure 2473×1773 px costing 274 KB; **123/123 independent checks**, and identical text plus identical figure bytes across two fresh runs)
 - [ ] T19 | Rubric 4 | Campaign/history features vs subscription rate | Output: `reports/figures/04_campaign_vs_target.png` | Done when: timing, contact-type and previous-outcome insights are written
 - [ ] T20 | Rubric 4 | Correlation heatmap of numeric features | Output: `reports/figures/05_correlation_heatmap.png` | Done when: strongest correlations with `y` are listed and multicollinearity is flagged
 - [ ] T21 | Rubric 4 | Consolidate EDA findings | Output: `docs/04_eda_insights.md` | Done when: every figure has its one-line business interpretation and at least 5 insights are listed
@@ -168,8 +176,10 @@ Tick only after the deliverable is verified to exist and run.
 | `src/clean.py` | Phase 3 (rubric 3, **T12**): the two cleaning decisions, implemented and justified in the module docstring — `unify_unknown()` (D22: keep `unknown` as an explicit category, normalise any NaN to it, never impute or delete; returns a per-column report) and `add_contact_history()` (D23: adds `previously_contacted` from `previous > 0` per D21 and `days_since_contact` with the sentinel → NaN, keeps raw `pdays`, warns when the sentinel and `previous` disagree). Plus `clean_frame()` / `clean()` (loads via the loader, so D13 holds) with no-touch invariants, `print_report()` and a runnable `python -m src.clean` self-check. **T14** turned it into the checked raw → processed converter: `process(variant)` (the single Phase 3 entry point, D13 respected), `validate()` returning **15 labelled checks as data** that are *total* and proven able to fail (D25: positional comparisons, an unexecutable check counts as FAILED, never raised), `print_conversion_report()` printing before/after shapes, dtypes and class balance, and a CLI that exits non-zero on any failure | 2026-10-27 |
 | `src/split.py` | Phase 3 (rubric 3, **T15**): the stratified train/test split. `split_frame()` (seeded, stratified, shuffled; returns train/test/report), `encode_target()`, `write_split()` (converts via `clean.process` so every half inherits T14's checks, then writes both files), `load_split()` with the declared-dtype guard, `validate_split()` (**15 checks that measure the frames, never the report** - D27) and `validate_round_trip()` (3 checks per file), plus `_duplicate_rows_spanning()` which reports duplicate source rows that straddle the halves instead of removing them (D26) | 2026-10-27 |
 | `data/processed/train.csv`, `test.csv`, `train_additional.csv`, `test_additional.csv` | Phase 3 (**T15**) outputs: the fixed evaluation halves, 36,168 / 9,043 rows (classic) and 32,950 / 8,238 (additional), 19 and 23 columns, target `y` still as text and `previously_contacted` as a real boolean. Byte-identical on a re-run of `python -m src.split` | 2026-10-27 |
-| `notebooks/03_eda.ipynb` | Phase 4 (rubric 4, **T16**): 17 cells (8 code) with stored outputs — a provenance-guarded load of the **train half only**, the class counts with share and cumulative share, the two-panel chart, the baselines the imbalance forces (always-`no` 88.3018% accuracy, PR-AUC 0.1170, ROC-AUC 0.50, 8.55 calls per subscription), the stratification sanity line against the population's 11.698480%, the 5-fold stratified positive counts (846/846/847/846/846), **13 in-notebook assertions** and a reproducibility record. Sections `2.`–`5.` are reserved for T17–T20 | 2026-10-27 |
+| `notebooks/03_eda.ipynb` | Phase 4 (rubric 4, **T16–T18**): 34 cells (15 code) with stored outputs. §1 (T16): a provenance-guarded load of the **train half only**, the class counts with share and cumulative share, the two-panel chart, the baselines the imbalance forces (always-`no` 88.3018% accuracy, PR-AUC 0.1170, ROC-AUC 0.50, 8.55 calls per subscription), the stratification sanity line against the population's 11.698480%, the 5-fold stratified positive counts (846/846/847/846/846). §2 (T17): the 8-column numeric profile, **one interpretation line per variable**, the three carried-in traps re-measured on this half, `|skew|` and IQR counts printed from the data. §3 (T18): all **44 levels** of the nine `object` columns with `n`, share, lift and **Wilson 95% intervals**, Cramér's V and `dof` per column, the **best and worst segments named with their rates**, the never-contacted control that stops `month` from being read as prior-success composition, and the 5-row gap between `poutcome` and `previously_contacted`. **Three evidence cells (13, 32 and 59 assertions)** and a reproducibility record covering all three sections. Sections `4.`–`5.` are reserved for T19–T20 | 2026-10-27 |
 | `reports/figures/01_target_distribution.png` | Phase 4 (**T16**) figure, 1707×677 px: class counts with counts and shares annotated beside the 100%-share bar carrying the **7.55 : 1** ratio | 2026-10-27 |
+| `reports/figures/02_numeric_distributions.png` | Phase 4 (**T17**) figure, 2459×1194 px: one log-count panel per numeric column, each drawn over its 1st–99th percentile window with the full range and the plotted share disclosed; median marked; one bin per value for the few-valued integer columns; `previous` annotated **IQR = 0**; `pdays` annotated with its 29,584 sentinel rows; `days_since_contact` with its 29,584 missing; `duration` coloured and labelled as the D05 leak | 2026-10-27 |
+| `reports/figures/03_categorical_vs_target.png` | Phase 4 (**T18**) figure, 2473×1773 px: one horizontal-bar panel per categorical column, panels ordered by **Cramér's V** and levels within a panel by rate, teal above and slate below the 11.6982% base-rate line, Wilson 95% whiskers, and `n` printed for every level so a 178-row rate cannot be read like a 29,589-row one | 2026-10-27 |
 | `src/cost.py` | Cost-of-errors model: labelled `ASSUMPTIONS` (C = €1.50, V = €20.00), `break_even_threshold()` → 0.0750, `expected_net_value_per_call()`, `should_call()`, `cost_of_errors()` (12.3:1 ratio), `expected_campaign_value()`, `best_threshold()`, `sensitivity_table()`, and a runnable `python -m src.cost` report | 2026-10-27 |
 | `docs/02_data_dictionary.md` | Phase 2 (rubric 2, **T10**): all 17 + 21 columns with measured type, values/range, meaning and leakage risk; variant difference summary; `unknown` and `pdays` sentinel tables; leakage assessment; self-check | 2026-10-27 |
 | `notebooks/01_data_understanding.ipynb` | Phase 2 (rubric 2, **T11**): 30-cell quality profile of both variants with stored outputs — inventory, dtypes, nulls, duplicates, concentration, `unknown` profile, `pdays` sentinel **plus a §7.1 test of whether the sentinel can be trusted**, skew/outliers, negative-value checks, 9 written findings and a 53-check cross-check against the T10 dictionary | 2026-10-27 |
@@ -722,6 +732,118 @@ the `*.log` scratch files remain ignored.
 **Next:** T17 — numeric distributions and skew for every numeric column into
 `reports/figures/02_numeric_distributions.png`, one interpretation line per variable, carrying in the
 three measured traps (`previous` IQR = 0, negative `balance`, `duration` as the labelled leak).
+
+### 2026-10-27 — Session 19  (T17 complete)
+**Completed:** **T17** — extended `notebooks/03_eda.ipynb` to 25 cells (11 code) and added
+`reports/figures/02_numeric_distributions.png` (2459×1194 px, 196 KB). The section profiles the eight
+numeric columns of the training half and writes **one interpretation line per variable**, which is what
+the task is graded on; the trailing sections were renumbered to `3.` and `4.` so the notebook still has
+no gap in its numbering.
+
+**What the training half says (re-measured here per D28, not carried over from T13).** Five of the eight
+numeric columns have `|skew|` above 2 — `previous` **+45.03**, `balance` **+8.34**, `campaign` **+4.94**,
+`duration` **+3.21**, `pdays` **+2.62** — while `age` (+0.69), `days_since_contact` (+0.69) and `day`
+(+0.09) are close to symmetric. `balance`'s mean of **€1,365** against a median of **€451** is the
+clearest case for scaling rather than trusting a raw value, and **3,001 rows (8.30%)** are negative,
+which is why `arcsinh` is the transform that survives and `log1p` is not.
+
+**The finding the task did not anticipate: `previous` is not the only column with a zero IQR.** `pdays`
+has one too (81.80% of rows are the −1 sentinel), so a median/IQR scaler divides by zero **twice**, not
+once. And the two degenerate columns turn out to be the **same 29,584 rows** — `pdays == -1` is
+element-for-element identical to `previous == 0`, 0 disagreements — so a single underlying fact, "this
+client was never contacted before", makes two columns useless as scales. The message to T23/T24 is a
+flag plus a real scale (D23's `days_since_contact`), not a different scaler.
+
+**Two numbers were corrected by measurement rather than carried forward.** `duration` correlates with
+the target at **+0.3967** and the runner-up is `days_since_contact` at **−0.1526**, a ratio of **2.60×**
+— not the "four times" a first pass assumed when the runner-up was computed with its missing rows
+median-filled instead of dropped (which understated it at −0.0452 and became D29). Spearman agrees on
+the ordering (**+0.3427** vs **−0.1873**). And `previous`'s skew on this half is **+45.03** against the
+**+41.85** T13 measured on the full frame, with `balance` losing 765 negative rows in the same move:
+exactly the drift D28 exists to catch.
+
+**Three corrections to my own work, each caught by a check rather than by review.** The generated
+section first printed "evidence: 31 assertion lines pass" while the cell contained **32** — a count
+written by hand instead of measured, the same defect class as D27. The first draft of the build script
+also **wiped the findings list** by replacing a whole cell where only its heading line should have
+changed; the script's anchors are asserted to match exactly once and it refused to write, so the
+notebook on disk never held that state. And two figure defects were visible only in the rendered PNG:
+`campaign` and `previous` were drawn with 50 bins across a handful of integer values (bars alternating
+with empty bins, plus fractional ticks on a count variable), and `days_since_contact`'s footnote read
+"17.9% of rows" where the truthful statement is "98.1% of the plotted values", since it has 29,584
+missing rows. All are fixed, and the footnote is now measured against the values the panel can plot
+(D30).
+
+**Verification:** `jupyter nbconvert --execute` exits **0** with 0 error outputs and every code cell
+holding an output; **60/60 independent checks** recomputed from `data/processed/train.csv` with plain
+pandas (42 on the data, 18 on the notebook), including the done-condition itself — one bullet per
+numeric variable, each carrying a measured number — and the heading sequence
+`1, 1.1, 1.2, 1.3, 2, 2.1, 2.2, 2.3, 3, 4`; two independent executions produce **identical output
+content, including the figure's PNG bytes**, the only variation being whether the kernel delivers a
+cell's stdout as one stream message or two, which is serialization rather than content; and the test
+half is still unread (`load_split("full", "train")` is the only load, no bare `read_csv` of a
+processed file). A pixel check confirmed `duration` is the only coloured panel title, so the warning
+colour is deliberate rather than accidental.
+
+**One note for later phases, recorded rather than changed:** the raw files are semicolon-delimited
+(`config.CSV_SEPARATOR`) while the processed splits are comma-delimited, because `split.write_split`
+uses `to_csv` defaults and `split.load_split` is the declared single reader for them. Nothing reads a
+processed file any other way, so this is consistent today — but code that later calls `read_csv` on
+`data/processed/*.csv` with `sep=";"` would silently get a single column.
+
+**Blocked:** none.
+**Uncommitted:** this session changed `notebooks/03_eda.ipynb`, added the T17 figure and edited this
+tracker; those edits are local, on top of the four commits pushed in Session 18.
+**Next:** T18 — categorical features vs subscription rate into
+`reports/figures/03_categorical_vs_target.png`.
+
+### 2026-10-28 — Session 20  (T18 complete)
+**Completed:** **T18** — extended `notebooks/03_eda.ipynb` to 34 cells (15 code) with a new §3, and added
+`reports/figures/03_categorical_vs_target.png` (2473×1773 px, 274 KB). All **44 levels** of the nine
+`object` columns are measured against the 11.6982% base rate, each carrying its row count and a Wilson
+95% interval; the trailing sections were renumbered to `4.` and `5.`, and the header cell — which still
+described the notebook as T16-only — now lists all three sections.
+
+**The answer the task grades.** Best segment **`poutcome = success`: 779/1,205 = 64.65%** (lift 5.53×),
+worst **`contact = unknown`: 427/10,386 = 4.11%** (lift 0.35×) — a **15.7× gap**. Unusually, both ends
+rest on large segments, so their intervals barely overlap (61.91%–67.30% against 3.75%–4.51%);
+`success` is 3.33% of the half but supplies **18.41%** of all subscribers, while `contact = unknown` is
+28.72% of the half and still supplies 10.09%.
+
+**What the ranking says.** Cramér's V puts `poutcome` (**0.3102**) and `month` (**0.2573**) clearly
+ahead, then `contact` 0.1500, `housing` 0.1393 and `job` 0.1378 as a **tie**, and `default` last at
+0.0241 (D31). The largest level is not a segment at all: `default = no` covers 35,521 rows — 98.21% of
+the half — so its 11.80% is the base rate wearing a label. The largest level that still carries
+information is `poutcome = unknown`, 29,589 rows (81.81%) at **9.22%**: the strongest column still
+leaves five clients in six in one bucket it cannot split, and that bucket is below average.
+
+**Two things the measurements forced.** The four highest-rate months are also the four smallest
+(178–592 rows, 4.46% combined), `dec`'s interval spans 39.99%–54.51%, and the order *inside* that group
+flips when never-contacted clients are separated (`sep` falls below `oct`) — so the group is a finding
+and its order is noise. And `poutcome = unknown` is not `previous == 0` (D32): 6,584 rows have prior
+contact, 6,579 have a known outcome, and the 5-row difference is one-way.
+
+**Three defects were caught by measuring, not by re-reading.** The assertion that the largest segment
+was `month = may` failed twice — first because the largest *month* is not the largest *segment*, then
+because the largest segment is `default = no` — so that claim was rewritten until it was true.
+`Series.argmax()` returned an index *label* where `iloc` needed a position, silently fetching a
+different row; `idxmax` with `.loc` fixed it. And the rendered PNG showed every annotation reading
+`0.65%` beside a 64.65% bar, because the label formatted the fraction without multiplying by 100 —
+invisible to the text checks and only caught by looking at the image. The evidence cell's assertion
+count is now read from its own source instead of typed, after T17 shipped "31" for 32 lines.
+
+**Verification:** `jupyter nbconvert --execute` exits **0** with 0 error outputs and every code cell
+holding an output; **123/123 independent checks** recomputed from `data/processed/train.csv` with plain
+pandas, including that the prose *contains* each formatted value it quotes, the heading sequence
+`1, 2, 3, 4, 5`, one bullet per categorical variable, and the best/worst done-condition; all three
+evidence cells' self-reported counts match their assertions (13, 32, **59**); two fresh executions give
+**identical text and identical figure bytes** (sha256 `706a773a…`); and the test half is still unread.
+
+**Blocked:** none.
+**Uncommitted:** `notebooks/03_eda.ipynb`, `PROGRESS.md` and the new figure, on top of the four commits
+pushed in Session 18. T17's edits were never pushed either, so the next push carries both sessions.
+**Next:** T19 — campaign and history features vs subscription rate into
+`reports/figures/04_campaign_vs_target.png`.
 
 ---
 

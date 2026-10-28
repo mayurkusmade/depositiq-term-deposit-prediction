@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-28 22:46
-**Overall completion:** 41% (19 / 46 tasks)
+**Last updated:** 2026-10-28 23:08
+**Overall completion:** 43% (20 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -12,13 +12,13 @@
 | 1 | Problem Definition & Business Understanding | 10 | 3 / 3 ✅ | T07–T09 |
 | 2 | Dataset & Data Understanding | 10 | 2 / 2 ✅ | T10–T11 |
 | 3 | Data Preprocessing & Cleaning | 10 | 4 / 4 ✅ | T12–T15 |
-| 4 | EDA | 10 | 4 / 6 | T16–T21 |
+| 4 | EDA | 10 | 5 / 6 | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 0 / 4 | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 0 / 6 | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 0 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **19 / 46** | |
+| | **Total** | **100** | **20 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,18 +28,18 @@
 
 ## NEXT TASK
 
-**T20 | Phase 4 – EDA | Correlation heatmap of the numeric features.**
-Open: `notebooks/03_eda.ipynb` (§5), `reports/figures/05_correlation_heatmap.png`.
-Rank the paired Pearson and Spearman correlations among the numeric columns, list the strongest
-associations with `y`, and flag multicollinearity before T24 builds the `ColumnTransformer`.
-**Done when:** the heatmap is saved to `reports/figures/05_correlation_heatmap.png`, the strongest
-correlations with `y` are listed, and multicollinearity is flagged.
-**Carry in:** `duration`'s +0.3967 dominates and must carry the D05 label rather than rank as the best
-available predictor (T17); `pdays`' +0.1007 is a sentinel artefact and `days_since_contact` at −0.1526 is
-the honest version of it. Three redundancies are already measured: `pdays` and `previous` are degenerate
-on the same 29,584 rows (IQR 0 in both), `days_since_contact` duplicates their content, and `campaign`
-has an IQR of 1 with skew +4.94. T19 also showed the `campaign` gradient survives inside all four prior
-outcomes, so a `poutcome`-conditioned view is available if the raw heatmap looks like composition.
+**T21 | Phase 4 – EDA | Consolidate the EDA into one written insight document.**
+Open: `docs/04_eda_insights.md`.
+Turn §1–§5 into prose: every figure gets its one-line business interpretation, and the findings are
+ranked by what a campaign planner should act on rather than by the order the figures were built.
+**Done when:** every figure has its one-line business interpretation and at least 5 insights are listed.
+**Carry in:** the five figures are `01_target_distribution.png` (11.6982%, 7.55 : 1), `02_numeric_…`
+(five of eight columns skewed past +2; two columns with IQR 0 on the same 29,584 rows),
+`03_categorical_…` (the 15.7× spread, `poutcome = success` 64.65% against `contact = unknown` 4.11%),
+`04_campaign_…` (the fourth call onward loses €32,906) and `05_correlation_heatmap.png` (`pdays` is a
+duplicate of `days_since_contact`). The notebook's §6 already holds 18 numbered findings, so T21 is a
+selection and rewrite task, not a re-analysis: the document should carry at least five insights but not
+all 18, and every number in it must be one of the 86 + 42 checks already verified.
 
 ---
 
@@ -82,6 +82,9 @@ outcomes, so a `poutcome`-conditioned view is available if the raw heatmap looks
 | D33 | 2026-10-28 | The `campaign` gradient is reported as **arithmetic about the call budget**, explicitly **not** as a causal effect of calling | A client recorded at six calls is one who declined five times, so part of the gradient is the definition of the column. What decides the question is what the extra calls cost and return, which is measurable without identifying a cause: 29,537 calls beyond the third return 570 subscriptions at €1.50 each against €20 of value, **−€32,906** net. The association is then checked for the confounds that are visible (prior outcome, prior contact, month) and survives all three, which is stated as evidence against the *composition* explanation rather than as proof of the reverse |
 | D34 | 2026-10-28 | Any call cap is **conditional**: three calls for clients with **no known prior outcome**, unlimited for clients whose previous campaign **succeeded** | The tail is not uniformly bad. Beyond the third call, `poutcome = unknown` returns **1.66%** a call (€90.43 per extra subscription) and `poutcome = success` returns **22.55%** (€6.65, three times break-even), and **93.28%** of all the extra calls go to the first group. A blanket cap would cut the one segment where persistence pays, which is exactly the error a single pooled average hides |
 | D35 | 2026-10-28 | `day` is kept as a raw feature but **no rule is built on it**; `campaign` enters T23 as a **capped count or bucket**, not the raw 1–63 scale | `day`'s marginal band difference (12.66% for 1–10 against 10.92% for 11–20, intervals not overlapping) **reverses inside `may`** (5.94% against 7.14% for 21–31) and changes direction month to month, and the column is entangled with `month` by construction (`jan` never runs below day 6, `feb` stops at 27, `may` starts at 4) — so a day rule would encode this file's calendar rather than the behaviour. `campaign`'s own scale is unusable for the same reason the bucket table exists: median 2, max 63, and the productivity changes by a factor of 3.4 between one call and ten |
+| D36 | 2026-10-28 | T24 keeps **`days_since_contact`** and **`previously_contacted`** and **drops raw `pdays`**; there is no other multicollinearity to defuse, so no PCA and no dropping of `balance` or `campaign` on "correlation" grounds | Measured: of the 28 off-diagonal pairs only two reach an absolute r of 0.20, and one of those is `pdays` ↔ `days_since_contact` at **+1.0000** — the same values, not merely correlated ones. With both present the 8-column complete-case matrix is **rank 7**, the condition number is **5.0×10¹⁶** and both VIFs are **9.0×10¹⁵**; with `pdays` dropped every VIF is **1.01–1.03**. Keeping the raw column would let a linear model split one effect between two names while the VIF appeared tolerable, because the sentinel masks the duplication in the full-column view |
+| D37 | 2026-10-28 | Any correlation involving **`pdays`** is reported on the **previously-contacted rows only** (or not at all); the whole-column value is a sentinel artefact and is never quoted as a finding | The column reads **+0.1007** against the target over all 36,168 rows and **−0.1526** — bit-for-bit `days_since_contact`'s value — once the 29,584 sentinel rows are removed, because −1 is the smallest possible value and therefore sorts as "very recent". A modeller acting on the +0.1007 would invert the effect for every real observation. This is the concrete reason D23 replaced the column instead of re-scaling it |
+| D38 | 2026-10-28 | The numeric correlation matrix and the categorical Cramér's V tables are **two halves of one feature ranking**, and neither is quoted as a ranking on its own | `duration` is the strongest number in the matrix (+0.3967) and unusable (D05); the strongest *usable* numeric is −0.1526; `poutcome` at V = 0.3102 is the strongest association anywhere in the data and does not appear in the heatmap at all, because Pearson cannot see a categorical column. Any statement of the form "the top predictors are …" therefore has to name which half it came from |
 
 ---
 
@@ -118,7 +121,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T17 | Rubric 4 | Numeric distributions and skew | Output: `reports/figures/02_numeric_distributions.png` | Done when: one interpretation line exists per numeric variable — **done 2026-10-27** (figure 2459×1194 px costing 196 KB with all 8 panels; **one interpretation line for each of the 8 numeric variables**; `previous` and `pdays` both have **IQR 0** and are the **same 29,584 rows**; `duration` correlates **+0.3967**, which is **2.60×** the runner-up; **60/60 independent checks** and identical output content across two runs)
 - [x] T18 | Rubric 4 | Categorical features vs subscription rate | Output: `reports/figures/03_categorical_vs_target.png` | Done when: best and worst segments are identified with actual rates — **done 2026-10-28** (all **44 levels** of the nine `object` columns measured with `n`, share, lift and **Wilson 95% intervals**; best `poutcome = success` **64.65%** (779/1,205) against worst `contact = unknown` **4.11%** (427/10,386), a **15.7×** gap; figure 2473×1773 px costing 274 KB; **123/123 independent checks**, and identical text plus identical figure bytes across two fresh runs)
 - [x] T19 | Rubric 4 | Campaign/history features vs subscription rate | Output: `reports/figures/04_campaign_vs_target.png` | Done when: timing, contact-type and previous-outcome insights are written — **done 2026-10-28** (figure 2468×1449 px costing 252 KB with six panels; **one interpretation line for each of the seven campaign/history variables**; the 4th call onward measured as value-destroying — clients needing 4+ calls hold **52.68% of the 99,966 calls for 13.47% of the 4,231 successes**, the first three calls convert at **7.7386%** against D17's **7.50%** break-even while the extra calls convert at **1.9298%**, i.e. **€77.73** per extra subscription against a €20 deposit and **−€32,906** net; the cap must be targeted because **93.28%** of the tail sits in the no-known-outcome group while `poutcome = success` still returns **22.55%** a call; **86/86 independent checks**, and identical text plus identical figure bytes across the stored notebook and two fresh runs)
-- [ ] T20 | Rubric 4 | Correlation heatmap of numeric features | Output: `reports/figures/05_correlation_heatmap.png` | Done when: strongest correlations with `y` are listed and multicollinearity is flagged
+- [x] T20 | Rubric 4 | Correlation heatmap of numeric features | Output: `reports/figures/05_correlation_heatmap.png` | Done when: strongest correlations with `y` are listed and multicollinearity is flagged — **done 2026-10-28** (figure 2443×1921 px costing 343 KB with four panels; Pearson **and** Spearman on a shared colour scale, the target ranking annotated with the **rows behind each coefficient**, and the pairwise-complete counts plotted so a 6,584-row correlation cannot be read like a 36,168-row one; the ranking is listed in §5.1; **multicollinearity flagged as a duplicate rather than a correlated pair** — only **2 of 28** off-diagonal pairs reach |r| ≥ 0.20, but `pdays` and `days_since_contact` are the **same number on all 6,584 rows where both exist**, making the complete-case matrix **rank 7 of 8** with condition number **5.0×10¹⁶** and VIF **9.0×10¹⁵** for both, while every VIF is **1.01–1.03** once `pdays` is dropped; **42/42 independent checks** and identical text plus figure bytes across the stored notebook and two fresh runs)
 - [ ] T21 | Rubric 4 | Consolidate EDA findings | Output: `docs/04_eda_insights.md` | Done when: every figure has its one-line business interpretation and at least 5 insights are listed
 
 ### Phase 5 — Feature Engineering & Selection
@@ -173,11 +176,12 @@ Tick only after the deliverable is verified to exist and run.
 | `src/clean.py` | Phase 3 (rubric 3, **T12**): the two cleaning decisions, implemented and justified in the module docstring — `unify_unknown()` (D22: keep `unknown` as an explicit category, normalise any NaN to it, never impute or delete; returns a per-column report) and `add_contact_history()` (D23: adds `previously_contacted` from `previous > 0` per D21 and `days_since_contact` with the sentinel → NaN, keeps raw `pdays`, warns when the sentinel and `previous` disagree). Plus `clean_frame()` / `clean()` (loads via the loader, so D13 holds) with no-touch invariants, `print_report()` and a runnable `python -m src.clean` self-check. **T14** turned it into the checked raw → processed converter: `process(variant)` (the single Phase 3 entry point, D13 respected), `validate()` returning **15 labelled checks as data** that are *total* and proven able to fail (D25: positional comparisons, an unexecutable check counts as FAILED, never raised), `print_conversion_report()` printing before/after shapes, dtypes and class balance, and a CLI that exits non-zero on any failure | 2026-10-27 |
 | `src/split.py` | Phase 3 (rubric 3, **T15**): the stratified train/test split. `split_frame()` (seeded, stratified, shuffled; returns train/test/report), `encode_target()`, `write_split()` (converts via `clean.process` so every half inherits T14's checks, then writes both files), `load_split()` with the declared-dtype guard, `validate_split()` (**15 checks that measure the frames, never the report** - D27) and `validate_round_trip()` (3 checks per file), plus `_duplicate_rows_spanning()` which reports duplicate source rows that straddle the halves instead of removing them (D26) | 2026-10-27 |
 | `data/processed/train.csv`, `test.csv`, `train_additional.csv`, `test_additional.csv` | Phase 3 (**T15**) outputs: the fixed evaluation halves, 36,168 / 9,043 rows (classic) and 32,950 / 8,238 (additional), 19 and 23 columns, target `y` still as text and `previously_contacted` as a real boolean. Byte-identical on a re-run of `python -m src.split` | 2026-10-27 |
-| `notebooks/03_eda.ipynb` | Phase 4 (rubric 4, **T16–T19**): 44 cells (19 code) with stored outputs. §1 (T16): a provenance-guarded load of the **train half only**, the class counts with share and cumulative share, the two-panel chart, the baselines the imbalance forces (always-`no` 88.3018% accuracy, PR-AUC 0.1170, ROC-AUC 0.50, 8.55 calls per subscription), the stratification sanity line against the population's 11.698480%, the 5-fold stratified positive counts (846/846/847/846/846). §2 (T17): the 8-column numeric profile, **one interpretation line per variable**, the three carried-in traps re-measured on this half, `|skew|` and IQR counts printed from the data. §3 (T18): all **44 levels** of the nine `object` columns with `n`, share, lift and **Wilson 95% intervals**, Cramér's V and `dof` per column, the **best and worst segments named with their rates**, the never-contacted control that stops `month` from being read as prior-success composition, and the 5-row gap between `poutcome` and `previously_contacted`. §4 (T19): the seven campaign/history variables, **one interpretation line each**, the call-budget table with its cost arithmetic, and four controls that pin which effects survive. **Four evidence cells (13, 32, 59 and 79 assertions)** and a reproducibility record covering all four sections; sections `5.` and `6.` hold the findings list and the record, with §5 left as T20's slot | 2026-10-28 |
+| `notebooks/03_eda.ipynb` | Phase 4 (rubric 4, **T16–T20**): 53 cells (22 code) with stored outputs. §1 (T16): a provenance-guarded load of the **train half only**, the class counts with share and cumulative share, the two-panel chart, the baselines the imbalance forces (always-`no` 88.3018% accuracy, PR-AUC 0.1170, ROC-AUC 0.50, 8.55 calls per subscription), the stratification sanity line against the population's 11.698480%, the 5-fold stratified positive counts (846/846/847/846/846). §2 (T17): the 8-column numeric profile, **one interpretation line per variable**, the three carried-in traps re-measured on this half, `|skew|` and IQR counts printed from the data. §3 (T18): all **44 levels** of the nine `object` columns with `n`, share, lift and **Wilson 95% intervals**, Cramér's V and `dof` per column, the **best and worst segments named with their rates**, the never-contacted control that stops `month` from being read as prior-success composition, and the 5-row gap between `poutcome` and `previously_contacted`. §4 (T19): the seven campaign/history variables, **one interpretation line each**, the call-budget table with its cost arithmetic, and four controls that pin which effects survive. §5 (T20): Pearson and Spearman matrices on a shared scale, the target ranking with the rows behind each coefficient, and the pairwise-complete counts. **Five evidence cells (13, 32, 59, 79 and 38 assertions)** and a reproducibility record covering all five sections; §6 holds the 18-item findings list and §7 the record | 2026-10-28 |
 | `reports/figures/01_target_distribution.png` | Phase 4 (**T16**) figure, 1707×677 px: class counts with counts and shares annotated beside the 100%-share bar carrying the **7.55 : 1** ratio | 2026-10-27 |
 | `reports/figures/02_numeric_distributions.png` | Phase 4 (**T17**) figure, 2459×1194 px: one log-count panel per numeric column, each drawn over its 1st–99th percentile window with the full range and the plotted share disclosed; median marked; one bin per value for the few-valued integer columns; `previous` annotated **IQR = 0**; `pdays` annotated with its 29,584 sentinel rows; `days_since_contact` with its 29,584 missing; `duration` coloured and labelled as the D05 leak | 2026-10-27 |
 | `reports/figures/03_categorical_vs_target.png` | Phase 4 (**T18**) figure, 2473×1773 px: one horizontal-bar panel per categorical column, panels ordered by **Cramér's V** and levels within a panel by rate, teal above and slate below the 11.6982% base-rate line, Wilson 95% whiskers, and `n` printed for every level so a 178-row rate cannot be read like a 29,589-row one | 2026-10-27 |
 | `reports/figures/04_campaign_vs_target.png` | Phase 4 (**T19**) figure, 2468×1449 px: rate by calls placed with the base rate and the **7.50% break-even** as two reference lines; the call budget as **cost against value** for calls 1–3 and 4+, annotated with the net; rate by prior contacts; recency with the never-contacted group as its own bar; the robustness check that splits the gradient by prior contact; and the negative result showing `day`'s marginal lead reversing inside `may` | 2026-10-28 |
+| `reports/figures/05_correlation_heatmap.png` | Phase 4 (**T20**) figure, 2443×1921 px: Pearson and Spearman matrices on one colour scale so their disagreement is visible, the target ranking as dodged bars annotated with both coefficients and the `n` behind each row, and the pairwise-complete **row-count matrix** that qualifies every cell; `pdays` and `days_since_contact` coloured to mark the duplicate, `duration` marked as the D05 leak | 2026-10-28 |
 | `src/cost.py` | Cost-of-errors model: labelled `ASSUMPTIONS` (C = €1.50, V = €20.00), `break_even_threshold()` → 0.0750, `expected_net_value_per_call()`, `should_call()`, `cost_of_errors()` (12.3:1 ratio), `expected_campaign_value()`, `best_threshold()`, `sensitivity_table()`, and a runnable `python -m src.cost` report | 2026-10-27 |
 | `docs/02_data_dictionary.md` | Phase 2 (rubric 2, **T10**): all 17 + 21 columns with measured type, values/range, meaning and leakage risk; variant difference summary; `unknown` and `pdays` sentinel tables; leakage assessment; self-check | 2026-10-27 |
 | `notebooks/01_data_understanding.ipynb` | Phase 2 (rubric 2, **T11**): 30-cell quality profile of both variants with stored outputs — inventory, dtypes, nulls, duplicates, concentration, `unknown` profile, `pdays` sentinel **plus a §7.1 test of whether the sentinel can be trusted**, skew/outliers, negative-value checks, 9 written findings and a 53-check cross-check against the T10 dictionary | 2026-10-27 |
@@ -891,6 +895,51 @@ released non-interactively (`GIT_TERMINAL_PROMPT=0`, `GCM_INTERACTIVE=never`), t
 `GH_TOKEN`/`GITHUB_TOKEN` in the environment, and the local SSH key is not authorised on GitHub
 (`Permission denied (publickey)`). A one-line interactive `git push` from a terminal resolves it.
 **Next:** T20 — the numeric correlation heatmap into `reports/figures/05_correlation_heatmap.png`.
+
+---
+
+### 2026-10-28 — Session 22  (T20 complete)
+**Completed:** **T20** — extended `notebooks/03_eda.ipynb` to 53 cells (22 code) with a new §5, and
+added `reports/figures/05_correlation_heatmap.png` (2443×1921 px, 343 KB). Pearson and Spearman are
+shown on one colour scale because seven of the eight numeric columns are skewed, and every cell is
+annotated with the **number of rows behind it** — the section's central warning, since a correlation
+involving `days_since_contact` rests on 6,584 rows and everything else on 36,168.
+
+**The finding that changes a decision.** The numeric half is **nearly orthogonal**: of the 28
+off-diagonal pairs only **two** reach |r| ≥ 0.20. The severe problem is not a correlated pair but a
+**duplicate column** — `pdays` and `days_since_contact` are the same number on all 6,584 rows where both
+exist, which makes the complete-case matrix **rank 7 of 8** with condition number **5.0×10¹⁶** and hands
+both columns a VIF of **9.0×10¹⁵**. Drop `pdays` and every remaining VIF is **1.01–1.03**. Hence D36:
+T24 keeps `days_since_contact` plus `previously_contacted` and drops raw `pdays`, and there is nothing
+else to defuse.
+
+**Two readings the matrix alone would get wrong.** `pdays` correlates **+0.1007** with the target over
+the whole column and **−0.1526** — exactly `days_since_contact`'s value — on the contacted rows, because
+−1 sorts as "very recent" (D37). And a line understates structure it cannot see: `campaign`'s r² is
+0.0052 against the six-bucket η² of 0.0076, while `previous`'s step at zero (9.22% → 20.65%, T19) reads
+as +0.0888. `duration` stays first at +0.3967 and remains unusable (D05); the strongest *usable* numeric
+is −0.1526, and `poutcome` at V = 0.3102 never appears at all (D38).
+
+**Four defects were caught before shipping.** A stray `del span` and an f-string whose `\n` the
+generator's own string literal consumed (a `SyntaxError`, caught by validating the cells standalone
+before they ever reached the notebook); `xlim` and annotation placement in panel 3, where negative rows
+pushed their numbers into the tick labels; and `imshow`'s equal aspect leaving a band of empty canvas
+above two shrunken matrices. Two more appeared only in the rendered PNG: literal backticks in three
+matplotlib strings, and the top row's rotated tick labels colliding with the bottom row's titles. The
+`tight_layout` call also warned that colorbar axes from an explicit gridspec are "not compatible" with
+it — replaced with explicit margins so the inline and Agg backends produce the same file.
+
+**Verification:** `jupyter nbconvert --execute` exits **0** with 0 error outputs and all 22 code cells
+holding output; **42/42 independent checks** recomputed from `data/processed/train.csv` with plain pandas,
+including the rank, condition number and VIFs recomputed from scratch, the ranking order, and that the
+prose *contains* each of 37 quoted values; the evidence cell counts its own **38** assertions from source
+(D27); the stored notebook plus two fresh executions give **identical text and identical PNG bytes for
+all five figures**; and the test half is still unread.
+
+**Blocked:** three commits are now unpushed (`a87be66`, `ec739e9` and this one). `git push` still cannot
+authenticate: no interactive credential, no `GH_TOKEN`, and the local SSH key is not authorised on
+GitHub. A one-line interactive `git push` resolves it.
+**Next:** T21 — consolidate §1–§5 into `docs/04_eda_insights.md`.
 
 ---
 

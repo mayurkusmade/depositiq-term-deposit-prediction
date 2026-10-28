@@ -1131,8 +1131,11 @@ scaled cell recomputed with `numpy` mean/std, 450 spot-checked rows for one-hot 
 compatibility — and the T36 toggle is exercised end to end: **arm A 65 columns, arm B 66**, differing by
 exactly `duration`.
 
-**Blocked:** unchanged — `git push` cannot authenticate from this shell. **Seven commits are now
-unpushed**; the tracker records which.
+**Blocked:** none — and the long-standing one is gone. `git push` succeeded from this shell for the first
+time since Session 18 (`5e20d58..85e2fd9 main -> main`, exit 0), so the **seven** commits that had been
+accumulating locally (`a87be66`, `ec739e9`, `3334e49`, `b6f76fb`, `a3b4d04`, `38f61bc`, `85e2fd9`) are on
+the remote and `origin/main` now equals `HEAD`. The credential helper is evidently holding a token now;
+nothing in the workflow changed.
 **Uncommitted:** at the time of writing, `src/preprocess.py`, `PROGRESS.md` and this session's script.
 **Next:** T25 — feature selection and importance in `src/select.py`, comparing mutual information against
 model importance per one-hot *level* and reading the ranking back to the 17 source features.
@@ -1147,7 +1150,11 @@ model importance per one-hot *level* and reading the ranking back to the 17 sour
    in Sessions 2–17 was stale from that moment on. The remaining files were then committed and pushed
    in Session 18; `origin/main` is now `a734914` and its tree matches the working tree file for file.
    The one genuine obstacle was that a push requires an interactive Git Credential Manager sign-in,
-   which the agent's shell cannot drive (see Session 18).
+   which the agent's shell could not drive (see Session 18). **Resolved again, and properly, 2026-10-29
+   (Session 26):** the same push now succeeds non-interactively — `5e20d58..85e2fd9 main -> main`, exit
+   0 — so the credential helper is holding a token and the seven commits that had queued up locally
+   since Session 19 are pushed. This item is closed; it should not be reopened unless a push actually
+   fails again.
 2. **Primary dataset confirmation.** I have assumed `bank-full.csv` is primary and
    `bank-additional-full.csv` optional (D02). Confirm, or say if the richer variant should lead.
 3. **Deliverable format.** Assumed a written report **and** a slide deck are both marked

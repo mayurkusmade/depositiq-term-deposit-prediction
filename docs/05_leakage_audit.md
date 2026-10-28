@@ -283,3 +283,187 @@ attributes in the EDA. That is exactly why it is excluded: a model containing it
 conversations it has already had, not the clients it has to choose between. I measured the cost of
 honesty as a specification rather than an apology — the same pipeline run twice with one column
 toggled, same folds, same preprocessing, and the gap reported in PR-AUC and in money."
+
+---
+
+## 8. Feature selection: what the ranking does with the leak (T25)
+
+T25 asks for two importance methods, compared, with every keep and every drop justified. This section is
+the record: `src/select.py` prints every number below, and `reports/figures/06_feature_importance.png`
+draws both rankings over the same 17 features. The 17 are the features behind T24's 65 columns, so the
+leak is already gone from the matrix before anything here is measured - which is the point of ordering it
+after §3-§4 rather than before.
+
+### 8.1 The two rankings
+
+**M1 - mutual information** on the 17 source features (a categorical enters as its integer codes, so `job`
+is one 12-level variable), each judged against **its own permutation null** from 10 label shuffles.
+**M2 - permutation importance**: the ROC-AUC lost when a feature's columns are shuffled, on the whole
+held-out fold, from a 200-tree forest whose out-of-fold ROC-AUC is **0.7936 +/- 0.0063**.
+
+| feature | MI | its null 95th | z | MI rank | AUC lost when shuffled | model rank |
+|---|---|---|---|---|---|---|
+| `month` | 0.0240 | 0.0003 | 271.9 | 2 | **+0.04971** +/- 0.00461 | **1** |
+| `contact` | 0.0134 | 0.0001 | 400.7 | 4 | +0.03270 +/- 0.00851 | 2 |
+| `poutcome` | **0.0291** | 0.0001 | 707.8 | **1** | +0.01905 +/- 0.00282 | 3 |
+| `day` | 0.0082 | 0.0025 | 7.4 | 11 | +0.01498 +/- 0.00102 | 4 |
+| `age` | 0.0127 | 0.0014 | 21.2 | 6 | +0.01000 +/- 0.00265 | 5 |
+| `housing` | 0.0097 | 0.0001 | 444.9 | 9 | +0.00732 +/- 0.00220 | 6 |
+| `recency_band` | 0.0132 | 0.0002 | 232.3 | 5 | +0.00614 +/- 0.00207 | 7 |
+| `marital` | 0.0023 | 0.0001 | 125.6 | 16 | +0.00453 +/- 0.00277 | 8 |
+| `balance_arsinh` | 0.0222 | 0.0026 | 20.1 | 3 | +0.00390 +/- 0.00068 | 9 |
+| `campaign_bucket` | 0.0041 | 0.0002 | 74.9 | 13 | +0.00271 +/- 0.00256 | 10 |
+| `previously_contacted` | 0.0115 | 0.0000 | 635.1 | 8 | +0.00241 +/- 0.00159 | 11 |
+| `previous_capped` | 0.0116 | 0.0001 | 527.7 | 7 | +0.00233 +/- 0.00145 | 12 |
+| `education` | 0.0024 | 0.0001 | 68.6 | 15 | +0.00069 +/- 0.00093 | 13 |
+| `loan` | 0.0025 | 0.0001 | 124.4 | 14 | +0.00052 +/- 0.00131 | 14 |
+| `default` | 0.0004 | 0.0000 | 27.5 | 17 | -0.00010 +/- 0.00015 | 15 |
+| `balance_band` | 0.0050 | 0.0001 | 127.1 | 12 | -0.00023 +/- 0.00085 | 16 |
+| `job` | 0.0085 | 0.0002 | 120.5 | 10 | -0.00036 +/- 0.00039 | 17 |
+
+The two orderings correlate at **Spearman +0.647** - substantial, and far from agreement. `poutcome`
+tops the filter and sits third for the model; `month` does the reverse; `marital` moves eight places.
+
+The `null 95th` column is what makes the MI column readable. Raw MI is biased upward by cardinality, so
+`month` (12 levels) would out-rank `contact` (3) even if neither carried information; dividing by each
+feature's own null is what separates 0.0240 with signal from 0.0240 of bias. It also shows how sharp the
+null is: the narrowest null standard deviation is **1.25e-05**, which is why the `z` column is enormous
+for everything and is **not** used as an effect size anywhere below.
+
+### 8.2 Where they disagree, and why neither wins
+
+Five features sit 5 or more rank places apart:
+
+- **`marital`** - filter 16, model 8. Marginal association is nearly nil (MI 0.0023) but the forest uses
+  it for **+0.00453** AUC. This is the classic masked-signal case: alone it says little, in combination
+  it separates.
+- **`day`** - filter 11, model 4. D35 already established that `day`'s marginal band difference
+  **reverses inside `may`**, so a marginal statistic averages a real interaction to nothing while a tree
+  can split on `day` x `month`. The model is right here and the filter cannot be.
+- **`balance_arsinh`** - filter 3, model 9. The filter sees the monotone relationship; the forest finds
+  the same information reachable through `age` and `day`.
+- **`previous_capped`** (7 vs 12) and **`job`** (10 vs 17) - the filter rates both on association the
+  forest does not need, since `poutcome` and `previously_contacted` already carry the contact history and
+  `job`'s levels are largely reproduced by `education`, which is itself weak.
+
+Neither ranking is corrected by the other. The disagreement is the input to the next step, not a problem
+to be smoothed away by averaging two ranks.
+
+### 8.3 The screen, and the finding that it cannot decide
+
+Nominating a feature required **either** view to be unable to see it: MI at or below its own 95th
+percentile, **or** `AUC lost - sd <= 0`.
+
+Measured, the first condition never fires. No feature has `z < 1`; the lowest is `day` at **7.4**,
+**16 of 17** clear `z = 20`, and the smallest MI in the table (`default`, 0.0004 nats) still sits at
+`z = 27.5`. With 10 shuffles of 36,168 rows there is almost no room for spurious association, so
+**every nominee comes from the model half**. The rule I wrote had two conditions and only one of them was
+capable of being false - which is precisely why it is not allowed to make the decision on its own.
+
+That leaves **five nominees**, each labelled *model blind, filter sees it*: `education`, `loan`, `default`,
+`balance_band`, `job`.
+
+`campaign_bucket` carries a declared **carve-out** (it is the model's only representation of the T19/D33
+call-budget finding, which §6 of the report discusses while the shipped model is on display). In the event
+the carve-out was not needed: it cleared the model condition by **+0.00015** AUC, which is inside
+rounding distance of the noise. It is recorded as a guard that exists rather than a decision that was
+taken.
+
+### 8.4 The ablation, which does decide
+
+The five nominees were removed **as a group**, the same five folds were re-run, and the paired per-fold
+differences decide:
+
+| fold | all 17 features (65 cols) | 12 features (40 cols) | delta |
+|---|---|---|---|
+| 1 | 0.78816 | 0.78688 | -0.00129 |
+| 2 | 0.80354 | 0.80429 | **+0.00075** |
+| 3 | 0.78568 | 0.78229 | -0.00340 |
+| 4 | 0.79410 | 0.79593 | **+0.00183** |
+| 5 | 0.79653 | 0.79794 | **+0.00141** |
+| **mean** | | | **-0.00014 +/- 0.00195** |
+
+Three of five folds **improve** when the five features are removed, and the mean loss is 0.00014 against a
+spread of 0.00195 - the loss is **14 times smaller than its own noise**.
+
+My first version of this test compared the mean against exactly zero, which would have made the verdict
+turn on that 0.00014. That is not a threshold, it is a coin flip with a decimal point. The rule is now the
+**one-standard-error form** used in model selection: take the simpler model when its score is within one
+standard error of the best. Concretely, the group goes if `mean delta >= -sd`. Stage 1 already judged
+features by "distinguishable from zero"; stage 2 now uses the same standard.
+
+### 8.5 The decision
+
+**Dropped (5):** `education`, `loan`, `default`, `balance_band`, `job`.
+
+- `education`, `loan`, `default` - the three weakest categoricals by both measures; `default` is
+  **0.0004 nats** of mutual information and costs **-0.00010** AUC when shuffled.
+- `balance_band` - redundant with `balance_arsinh`, which keeps the balance information at a finer
+  resolution and is 9th by the model. The band's only distinctive content (the dip above EUR 5,000) is not
+  something the forest uses.
+- `job` - the largest single block in the matrix (**12 columns** of the 65) and the 17th by the model:
+  shuffling all twelve costs **-0.00036** AUC. It is 10th by mutual information, which is the disagreement
+  the ablation resolves against it.
+
+**Kept (12):** `month`, `contact`, `poutcome`, `day`, `age`, `housing`, `recency_band`, `marital`,
+`balance_arsinh`, `campaign_bucket`, `previously_contacted`, `previous_capped` - the shipped matrix is
+**40 columns, down from 65**.
+
+One consequence worth stating rather than letting a reader discover it: the shipped model keeps `age` and
+`marital` but no longer sees `job` or `education`. D16 already scopes out a formal fairness audit, and
+this decision is not one - but a model that has stopped using occupation and schooling is a defensible
+place to be, and it happened for measured reasons rather than as a gesture.
+
+### 8.6 What this says, and does not say, about the leak
+
+- **No forbidden column was ranked.** `duration`, `pdays` and `y` are absent from the matrix, so the
+  check that they never reached the ranking is a test, not a promise.
+- **This cannot be used to argue the leak is expendable.** Everything here is computed on the feature set
+  §3-§4 already stripped. `duration` is worth **0.8078** ROC-AUC by itself (§3.2); nothing in this ranking
+  measures or implies what would be gained or lost by admitting it.
+- **Selection is not itself a leakage surface here.** The ablation re-uses the folds materialised before
+  it, and every fold refits the T24 preprocessor inside its own training rows (D24), so no fold's scaler
+  or encoder ever saw another fold's rows.
+- **The decision is instrument-specific, and that is a limitation.** The forest is not the shipped model
+  (D08 selects XGBoost; T26-T30 choose and tune it). A feature can be redundant to one learner and useful
+  to another - `job`'s twelve columns are a plausible case for the linear baseline. The ablation numbers
+  are on record so that if T32 finds the reduced set underperforming, this decision is the first thing
+  revisited, with evidence rather than hindsight.
+- **Block attribution overstates overlapping levels.** Permutation importance is summed within a feature
+  block, so a block whose one-hot levels predict the same thing has its contribution counted more than
+  once. The direction of that bias is known (upward) and is stated rather than corrected.
+
+### 8.7 Two defects the measurement caught
+
+Both were mine, and neither was visible from reading the code.
+
+1. **A head slice of a validation fold is a time slice.** The first version permuted on
+   `X_valid.iloc[:3000]` to save time. `StratifiedKFold` returns indices in ascending original order and
+   the file is ordered by campaign date (D26), so those 3,000 rows were the campaign's opening weeks.
+   They contained **no** `poutcome=success` rows at all, which made 20 columns constant: `poutcome`,
+   `recency_band`, `previous_capped` and `previously_contacted` came back at exactly
+   **0.00000 +/- 0.00000**, `housing` at -0.00711, and the screen nominated **13 of 17** features
+   including `month`, the most important one. Using the whole fold removed it. The cost of the shortcut
+   was not a noisier number but a wrong one.
+2. **A threshold inside the noise is not a threshold.** Discussed in §8.4: the mean ablation effect was
+   14 times smaller than its spread, so comparing it against exactly zero decided the question by
+   rounding.
+
+### 8.8 Self-check against the done-condition
+
+| Requirement | Where satisfied |
+|---|---|
+| At least two methods, compared | §8.1 - mutual information with a per-feature permutation null, and permutation importance from a fixed forest, both over the same 17 features, with **Spearman +0.647** reported and the five rank gaps of 5+ explained in §8.2 |
+| Kept features justified | §8.5 - 12 kept, each with its measured contribution; the five that only one method saw are justified by the ablation rather than by preference |
+| Dropped features justified | §8.5 - 5 dropped, each named with the evidence that nominated it and the group ablation that confirmed the loss is within one sd of zero |
+| A third method, so the decision is measured | §8.4 - the group ablation, three of five folds improving and a mean loss 14x smaller than the noise |
+| The figure exists | `reports/figures/06_feature_importance.png`, 128 KB, both rankings on one pair of axes with each feature's own null drawn and dropped features hatched |
+| Numbers reproducible, not typed | `python -m src.select` prints every figure in this section; the module runs **17 checks** on its own output, and one of them rebuilds the shipped 40-column matrix rather than trusting the count |
+
+*Interpretation for the viva:* "Two methods that disagree are more useful than one that agrees with
+itself, so I reported both and then settled the argument by measurement rather than by preference: drop
+the five features that either method could not see, then check whether the model actually gets worse.
+Held-out ROC-AUC moved by minus 0.0001 with a spread of 0.002, so the five went and the matrix dropped
+from 65 columns to 40. What I will not claim is that this transfers to the XGBoost model T32 will
+evaluate - a forest failing to use `job` is not proof that `job` is useless, which is exactly why the
+ablation numbers are in the record."

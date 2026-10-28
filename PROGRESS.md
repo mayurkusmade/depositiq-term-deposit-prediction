@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-29 01:50
-**Overall completion:** 52% (24 / 46 tasks)
+**Last updated:** 2026-10-29 03:40
+**Overall completion:** 54% (25 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -13,12 +13,12 @@
 | 2 | Dataset & Data Understanding | 10 | 2 / 2 ✅ | T10–T11 |
 | 3 | Data Preprocessing & Cleaning | 10 | 4 / 4 ✅ | T12–T15 |
 | 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
-| 5 | Feature Engineering / Selection | 10 | 3 / 4 | T22–T25 |
+| 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 0 / 6 | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 0 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **24 / 46** | |
+| | **Total** | **100** | **25 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,20 +28,21 @@
 
 ## NEXT TASK
 
-**T25 | Phase 5 – Feature Engineering | Feature selection / importance with justification.**
-Open: `src/select.py`, `reports/figures/06_feature_importance.png`, notes appended to
-`docs/05_leakage_audit.md`.
-Rank the **65 columns** `src/preprocess.py` builds, two independent ways — mutual information and a
-model's own importance — and justify every keep and every drop. The methods must be compared on the same
-matrix, and a disagreement has to be resolved rather than averaged away.
-**Done when:** at least two methods (mutual information + model importance) are compared and kept/dropped
-features are justified.
-**Carry in:** **60 of the 65 columns are one-hot levels of 12 categorical features**, so importance is
-measured per *level*, not per source column; the ranking has to be read back to the 17 features it came
-from, or it will recommend keeping `month=may` and dropping `month`. Any mutual-information number that
-is reported must be computed inside the CV pipeline (D24 — nothing is fitted before the split), and
-`duration` is not in the matrix at all, so no keep/drop decision here may be motivated by it: T36 is the
-task that toggles it, through `src.preprocess.build_preprocessor(..., extra_numeric=("duration",))`.
+**T26 | Phase 6 – Model Selection | Baseline models: `DummyClassifier` + Logistic Regression.**
+Open: `src/train.py`, artifacts in `models/`.
+Train both baselines inside one `Pipeline` whose first step is the T24 preprocessor, on the **12 kept
+features (40 columns)** T25 decided, and log 5-fold CV ROC-AUC and PR-AUC for each so T27–T29 have a
+number to beat.
+**Done when:** both are trained inside a Pipeline and their CV ROC-AUC/PR-AUC are logged.
+**Carry in:** the shipped column list is `src.select.columns_for(kept)` — **40 columns, not 65** (D44),
+and `src.select.report()` rebuilds it, so the list is derived rather than typed. The baselines must be
+identical apart from the estimator, or the comparison is two experiments: one fold split, one
+preprocessor factory (`preprocess.build_preprocessor`), one scorer. The `DummyClassifier` is not
+decoration — it fixes the two floors everything else is measured against: **88.30%** accuracy from always
+predicting `no` and a PR-AUC of the **0.1170** base rate (D28). Report PR-AUC and ROC-AUC as headline
+numbers and **never** accuracy (D04). Logistic Regression needs `class_weight="balanced"` and scaling,
+which the preprocessor already supplies, and its coefficients are the natural check on T25's decision: if
+dropping `job` and `education` hurts anything, this is where it shows.
 
 ---
 
@@ -86,6 +87,8 @@ task that toggles it, through `src.preprocess.build_preprocessor(..., extra_nume
 | D35 | 2026-10-28 | `day` is kept as a raw feature but **no rule is built on it**; `campaign` enters T23 as a **capped count or bucket**, not the raw 1–63 scale | `day`'s marginal band difference (12.66% for 1–10 against 10.92% for 11–20, intervals not overlapping) **reverses inside `may`** (5.94% against 7.14% for 21–31) and changes direction month to month, and the column is entangled with `month` by construction (`jan` never runs below day 6, `feb` stops at 27, `may` starts at 4) — so a day rule would encode this file's calendar rather than the behaviour. `campaign`'s own scale is unusable for the same reason the bucket table exists: median 2, max 63, and the productivity changes by a factor of 3.4 between one call and ten |
 | D36 | 2026-10-28 | T24 keeps **`days_since_contact`** and **`previously_contacted`** and **drops raw `pdays`**; there is no other multicollinearity to defuse, so no PCA and no dropping of `balance` or `campaign` on "correlation" grounds | Measured: of the 28 off-diagonal pairs only two reach an absolute r of 0.20, and one of those is `pdays` ↔ `days_since_contact` at **+1.0000** — the same values, not merely correlated ones. With both present the 8-column complete-case matrix is **rank 7**, the condition number is **5.0×10¹⁶** and both VIFs are **9.0×10¹⁵**; with `pdays` dropped every VIF is **1.01–1.03**. Keeping the raw column would let a linear model split one effect between two names while the VIF appeared tolerable, because the sentinel masks the duplication in the full-column view |
 | D37 | 2026-10-28 | Any correlation involving **`pdays`** is reported on the **previously-contacted rows only** (or not at all); the whole-column value is a sentinel artefact and is never quoted as a finding | The column reads **+0.1007** against the target over all 36,168 rows and **−0.1526** — bit-for-bit `days_since_contact`'s value — once the 29,584 sentinel rows are removed, because −1 is the smallest possible value and therefore sorts as "very recent". A modeller acting on the +0.1007 would invert the effect for every real observation. This is the concrete reason D23 replaced the column instead of re-scaling it |
+| D44 | 2026-10-29 | The shipped feature set drops **5 of 17** features — `education`, `loan`, `default`, `balance_band`, `job` — leaving **12 features and a 40-column matrix**, down from 65; `campaign_bucket` carries a declared carve-out so it can never be dropped | The five were nominated because the forest could not distinguish their contribution from zero, then removed **as a group** and the same 5 folds re-measured: held-out ROC-AUC moved **-0.00014 +/- 0.00195**, with **3 of 5 folds improving**. `balance_band` is redundant with `balance_arsinh`, which keeps the same information at finer resolution; `job` was the largest single block (**12 of 65 columns**) and 17th by the model; `default` carries **0.0004 nats** of mutual information. The decision is **instrument-specific** — the forest is not the shipped XGBoost — so the ablation numbers are recorded in `docs/05_leakage_audit.md` §8.4 as the evidence to revisit if T32 finds the reduced set underperforming |
+| D43 | 2026-10-29 | Feature selection is **two stages**: a screen that nominates any feature **either** method cannot see (MI at or below its own permutation-null 95th percentile, **or** `AUC lost - sd <= 0`), then a **group ablation** decided by the **one-standard-error form** (`mean delta >= -sd`); the screen alone may not drop anything | Written before the numbers and then corrected by them, in the open: the original rule required **both** methods to fail, and the MI condition turned out to be incapable of failing — with 10 label shuffles of 36,168 rows the null is so tight that **no feature has z < 1** (lowest is `day` at **7.4**), **16 of 17** clear `z = 20` and the smallest MI in the table (`default`, 0.0004 nats) sits at `z = 27.5`, so the filter nominated **nothing** and every nominee came from the model half. The second correction was the ablation threshold: the measured effect was **-0.00014 +/- 0.00195**, so comparing the mean against exactly zero would have decided on a quantity **14x smaller than its own noise**. The one-SE form is not an invention — it is the standard rule for choosing the simpler model when the scores are within one standard error — and it applies the same standard stage 1 already used |
 | D42 | 2026-10-29 | T24 scales **only** `age`, `day` and `balance_arsinh`; `previous_capped` and `previously_contacted` pass through unscaled; categoricals are one-hot with **all** levels kept and `handle_unknown="ignore"`, `remainder="drop"` | Three of the four group choices are measured rather than conventional. `previous_capped` has **median 0, Q1 0, Q3 0 — an IQR of 0**, and raw `previous` has one too (**81.80% zeros**), so the degeneracy belongs to the column, not to the cap; sklearn silently substitutes `scale_ = 1.0` for a zero IQR, so a median/IQR scaler would appear to work while doing nothing, and a z-score of a three-value count is a relabelling of {0, 1, 2} rather than a units fix. The boolean is passed through because one-hot encoding it produces two columns that sum to 1 — the same column twice — and passing the raw `bool` through made the assembled matrix `object`, which failed `np.isfinite`, so it is cast to float64 and not scaled: measured, the first version of this module failed for exactly that reason. `drop=None` keeps every level because dropping the first is asymmetric across columns with 2 and 12 levels and makes a coefficient interpretable only for the linear baseline, while the L2 regularisation T26 uses makes the collinearity harmless. `handle_unknown="ignore"` is required because the encoder is fitted on one half and applied to the other; measured, **no test-only level exists on this split**, so the net is proven by injecting an unseen level rather than by the data happening to exercise it. `remainder="drop"` is what makes the frame safe to hand in with `duration`, `pdays` and `y` still attached (D14), and it is verified by transforming such a frame and comparing the matrix element-wise |
 | D41 | 2026-10-28 | `campaign` enters as a **six-level bucket**, not a count capped at three; `days_since_contact` is replaced by `recency_band`; raw `balance` is replaced by `balance_arsinh` plus `balance_band` | A cap at three is the *policy* decision, but as a feature it would merge "exactly 3" (11.26%) with "ten or more" (4.30%) into one level at 8.80% — throwing away a real gradient the model needs in order to rank heavy clients, since the cap is applied after scoring, not before. The bucket is bounded, fixes a skew of 4.94, and reproduces T19's table exactly. Recency keeps only the band because the 30-89 day peak (40.20%) is prior-success composition (T21 I7) and a continuous column invites a marginal reading of a controlled-negative result; `balance` keeps both a monotone scale (arcsinh, defined for the 3,001 negative balances) and a band, because the top band dips (16.44% → 15.73%) and a single monotone column cannot represent that |
 | D40 | 2026-10-28 | T36's with-vs-without comparison is **pre-registered** in `docs/05_leakage_audit.md` §4.5 and runs both arms in **one process, with one fold split replayed into each**, toggling the column only through `src.leakage.feature_columns` | A comparison whose decision rule is written after seeing the numbers is a rationalisation, so the rule is fixed first: arm A ships whatever the gap, arm B is an upper bound no targeting claim may quote, and a near-zero gap is a finding to report. The single splitter and single scorer exist because the usual way a controlled comparison goes wrong is a second, unnoticed difference — a re-seeded fold, a refitted scaler, a different metric call |
@@ -134,7 +137,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T22 | Rubric 5 | Design the `duration` leakage with-vs-without experiment | Output: `docs/05_leakage_audit.md` | **done 2026-10-28** (2,907 words; the experiment is two arms, **six held-fixed elements**, one toggled column and **four assertions that fail loudly** — identical fold arrays replayed into both arms, identical target vector, and every transformer fitted on fold-train only; the decision rule is **pre-registered before the numbers exist**, so arm A ships regardless of the gap, arm B is labelled an upper bound and a near-zero gap must be reported as the finding; the risk is **quantified rather than asserted** — `duration` alone reaches **ROC-AUC 0.8078** and **PR-AUC 0.3897** against a **0.1170** base rate (**3.33×**), and the rate climbs monotonically from **0.16%** under a minute to **48.56%** at 600 s or more, so the shortest tenth of calls supplies **0.14%** of subscribers while the longest **8.44%** supplies **35.03%**; **seven further leakage surfaces** audited with verdicts — the `pdays` duplicate is redundancy rather than leakage, `poutcome` is legitimate provided the encoder is fitted on train only, and the **stratified-random split is left unresolved and declared**; **541/541 independent checks**, with bands, Wilson intervals, ROC-AUC and average precision re-derived by a separate numpy/scipy path and the quoted manual verified word for word in `bank-additional-names.txt`; `python -m src.leakage` exits 0 and prints every quoted figure)
 - [x] T23 | Rubric 5 | Engineer additional features | Output: `src/features.py` | **done 2026-10-28** (379 lines, **five engineered columns** each replacing a raw one rather than sitting beside it: `campaign_bucket` reproduces T19's six buckets exactly, **14.59%** at one call down to **4.30%** at ten or more; `previous_capped` caps at two, **9.22%** → **20.65%** → **23.97%**; `balance_arsinh` takes |skew| from **8.34** to **1.68** and `balance_band` carries the non-linear part, **5.36%** overdrawn to **16.44%** at €1,500–4,999; `recency_band` gives the **81.80%** never-contacted their own level instead of an imputed number; the resulting set is **17 features (4 numeric, 12 categorical, 1 boolean)** with `duration`, `pdays` and `y` excluded; **eight leakage checks run in the module** — permuting `y` and permuting `duration` must leave every engineered value byte-identical, no feature may read a forbidden column, and features must be per-row — and **145/145 independent checks** recompute every band from the CSV, verify the fixed category vocabularies T24 depends on, and prove the permutation tests can fail by planting a target-derived and a duration-derived column; `python -m src.features` exits 0)
 - [x] T24 | Rubric 5 | Build the preprocessing `ColumnTransformer` | Output: `src/preprocess.py` | **done 2026-10-29** (507 lines; **17 features in -> 65 columns out** = 3 `StandardScaler` + 1 count passed through + **60 one-hot** + 1 boolean, with the column list imported from `features.FEATURES` rather than restated and the four groups declared as data; fits on the **36,168** training rows and transforms the **9,043** held-out rows to `(36168, 65)` and `(9043, 65)` with **no NaN, no inf and a single float64 dtype**; `build_preprocessor()` returns a **fresh unfitted** transformer per call so the scaler can only ever see its own fold — its `mean_` matches the training mean to **0.00e+00** while the pooled train+test mean is **4.32e-02** away; `remainder="drop"` is proven by transforming a frame that still carries `duration`, `pdays` and `y` and getting the **identical matrix**; `handle_unknown="ignore"` is proven by injecting an unseen `job` level (zeros, where the `handle_unknown="error"` clone raises `ValueError`), with **0 test-only levels** measured on this split so the safety net is explicitly untriggered; **15 checks in the module** all pass and `python -m src.preprocess` exits 0; **23,162 independent checks** recompute every one of the 65 columns from `train.csv`/`test.csv` — names, one-hot cells, scaled values and the check that no statistic was fitted across the split; and the T36 toggle is exercised now: arm A 65 columns, arm B 66, differing by exactly `duration` through `extra_numeric=("duration",)`)
-- [ ] T25 | Rubric 5 | Feature selection / importance with justification | Output: `reports/figures/06_feature_importance.png`, notes in `docs/05_leakage_audit.md` | Done when: at least two methods (mutual information + model importance) are compared and kept/dropped features are justified
+- [x] T25 | Rubric 5 | Feature selection / importance with justification | Output: `reports/figures/06_feature_importance.png`, notes in `docs/05_leakage_audit.md` §8 | **done 2026-10-29** (`src/select.py`, and **2,149 words** in §8; **two methods over the same 17 features** — mutual information with a **per-feature permutation null** (narrowest null sd **1.25e-05**) and permutation importance from a 200-tree forest with out-of-fold ROC-AUC **0.7936 +/- 0.0063** — correlating at **Spearman +0.647**, with the five rank gaps of 5+ explained (`marital` 16 vs 8, `day` 11 vs 4, `balance_arsinh` 3 vs 9, `previous_capped` 7 vs 12, `job` 10 vs 17); a **third measurement decides**: the 5 nominated features removed as a group cost **-0.00014 +/- 0.00195** ROC-AUC with **3 of 5 folds improving**, so the **one-standard-error** rule drops them; **5 dropped** (`education`, `loan`, `default`, `balance_band`, `job`), **12 kept**, and the shipped matrix goes from **65 columns to 40**; **17/17 in-module checks** pass and `python -m src.select` exits 0; the figure draws both rankings with each feature's own null and the dropped features hatched)
 
 ### Phase 6 — Model Selection & Implementation
 - [ ] T26 | Rubric 6 | Baseline models: `DummyClassifier` + Logistic Regression | Output: `src/train.py`, artifacts in `models/` | Done when: both are trained inside a Pipeline and their CV ROC-AUC/PR-AUC are logged
@@ -1139,6 +1142,62 @@ nothing in the workflow changed.
 **Uncommitted:** at the time of writing, `src/preprocess.py`, `PROGRESS.md` and this session's script.
 **Next:** T25 — feature selection and importance in `src/select.py`, comparing mutual information against
 model importance per one-hot *level* and reading the ranking back to the 17 source features.
+
+### 2026-10-29 — Session 27  (T25 complete)
+**Completed:** **T25** — `src/select.py` plus `reports/figures/06_feature_importance.png` (128 KB) and
+**2,149 words** appended as §8 of `docs/05_leakage_audit.md`. **17 features ranked two ways**, and then a
+third measurement made the decision the two rankings could not.
+
+**The two rankings, and the disagreement that makes them worth having.** Mutual information on the 17
+source features (a categorical enters as its integer codes, so `job` is one 12-level variable) judged
+against **each feature's own permutation null**, versus permutation importance from a 200-tree forest
+(out-of-fold ROC-AUC **0.7936 +/- 0.0063**) measured as the ROC-AUC lost when a feature's columns are
+shuffled. They correlate at **Spearman +0.647** — substantial, and nothing like agreement. `poutcome` is
+first for the filter and third for the model; `month` is the reverse; `marital` moves **eight** places
+(16th to 8th) because its marginal MI is 0.0023 while the forest gets **+0.00453** AUC from it in
+combination. `day` moves seven the other way, which D35 predicted: its marginal effect **reverses inside
+`may`**, so a marginal statistic averages a real interaction to nothing and only the tree can see it.
+
+**The finding about the rule itself.** The original screen required **both** methods to fail. Measured,
+the filter half could not fail: with 10 label shuffles of 36,168 rows **no feature has z < 1** (the lowest
+is `day` at **7.4**), **16 of 17** clear `z = 20`, and the smallest MI in the table (**0.0004** nats, for
+`default`) sits at **z = 27.5**. So every nominee came from the model half, and a two-condition rule with
+one dead condition is a one-condition rule in disguise. Rather than quietly keep it, the screen now only
+nominates and the **group ablation decides**: the 5 nominees removed together cost **-0.00014 +/- 0.00195**
+ROC-AUC, with **3 of the 5 folds improving**.
+
+**That exposed the second error, in the threshold.** A mean of -0.00014 against a spread of 0.00195 is a
+decision resting on a quantity **14 times smaller than its own noise** — a coin flip with a decimal point.
+The rule is now the **one-standard-error form** (`mean delta >= -sd`), the same standard stage 1 already
+applied per feature.
+
+**The decision:** drop **5** — `education`, `loan`, `default`, `balance_band`, `job` — keep **12**, and the
+matrix goes **65 → 40 columns**. `balance_band` is redundant with `balance_arsinh`; `job` was the largest
+single block (**12 of 65** columns) and last by the model; `default` carries **0.0004 nats**. One
+consequence is stated rather than left to be discovered: the shipped model keeps `age` and `marital` but no
+longer sees `job` or `education`. D16 scopes out a formal fairness audit and this is not one, but it is a
+defensible place for a credit-offering model to land, and it happened for measured reasons.
+
+**Two defects, both invisible from reading the code.** The first: the permutation step originally used
+`X_valid.iloc[:3000]` to save time. `StratifiedKFold` returns indices in ascending original order and the
+file is ordered by campaign date (D26), so that "sample" was the campaign's opening weeks — it contained
+**no** `poutcome=success` rows at all, making **20 columns constant**. `poutcome`, `recency_band`,
+`previous_capped` and `previously_contacted` came back at exactly **0.00000 +/- 0.00000**, and the screen
+nominated **13 of 17** including `month`, the most important feature. The shortcut did not produce a
+noisier number, it produced a wrong one; using the whole held-out fold fixed it. The second is the threshold
+above.
+
+**Verified:** `python -m src.select` exits **0** with **17/17** checks — the screen and the decision are
+both re-derived from their declared conditions rather than read off a column, no dropped feature is an EDA
+anchor, the guard survived, the rankings are consistent with their values, the ablation replayed the same
+folds and its delta matches its fold differences, and one check **rebuilds the shipped 40-column matrix**
+from the kept list rather than trusting the count. Runtime ~5.5 minutes (2 x 5 folds, 3 permutation repeats
+on the full 7,234-row validation fold).
+
+**Blocked:** none.
+**Uncommitted:** `src/select.py`, the figure, `docs/05_leakage_audit.md`, `PROGRESS.md`.
+**Next:** T26 — the `DummyClassifier` and Logistic Regression baselines on the 40-column kept set, in one
+Pipeline, with CV ROC-AUC and PR-AUC logged.
 
 ---
 

@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-28 23:19
-**Overall completion:** 44% (21 / 46 tasks)
+**Last updated:** 2026-10-28 23:32
+**Overall completion:** 48% (22 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -13,12 +13,12 @@
 | 2 | Dataset & Data Understanding | 10 | 2 / 2 ✅ | T10–T11 |
 | 3 | Data Preprocessing & Cleaning | 10 | 4 / 4 ✅ | T12–T15 |
 | 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
-| 5 | Feature Engineering / Selection | 10 | 0 / 4 | T22–T25 |
+| 5 | Feature Engineering / Selection | 10 | 1 / 4 | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 0 / 6 | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 0 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **21 / 46** | |
+| | **Total** | **100** | **22 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,24 +28,24 @@
 
 ## NEXT TASK
 
-**T22 | Phase 5 – Feature Engineering | Design the `duration` leakage with-vs-without experiment.**
-Open: `docs/05_leakage_audit.md`.
-Specify one pipeline run twice — identical folds, identical preprocessing path, the feature set the only
-toggle — so that T36 can report what removing `duration` costs as a measured gap rather than an aside.
-Also document the leakage risk itself: what `duration` is, when it becomes known, and why a model that
-uses it cannot rank a call list.
-**Done when:** the experiment (identical pipeline, feature set toggled) is specified and the leakage risk
-is documented.
-**Carry in:** `duration` is the strongest correlation with the target in the file — **+0.3967** Pearson,
-**+0.3427** Spearman — and **2.60×** the best usable column (`days_since_contact` −0.1526), so D05 excludes
-it from the main model and keeps it only for this comparison. The audit has to distinguish three things the
-EDA left separate: the **leak** itself (D05), the **duplicate** `pdays`/`days_since_contact` (D36/D37, which
-is a redundancy question and not a leakage one), and the **target-encoding trap** that does not exist here
-because `poutcome` is a prior-campaign field, not the current outcome. `docs/04_eda_insights.md` I6 and A6
-are the written form of the claim this task has to make testable, and the severity argument is arithmetic:
-`duration` is only known after the call ends, so a model ranked by it scores the outcome rather than the
-prospect. T23 (features), T24 (`ColumnTransformer`) and T36 (the comparison) all depend on this document
-naming the exact toggle.
+**T23 | Phase 5 – Feature Engineering | Engineer the additional features.**
+Open: `src/features.py`.
+Build the derived columns the EDA and the leakage audit have already earned: contact recency, campaign
+intensity, and a balance band, each commented with what it encodes and what it assumes. Every column must
+pass the leakage test `docs/05_leakage_audit.md` set — a feature may only use facts available **before**
+the call.
+**Done when:** contact recency, campaign intensity and balance-band features are created, commented, and
+leak nothing from `y`.
+**Carry in:** the EDA decided the encodings, so this task implements rather than re-litigates them —
+`previously_contacted` as a **flag** and `previous` as a mild count (A5: the step is 0 → 1, **2.24×**, and
+one prior contact against two is indistinguishable), `campaign` as a **capped count or bucket** rather than
+the raw 1–63 scale (D35, A7), `days_since_contact` as the recency column and **never** raw `pdays` (D36,
+D37). `balance` needs `arcsinh` rather than `log1p` because **3,001 rows (8.30%)** are negative and the
+minimum is **−€8,019**; its skew is **+8.34**. The trap to avoid is inventing a bean-count that reads the
+outcome: `duration` must not appear in any engineered column, no column may be built from `y`, and any
+aggregate (a rate, a mean) must be computed inside the training fold only — which is what
+`src/leakage.feature_columns` exists to enforce for T36. T24 consumes this module, so the output is a list
+of columns plus the code that makes them, not a mutated frame.
 
 ---
 
@@ -90,6 +90,7 @@ naming the exact toggle.
 | D35 | 2026-10-28 | `day` is kept as a raw feature but **no rule is built on it**; `campaign` enters T23 as a **capped count or bucket**, not the raw 1–63 scale | `day`'s marginal band difference (12.66% for 1–10 against 10.92% for 11–20, intervals not overlapping) **reverses inside `may`** (5.94% against 7.14% for 21–31) and changes direction month to month, and the column is entangled with `month` by construction (`jan` never runs below day 6, `feb` stops at 27, `may` starts at 4) — so a day rule would encode this file's calendar rather than the behaviour. `campaign`'s own scale is unusable for the same reason the bucket table exists: median 2, max 63, and the productivity changes by a factor of 3.4 between one call and ten |
 | D36 | 2026-10-28 | T24 keeps **`days_since_contact`** and **`previously_contacted`** and **drops raw `pdays`**; there is no other multicollinearity to defuse, so no PCA and no dropping of `balance` or `campaign` on "correlation" grounds | Measured: of the 28 off-diagonal pairs only two reach an absolute r of 0.20, and one of those is `pdays` ↔ `days_since_contact` at **+1.0000** — the same values, not merely correlated ones. With both present the 8-column complete-case matrix is **rank 7**, the condition number is **5.0×10¹⁶** and both VIFs are **9.0×10¹⁵**; with `pdays` dropped every VIF is **1.01–1.03**. Keeping the raw column would let a linear model split one effect between two names while the VIF appeared tolerable, because the sentinel masks the duplication in the full-column view |
 | D37 | 2026-10-28 | Any correlation involving **`pdays`** is reported on the **previously-contacted rows only** (or not at all); the whole-column value is a sentinel artefact and is never quoted as a finding | The column reads **+0.1007** against the target over all 36,168 rows and **−0.1526** — bit-for-bit `days_since_contact`'s value — once the 29,584 sentinel rows are removed, because −1 is the smallest possible value and therefore sorts as "very recent". A modeller acting on the +0.1007 would invert the effect for every real observation. This is the concrete reason D23 replaced the column instead of re-scaling it |
+| D40 | 2026-10-28 | T36's with-vs-without comparison is **pre-registered** in `docs/05_leakage_audit.md` §4.5 and runs both arms in **one process, with one fold split replayed into each**, toggling the column only through `src.leakage.feature_columns` | A comparison whose decision rule is written after seeing the numbers is a rationalisation, so the rule is fixed first: arm A ships whatever the gap, arm B is an upper bound no targeting claim may quote, and a near-zero gap is a finding to report. The single splitter and single scorer exist because the usual way a controlled comparison goes wrong is a second, unnoticed difference — a re-seeded fold, a refitted scaler, a different metric call |
 | D39 | 2026-10-28 | `docs/04_eda_insights.md` carries **seven** insights selected from the notebook's eighteen findings, ranked by **money at stake**, then **planner actionability**, then **survival under a control** | The task asked for at least five, and all eighteen would bury the two that move money. The order puts the **€32,906** call-budget loss first because it is both large and immediately actionable, and demotes `duration` (I6) and `day`/recency (I7) to constraints on what may be built, because they remove work rather than win subscriptions — a reader who wants the full eighteen is sent to notebook §6, which stays the exhaustive record |
 | D38 | 2026-10-28 | The numeric correlation matrix and the categorical Cramér's V tables are **two halves of one feature ranking**, and neither is quoted as a ranking on its own | `duration` is the strongest number in the matrix (+0.3967) and unusable (D05); the strongest *usable* numeric is −0.1526; `poutcome` at V = 0.3102 is the strongest association anywhere in the data and does not appear in the heatmap at all, because Pearson cannot see a categorical column. Any statement of the form "the top predictors are …" therefore has to name which half it came from |
 
@@ -132,7 +133,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T21 | Rubric 4 | Consolidate EDA findings | Output: `docs/04_eda_insights.md` | **done 2026-10-28** (2,804 words; **five figures**, each with a one-sentence business interpretation directly under the image; **seven insights I1–I7** ranked by money at stake → planner actionability → survival under a control, where the task asked for five; **605 checks** pass — the page's structure, **164 numeric claims traced** to the notebook's cell sources rather than its outputs, and the headline figures re-derived from `train.csv` through `src.split.load_split`; the €-figures rest on the €1.50/€20 cost model and every claim that failed a control is labelled as such)
 
 ### Phase 5 — Feature Engineering & Selection
-- [ ] T22 | Rubric 5 | Design the `duration` leakage with-vs-without experiment | Output: `docs/05_leakage_audit.md` | Done when: the experiment (identical pipeline, feature set toggled) is specified and the leakage risk is documented
+- [x] T22 | Rubric 5 | Design the `duration` leakage with-vs-without experiment | Output: `docs/05_leakage_audit.md` | **done 2026-10-28** (2,907 words; the experiment is two arms, **six held-fixed elements**, one toggled column and **four assertions that fail loudly** — identical fold arrays replayed into both arms, identical target vector, and every transformer fitted on fold-train only; the decision rule is **pre-registered before the numbers exist**, so arm A ships regardless of the gap, arm B is labelled an upper bound and a near-zero gap must be reported as the finding; the risk is **quantified rather than asserted** — `duration` alone reaches **ROC-AUC 0.8078** and **PR-AUC 0.3897** against a **0.1170** base rate (**3.33×**), and the rate climbs monotonically from **0.16%** under a minute to **48.56%** at 600 s or more, so the shortest tenth of calls supplies **0.14%** of subscribers while the longest **8.44%** supplies **35.03%**; **seven further leakage surfaces** audited with verdicts — the `pdays` duplicate is redundancy rather than leakage, `poutcome` is legitimate provided the encoder is fitted on train only, and the **stratified-random split is left unresolved and declared**; **541/541 independent checks**, with bands, Wilson intervals, ROC-AUC and average precision re-derived by a separate numpy/scipy path and the quoted manual verified word for word in `bank-additional-names.txt`; `python -m src.leakage` exits 0 and prints every quoted figure)
 - [ ] T23 | Rubric 5 | Engineer additional features | Output: `src/features.py` | Done when: contact recency, campaign intensity and balance-band features are created, commented, and leak nothing from `y`
 - [ ] T24 | Rubric 5 | Build the preprocessing `ColumnTransformer` | Output: `src/preprocess.py` | Done when: the pipeline fits on train and transforms test with no errors and output shapes are reported
 - [ ] T25 | Rubric 5 | Feature selection / importance with justification | Output: `reports/figures/06_feature_importance.png`, notes in `docs/05_leakage_audit.md` | Done when: at least two methods (mutual information + model importance) are compared and kept/dropped features are justified
@@ -992,6 +993,54 @@ refused to write either time.
 still cannot authenticate from this shell: no TTY for the credential prompt, no `GH_TOKEN`, and the local
 SSH key is not authorised on GitHub. One interactive `git push` clears all four.
 **Next:** T22 — the `duration` leakage audit in `docs/05_leakage_audit.md`.
+
+---
+
+### 2026-10-28 — Session 24  (T22 complete)
+
+**T22 — the `duration` leakage audit.** `docs/05_leakage_audit.md` (2,907 words) plus `src/leakage.py`,
+which both defines the toggle and prints every number the document quotes. No model was fitted: this task
+measures the column, it does not compete with T26–T31.
+
+**What the audit establishes.** `duration` is the call's length in seconds, recorded at hang-up, while the
+score is needed before dialling — the document draws that timeline rather than asserting it. The risk is
+then measured rather than described: the subscription rate climbs monotonically across six bands, from
+**0.16%** (6 subscribers in 3,727 calls) under a minute to **48.56%** at 600 s or more, so the shortest
+tenth of calls yields **0.14%** of subscribers and the longest **8.44%** yields **35.03%**. Used directly
+as a score with no fitting, the single column reaches **ROC-AUC 0.8078** and **PR-AUC 0.3897** — **3.33×**
+the 0.1170 base rate, with a **3.90×** lift in the top decile — which is the yardstick T36's gap will be
+read against.
+
+**The experiment, specified not sketched.** Two arms; fold membership materialised **once** and replayed
+into both; one preprocessing factory rebuilt inside each fold; one estimator, one scoring function, one
+process. Four assertions make "identical except one column" checkable. The decision rule is written
+*before* the results exist (arm A ships whatever the gap; arm B is an upper bound; a near-zero gap is
+reported as the finding), which is D40.
+
+**Seven other surfaces audited.** `pdays`/`days_since_contact` is redundancy, not leakage (D36);
+`poutcome` is legitimate but only with encoders fitted on training rows; `y` is never a feature; the
+primary variant has no duplicate rows; and the split's **stratified-random rather than chronological**
+design is declared as an unresolved limitation — the file carries no year and no client id, so a
+time-based split cannot be reconstructed without invalidating Phase 4.
+
+**Verification:** `python -m src.leakage` exits **0** and prints every quoted figure; **541/541 independent
+checks** pass in `_t22_verify.py`, which re-derives the six bands, their Wilson intervals, ROC-AUC (Mann-
+Whitney with average ranks for ties) and average precision (over distinct score cuts) through a separate
+path, checks the seven audit surfaces and the pre-registered rule, compares 18 quoted literals against the
+recomputed values, and verifies the quoted manual sentence word for word in
+`data/raw/bank-additional/bank-additional-names.txt`.
+
+**Defects caught before commit.** My first "independent" average precision walked every row instead of
+grouping tied scores and disagreed with sklearn in the fourth decimal (0.3899 against 0.3897) — durations
+are whole seconds, so ties are common and the naive walk is simply a different estimator. My number
+normaliser turned `6,900` into `69` by stripping trailing zeros from an integer, which produced a
+provenance failure that did not exist. And the document claimed every figure was printed by
+`python -m src.leakage` while two capture shares and two lifts were not — the module was extended rather
+than the claim softened.
+
+**Blocked:** five commits are now unpushed (`a87be66`, `ec739e9`, `3334e49`, `b6f76fb` and this one);
+`git push` still cannot authenticate from this shell. One interactive `git push` clears all five.
+**Next:** T23 — the engineered features in `src/features.py`.
 
 ---
 

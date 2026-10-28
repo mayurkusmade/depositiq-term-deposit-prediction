@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-28 23:08
-**Overall completion:** 43% (20 / 46 tasks)
+**Last updated:** 2026-10-28 23:19
+**Overall completion:** 44% (21 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -12,13 +12,13 @@
 | 1 | Problem Definition & Business Understanding | 10 | 3 / 3 ✅ | T07–T09 |
 | 2 | Dataset & Data Understanding | 10 | 2 / 2 ✅ | T10–T11 |
 | 3 | Data Preprocessing & Cleaning | 10 | 4 / 4 ✅ | T12–T15 |
-| 4 | EDA | 10 | 5 / 6 | T16–T21 |
+| 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 0 / 4 | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 0 / 6 | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 0 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **20 / 46** | |
+| | **Total** | **100** | **21 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,18 +28,24 @@
 
 ## NEXT TASK
 
-**T21 | Phase 4 – EDA | Consolidate the EDA into one written insight document.**
-Open: `docs/04_eda_insights.md`.
-Turn §1–§5 into prose: every figure gets its one-line business interpretation, and the findings are
-ranked by what a campaign planner should act on rather than by the order the figures were built.
-**Done when:** every figure has its one-line business interpretation and at least 5 insights are listed.
-**Carry in:** the five figures are `01_target_distribution.png` (11.6982%, 7.55 : 1), `02_numeric_…`
-(five of eight columns skewed past +2; two columns with IQR 0 on the same 29,584 rows),
-`03_categorical_…` (the 15.7× spread, `poutcome = success` 64.65% against `contact = unknown` 4.11%),
-`04_campaign_…` (the fourth call onward loses €32,906) and `05_correlation_heatmap.png` (`pdays` is a
-duplicate of `days_since_contact`). The notebook's §6 already holds 18 numbered findings, so T21 is a
-selection and rewrite task, not a re-analysis: the document should carry at least five insights but not
-all 18, and every number in it must be one of the 86 + 42 checks already verified.
+**T22 | Phase 5 – Feature Engineering | Design the `duration` leakage with-vs-without experiment.**
+Open: `docs/05_leakage_audit.md`.
+Specify one pipeline run twice — identical folds, identical preprocessing path, the feature set the only
+toggle — so that T36 can report what removing `duration` costs as a measured gap rather than an aside.
+Also document the leakage risk itself: what `duration` is, when it becomes known, and why a model that
+uses it cannot rank a call list.
+**Done when:** the experiment (identical pipeline, feature set toggled) is specified and the leakage risk
+is documented.
+**Carry in:** `duration` is the strongest correlation with the target in the file — **+0.3967** Pearson,
+**+0.3427** Spearman — and **2.60×** the best usable column (`days_since_contact` −0.1526), so D05 excludes
+it from the main model and keeps it only for this comparison. The audit has to distinguish three things the
+EDA left separate: the **leak** itself (D05), the **duplicate** `pdays`/`days_since_contact` (D36/D37, which
+is a redundancy question and not a leakage one), and the **target-encoding trap** that does not exist here
+because `poutcome` is a prior-campaign field, not the current outcome. `docs/04_eda_insights.md` I6 and A6
+are the written form of the claim this task has to make testable, and the severity argument is arithmetic:
+`duration` is only known after the call ends, so a model ranked by it scores the outcome rather than the
+prospect. T23 (features), T24 (`ColumnTransformer`) and T36 (the comparison) all depend on this document
+naming the exact toggle.
 
 ---
 
@@ -84,6 +90,7 @@ all 18, and every number in it must be one of the 86 + 42 checks already verifie
 | D35 | 2026-10-28 | `day` is kept as a raw feature but **no rule is built on it**; `campaign` enters T23 as a **capped count or bucket**, not the raw 1–63 scale | `day`'s marginal band difference (12.66% for 1–10 against 10.92% for 11–20, intervals not overlapping) **reverses inside `may`** (5.94% against 7.14% for 21–31) and changes direction month to month, and the column is entangled with `month` by construction (`jan` never runs below day 6, `feb` stops at 27, `may` starts at 4) — so a day rule would encode this file's calendar rather than the behaviour. `campaign`'s own scale is unusable for the same reason the bucket table exists: median 2, max 63, and the productivity changes by a factor of 3.4 between one call and ten |
 | D36 | 2026-10-28 | T24 keeps **`days_since_contact`** and **`previously_contacted`** and **drops raw `pdays`**; there is no other multicollinearity to defuse, so no PCA and no dropping of `balance` or `campaign` on "correlation" grounds | Measured: of the 28 off-diagonal pairs only two reach an absolute r of 0.20, and one of those is `pdays` ↔ `days_since_contact` at **+1.0000** — the same values, not merely correlated ones. With both present the 8-column complete-case matrix is **rank 7**, the condition number is **5.0×10¹⁶** and both VIFs are **9.0×10¹⁵**; with `pdays` dropped every VIF is **1.01–1.03**. Keeping the raw column would let a linear model split one effect between two names while the VIF appeared tolerable, because the sentinel masks the duplication in the full-column view |
 | D37 | 2026-10-28 | Any correlation involving **`pdays`** is reported on the **previously-contacted rows only** (or not at all); the whole-column value is a sentinel artefact and is never quoted as a finding | The column reads **+0.1007** against the target over all 36,168 rows and **−0.1526** — bit-for-bit `days_since_contact`'s value — once the 29,584 sentinel rows are removed, because −1 is the smallest possible value and therefore sorts as "very recent". A modeller acting on the +0.1007 would invert the effect for every real observation. This is the concrete reason D23 replaced the column instead of re-scaling it |
+| D39 | 2026-10-28 | `docs/04_eda_insights.md` carries **seven** insights selected from the notebook's eighteen findings, ranked by **money at stake**, then **planner actionability**, then **survival under a control** | The task asked for at least five, and all eighteen would bury the two that move money. The order puts the **€32,906** call-budget loss first because it is both large and immediately actionable, and demotes `duration` (I6) and `day`/recency (I7) to constraints on what may be built, because they remove work rather than win subscriptions — a reader who wants the full eighteen is sent to notebook §6, which stays the exhaustive record |
 | D38 | 2026-10-28 | The numeric correlation matrix and the categorical Cramér's V tables are **two halves of one feature ranking**, and neither is quoted as a ranking on its own | `duration` is the strongest number in the matrix (+0.3967) and unusable (D05); the strongest *usable* numeric is −0.1526; `poutcome` at V = 0.3102 is the strongest association anywhere in the data and does not appear in the heatmap at all, because Pearson cannot see a categorical column. Any statement of the form "the top predictors are …" therefore has to name which half it came from |
 
 ---
@@ -122,7 +129,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T18 | Rubric 4 | Categorical features vs subscription rate | Output: `reports/figures/03_categorical_vs_target.png` | Done when: best and worst segments are identified with actual rates — **done 2026-10-28** (all **44 levels** of the nine `object` columns measured with `n`, share, lift and **Wilson 95% intervals**; best `poutcome = success` **64.65%** (779/1,205) against worst `contact = unknown` **4.11%** (427/10,386), a **15.7×** gap; figure 2473×1773 px costing 274 KB; **123/123 independent checks**, and identical text plus identical figure bytes across two fresh runs)
 - [x] T19 | Rubric 4 | Campaign/history features vs subscription rate | Output: `reports/figures/04_campaign_vs_target.png` | Done when: timing, contact-type and previous-outcome insights are written — **done 2026-10-28** (figure 2468×1449 px costing 252 KB with six panels; **one interpretation line for each of the seven campaign/history variables**; the 4th call onward measured as value-destroying — clients needing 4+ calls hold **52.68% of the 99,966 calls for 13.47% of the 4,231 successes**, the first three calls convert at **7.7386%** against D17's **7.50%** break-even while the extra calls convert at **1.9298%**, i.e. **€77.73** per extra subscription against a €20 deposit and **−€32,906** net; the cap must be targeted because **93.28%** of the tail sits in the no-known-outcome group while `poutcome = success` still returns **22.55%** a call; **86/86 independent checks**, and identical text plus identical figure bytes across the stored notebook and two fresh runs)
 - [x] T20 | Rubric 4 | Correlation heatmap of numeric features | Output: `reports/figures/05_correlation_heatmap.png` | Done when: strongest correlations with `y` are listed and multicollinearity is flagged — **done 2026-10-28** (figure 2443×1921 px costing 343 KB with four panels; Pearson **and** Spearman on a shared colour scale, the target ranking annotated with the **rows behind each coefficient**, and the pairwise-complete counts plotted so a 6,584-row correlation cannot be read like a 36,168-row one; the ranking is listed in §5.1; **multicollinearity flagged as a duplicate rather than a correlated pair** — only **2 of 28** off-diagonal pairs reach |r| ≥ 0.20, but `pdays` and `days_since_contact` are the **same number on all 6,584 rows where both exist**, making the complete-case matrix **rank 7 of 8** with condition number **5.0×10¹⁶** and VIF **9.0×10¹⁵** for both, while every VIF is **1.01–1.03** once `pdays` is dropped; **42/42 independent checks** and identical text plus figure bytes across the stored notebook and two fresh runs)
-- [ ] T21 | Rubric 4 | Consolidate EDA findings | Output: `docs/04_eda_insights.md` | Done when: every figure has its one-line business interpretation and at least 5 insights are listed
+- [x] T21 | Rubric 4 | Consolidate EDA findings | Output: `docs/04_eda_insights.md` | **done 2026-10-28** (2,804 words; **five figures**, each with a one-sentence business interpretation directly under the image; **seven insights I1–I7** ranked by money at stake → planner actionability → survival under a control, where the task asked for five; **605 checks** pass — the page's structure, **164 numeric claims traced** to the notebook's cell sources rather than its outputs, and the headline figures re-derived from `train.csv` through `src.split.load_split`; the €-figures rest on the €1.50/€20 cost model and every claim that failed a control is labelled as such)
 
 ### Phase 5 — Feature Engineering & Selection
 - [ ] T22 | Rubric 5 | Design the `duration` leakage with-vs-without experiment | Output: `docs/05_leakage_audit.md` | Done when: the experiment (identical pipeline, feature set toggled) is specified and the leakage risk is documented
@@ -940,6 +947,51 @@ all five figures**; and the test half is still unread.
 authenticate: no interactive credential, no `GH_TOKEN`, and the local SSH key is not authorised on
 GitHub. A one-line interactive `git push` resolves it.
 **Next:** T21 — consolidate §1–§5 into `docs/04_eda_insights.md`.
+
+---
+
+### 2026-10-28 — Session 23  (Phase 4 complete, T21)
+
+**T21 — consolidated the EDA into `docs/04_eda_insights.md`.** 2,804 words, 276 lines, six sections. The
+task is a selection and rewrite, so nothing new was measured: every number quotes the notebook's §1–§5.
+
+**What the document does.** §2 gives each of the five figures a one-sentence business interpretation
+directly under its image, plus the measures behind it. §3 is the deliverable: **seven** insights (I1–I7)
+in a stated ranking — money at stake, then whether a planner can act before the next campaign, then
+whether it survived a control — with the ranking rule written before the list. §4 turns them into seven
+actions (A1–A7), §5 lists six things the EDA does **not** establish, §6 checks the page against the
+task's wording, and the closing paragraph is the viva line.
+
+**The selection, and why it is not the notebook's order.** I1 is the call budget (**€32,906** lost beyond
+the third call, **93.28%** of it in the no-known-outcome group); I2 the prior-success segment
+(**64.65%**, **18.41%** of subscribers from **3.33%** of the list); I3 `contact = unknown` (**4.11%** on
+**28.72%** of rows); I4 `may` (**30.59%** of calls at **6.68%**); I5 prior contact as a flag (**2.24×** at
+zero, nothing added by the second call); then I6 `duration` as a constraint (**+0.3967**, post-outcome)
+and I7 the two negative results (`day` and recency, both of which fail their controls).
+
+**Verification:** **605/605 checks** pass in `_t21_verify.py`, in three independent passes — structure
+(five figures with a one-sentence interpretation read as a *paragraph*, not a physical line; ≥5 insights
+with contiguous numbering; the ranking rule before the list; table pipe consistency; ≤100-column prose),
+**recomputation** (26 headline values re-derived from `train.csv` through `src.split.load_split`, a
+different path from the notebook: call counts, the €-totals, the poutcome and contact counts, the May
+share, the prior-contact step, and that `may` really is the largest month), and **provenance** (every
+numeric token in the page must already appear in the notebook's *cell sources* — not its outputs, so the
+base64 cannot vouch for anything — or in the earlier documents; 164 claims traced).
+
+**Defects caught before commit.** Three of my own: `contact = unknown` described as "the second-largest
+segment in the file" when `cellular` and `poutcome = unknown` are both larger (reworded to the 28.72%
+share, which is what the argument needs); a test-half row count typed as 16,043 when the split is 9,043
+(measured, then fixed); and an invented "~2 days of work not spent" in the A7 row. One layout fix: my
+"one sentence" check read only the first physical line of a wrapped paragraph, so it reported five false
+failures and would have accepted a two-sentence interpretation. And re-wrapping the prose to the project's
+100-column convention was done by a script whose own two bugs — repeating the list marker on every
+continuation line, and merging consecutive bullet items — were caught by its word-sequence guard, which
+refused to write either time.
+
+**Blocked:** four commits are now unpushed (`a87be66`, `ec739e9`, `3334e49` and this one). `git push`
+still cannot authenticate from this shell: no TTY for the credential prompt, no `GH_TOKEN`, and the local
+SSH key is not authorised on GitHub. One interactive `git push` clears all four.
+**Next:** T22 — the `duration` leakage audit in `docs/05_leakage_audit.md`.
 
 ---
 

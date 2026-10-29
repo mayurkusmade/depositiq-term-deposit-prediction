@@ -26,8 +26,8 @@
     "The top driver is a blank field",
     "Eight actions, each with the number that would prove it wrong"
   ],
-  "bytes": 1342750,
-  "sha256": "85a84a4a9a6a9e4fe811be9bf06e84198608e33784bb5a419ca67f65db39bc12",
+  "bytes": 1342755,
+  "sha256": "73d034c8ef462c0d2bc03d9f8846b39847e31451c1560c8073bb0d2ddcd6891c",
   "slide_count": 15,
   "max_allowed": 15,
   "figures_planned": [

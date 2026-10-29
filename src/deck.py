@@ -194,7 +194,8 @@ SPEC: tuple[Slide, ...] = (
         source="models/playbook.json, models/threshold_choice.json",
         left=(
             bullets(
-                "At 1.50 EUR a call and a 20.00 EUR deposit, break-even is 7.50% - below the 11.6982% base rate.",
+                "At 1.50 EUR a call and a 20.00 EUR deposit, break-even is 7.50% - below the 11.6982% rate of "
+                "the modelling half.",
                 "So this model converts a fixed call budget. It is not a case for cutting campaign spend.",
                 "Calling 41.10% of the list reaches 77.90% of subscribers: 43,621.00 EUR against 30,368.00 EUR "
                 "for calling everyone.",
@@ -223,7 +224,7 @@ SPEC: tuple[Slide, ...] = (
         wide_right=True,
         left=(
             bullets(
-                "45,211 clients in the file; 4,231 subscribed - 11.6982%, a 7.55 : 1 split.",
+                "45,211 clients in the file; 5,289 subscribed - 11.70%, a 7.55 : 1 split.",
                 "Each day the bank has more clients than agents, so its decision is which clients to call.",
                 "The constraint is agent capacity, not budget: the unit of cost is one call.",
                 "So the question is not 'will this client buy', but 'is this client worth a call today'.",

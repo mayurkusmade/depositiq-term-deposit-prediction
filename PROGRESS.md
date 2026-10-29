@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-30 21:55
-**Overall completion:** 89% (41 / 46 tasks)
+**Last updated:** 2026-10-30 23:10
+**Overall completion:** 91% (42 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -17,8 +17,8 @@
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
-| 9 | Documentation & Presentation | 10 | 8 / 13 | T01–T06, T41–T46 |
-| | **Total** | **100** | **41 / 46** | |
+| 9 | Documentation & Presentation | 10 | 9 / 13 | T01–T06, T41–T46 |
+| | **Total** | **100** | **42 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,25 +28,22 @@
 
 ## NEXT TASK
 
-**T42 | Phase 9 – Deliverables | The README, and the repo hygiene it implies.** Open: `README.md`.
-**Phase 9 is two thirds done**: the report (**27 pages**) and the deck (**15 slides**) exist, and between them
-they carry the project's whole argument. What does not exist is the thing a marker reaches for first — there
-is no `README.md` at the repository root, so a clean clone has no entry point, no install line, and no map from
-`src/` to the claims in the report. **Done when:** a clean clone can reproduce the results by following the
-README alone.
-**Carry in:** five constraints. **(1) The command sequence must be real** — the sixteen modules, their runtimes
-(`src.train` at **182.3 s** is the longest) and their outputs, in dependency order, taken from `docs/report.md`
-§ 9.4 rather than remembered. **(2) State the Python 3.11 ceiling** (D09): fourteen exact pins, and
-`xgboost 3.2.0` / `shap 0.51.0` are the newest releases that install on 3.11 — the README is where that
-constraint gets discovered, so it belongs at the top and not in a footnote. **(3) The headline figures in the
-README are the same figures** — PR-AUC **0.4460** cross-validated and **0.4616** held out, **43,621.00 EUR** on
-the training half and **10,988.50 EUR** held out, **41.10%** of the list called for **77.90%** of subscribers —
-each traced to a record, because a README is the one document nobody re-runs. **(4) Repo hygiene:** `data/raw/`
-and `data/processed/` stay uncommitted per `.gitignore`, the 19 figures and `docs/presentation.pptx` are
-committed, and no absolute path appears anywhere (D11). **(5) Name what is still missing** — the Streamlit
-demo (T43) and the viva material (T45–T46) do not exist yet, and a README that implies a finished repository
-would be the project's only dishonest document.
-**Output:** `README.md` at the repository root; T44 then follows it as though the repository were new.
+**T43 | Phase 9 – Deliverables | The interactive demo.** Open: `app/app.py` (Streamlit).
+**The repository now has a front door**, so the one deliverable that a marker will actually click is the last
+substantial piece of code: an app that takes a client's attributes and returns a probability with the drivers
+behind it. `app/` is empty. **Done when:** it runs locally, accepts client attributes, and returns a
+probability with the top SHAP drivers.
+**Carry in:** five constraints. **(1) The app scores the shipped artifact, not a fresh fit** —
+`models/final_model.joblib` through the same `src.tune.make_estimator` path every evaluation used, so a
+displayed probability equals the one T33 recorded. **(2) The drivers are the ones D58 defines:** TreeSHAP
+contributions aggregated by **signed sum within each one-hot block**, in log-odds, because the naive per-column
+alternative inflates `month` by **58.52%**. **(3) `duration` is not an input and never appears in the form**
+(D22, prohibition one) — a demo that accepts it would be the one place the project's central prohibition is
+quietly broken. **(4) The output is a probability against the price, not a verdict:** show the score beside
+**0.0750** and refuse to imply that 0.5 is a cut. **(5) The euro columns are labelled as assumptions** —
+**1.50 EUR** a call, **20.00 EUR** a deposit, linear in V — so the app cannot be read as a bank's own numbers.
+**Note:** `src/readme.py` fails the moment `app/app.py` exists, because the README says the demo is missing.
+That failure is the mechanism, not a bug: update the README in the same task.
 
 ---
 
@@ -136,6 +133,7 @@ stops being evidence |
 | D60 | 2026-10-30 | **The playbook is eight recommendations held as data in `src/playbook.py`, each figure a file-plus-key-path pair re-read from disk, ordered data quality → pricing → ranking → instrumentation, with the D18 scope sentence ahead of any euro figure and `duration` permitted only in the recommendation that forbids it** | Three reasons the recommendations are not prose. **A sentence cannot be checked; a record can.** Every one of the **46** cited figures is resolved by `resolve()` and re-read in `validate()`, so a mistyped key path, a stale model or a number carried over from an older run fails the command rather than being marked — and a figure with no record behind it cannot be written at all, which is what the `derived()` function is for: the ten quantities the document needs (net per 1,000 calls on each half, cost per subscription both ways, held-out recall and precision, the always-`no` accuracy, the campaign/client split) are computed from records, not dictated. **Eight, not the required six**, because two of the eight are prohibitions rather than actions - R4 on `duration` and R7 against re-opening the feature set - and a prohibition is only credible next to the number it declines: **+0.1788** PR-AUC and **20,340.00 EUR** that would be banked by a model that has seen the answer, and a **0.4460** baseline that a future re-tune must beat to be worth doing. **The order is by leverage, not by importance**: R1 first because `contact=unknown` covers **28.72%** of clients at a **-1.0150** contribution, so one required field changes how nearly three clients in ten are scored, and no other recommendation touches that many rows for so little work; R5 second because it decides the cut, and every euro in the document is linear in an **assumed** V = **20.00 EUR**; R2/R3 after it, because how the list is worked only matters once the price is real. **Why R3 is written as a refusal:** calls saved peaks at **18.89%** coverage while the price puts the cut at **41.10%**, and the block between them converts at **8.96%** for **+2,350.50 EUR** - profitable, so pruning to the peak is an optimisation that loses money. The honest form is therefore "do not stop where calls saved peaks", with the held-out half stated beside it: **1,547** calls at **7.76%** for **+79.50 EUR** is a rounding error, so on fresh data the same policy may well flip, and the recommendation says so. **Why the scope sentence leads:** p* = **7.50%** sits below the **11.6982%** base rate, so the campaign already pays; the measured gain is **+13,253.00 EUR (+43.6%)** on **21,302 fewer calls**, which is a fixed-budget improvement. A playbook that omitted this would license a spend cut the model never justified (D18). **Scope:** one classic telemarketing campaign, prices assumed, no causal month effect, three clients and eight recommendations are not a validation set |
 | D61 | 2026-10-30 | **The final report is checked three ways — structure, coverage, provenance — and rendered to PDF by a headless browser already on the machine, so the deliverable adds no dependency** | Three reasons the report is generated rather than typed. **Its risk is transcription, not arithmetic.** Every other document was written beside the module that computed its figures; this one synthesises twelve records and eleven documents, so a misquoted 0.4460 is the failure mode and no test would ever run again to catch it. The provenance check therefore parses **every decimal in the document** — **497 tokens** — and requires each to exist in a `models/*.json` record, a `reports/*.csv` column, or a supporting document; thousands separators are stripped before matching because a comma splits `43,621.00` into a fragment that matches nothing, which is the same tokenizer defect T39 hit. **It caught three real errors, and they were mine:** `77.87%` reached subscribers in two places where the records say **77.90%** (3,296 / 4,231) — copied from an older progress note rather than from `lift_results.json`, which is exactly the drift the check exists for; and a pair of balance-band rates (**5.36%**, **16.44%**) that appear in no record and no document, replaced with the quoted **−0.00023 ± 0.00085** ablation and the **3,001 rows (8.30%)** of negative balances that *are* on file. **The four constraints are asserted, not trusted:** the D18 scope sentence must precede the first `EUR` total (it does, at byte 1,790 against 2,281), the price assumptions must be declared in the same breath, and each of the three prohibitions must appear inside the section where its result is presented — a prohibition stated only in the summary is one a reader will not connect to anything. **The renderer is deliberately small and the PDF is not a new dependency:** a ~120-line markdown subset (headings, tables, lists, code, images, bold/italic) and Chromium's own `--print-to-pdf`, which exists on every Windows and macOS machine — so the deliverable **27 pages, 2,794,041 bytes, 9 embedded figures** — is reproducible without adding a single pin to `requirements.txt`. A missing browser is reported as a failed check, never as a silent HTML-only run. **Scope:** the report selects and orders evidence; it computes nothing new, and its only derived claims (**3.95×** the base rate, the counts behind each percentage) are recomputed by the independent verifier from the records |
 | D62 | 2026-10-30 | **The deck is generated from a fifteen-slide `SPEC` by `src/deck.py` with `python-pptx==1.0.2`, and validated against the saved `.pptx` rather than the objects that built it, with the figure column widened to 6.34 in and every slide's citations checked to exist** | Three reasons. **The risk here is layout, which no test of the data would catch.** The report's risk was transcription; a deck's is a text box that overflows, a caption that runs past the bottom edge, or a chart shrunk until its labels are decoration — so the checks read coordinates, font sizes and text back out of the saved package (**24/24** in module, **38** independently through the XML) instead of trusting the code that placed them. That discipline found **two inherited errors** in `docs/report.md` § 7.6: a held-out accuracy beside a cross-validated balanced accuracy (**61.26%** where the held-out pair says **61.28%**), and a claim that accuracy maximises at **0.5** when the record's own peak is **89.76%** at **0.478284**. Both are repaired in the report and the deck, and they are the trace's blind spot made concrete: a token-level trace admits a number that appears *anywhere* in the documents, so a figure lifted from the wrong column passes it — which is why the deck additionally checks each slide against the **specific** record it cites. **Fifteen slides, ordered by decision rather than by rubric:** the answer and its scope, the decision, the price, then the evidence, then the eight recommendations — a deck that walks the nine criteria in order is a report read aloud. **The figure column is 6.34 inches, not 5.8:** the first build was exported to PNG through PowerPoint and looked at, and the project's multi-panel charts were unreadable at an even split, so the split, the baseline alignment and the type sizes were changed in response — a layout assertion that was never rendered is a guess. **Scope:** the deck selects and compresses; it computes nothing, and every number on it is the report's, traced to the same records. |
+| D63 | 2026-10-30 | **The README is a document plus a validator (`src/readme.py`), and its "reproduce by following it alone" claim is tested by reconstructing a clone from `git ls-files` and running the commands there; the data is committed, and the README must declare what is missing** | Three reasons. **A README is the one document nobody re-runs:** every other deliverable is protected by the module that produced it, but prose about paths, versions and commands has no such guard, so it drifts silently until a marker follows it into a `ModuleNotFoundError`. The validator therefore checks the README against the **filesystem, the records and `requirements.txt`** rather than against its own intentions: every `python -m src.<name>` must name an existing module with a `__main__` guard, every runnable module must be named somewhere, the command order must respect 14 dependency constraints, the quoted versions must equal the pins, the counts (modules, figures, CSV tables, documents, decisions, tasks) are counted from disk, every relative link must resolve, and every decimal must appear in a record. **The clone is the real test:** `_t42_clone.py` rebuilds a 102-file tree from git's own file list, imports all 24 modules there, confirms `src.config` resolves to the clone rather than the original tree, runs the smoke test, and checks that no `.venv` or bytecode leaks in — which is the static half of T44, and it passed 15/15. **The data is committed, contradicting this task's own carry-in:** `data/raw` and `data/processed` are tracked (10 files, 5 MB), and that is deliberate rather than an oversight — a clone with no data cannot follow step 1 at all, and the README publishes the three SHA-256 prefixes so a reader can confirm the file is the UCI original. **The honesty clause is enforced:** the README must say `app/` is empty, and the check fails the moment `app/app.py` appears, so T43 cannot land without updating it. **Four stale counts and one conflation were caught by building it this way:** the first draft claimed 15 pins (14), 23 modules (24), 4 CSV tables (6), and — the one that mattered — paired the file's **5,289** subscribers with the modelling half's **11.6982%** rate. That conflation was already in `docs/report.md` § 0 and on the deck's decision slide, all three quoting the same shared sentence; the file's rate is **11.70%** and the half's is **11.6982%**, and all three now say which is which. **Scope:** the README selects and links; it computes nothing, and its numbers are the report's, traced to the same records. |
 
 ---
 
@@ -204,7 +202,7 @@ Tick only after the deliverable is verified to exist and run.
 ### Phase 9 — Deliverables
 - [x] T40 | Rubric 9 | Write the final report | Output: `docs/report.md` (+ PDF) | **done 2026-10-30** (`src/report.py` → `docs/report.md`, `docs/report.html`, `docs/report.pdf` and `models/report.json`; **7,289 words over 27 rendered pages**, covering the nine criteria **in rubric order**, each section naming the document or module that carries its evidence; **9 figures embedded**, every one a file under `reports/figures/` that a record already produced; **12 records cited and re-parsed**; and **497 decimal tokens** all matched against a value in a `models/*.json` record, a `reports/*.csv` column or one of the eleven supporting documents — **0 unmatched**; the **D18 scope sentence sits at byte 1,790, before the first `EUR` total at 2,281**, with the price assumptions declared in the same paragraph; the three prohibitions are asserted where their results are (`duration` in §5.4, accuracy in §7.6, causal `month` in §8.1); `python -m src.report` exits **0** with **30/30** checks in **3.4 s**, and **45 independent checks** recompute the headline euros from the records without importing the module — every one of the fourteen quoted totals matched to the cent, every percentage re-derived from its counts; **three defects caught by that trace and fixed** — `77.87%` twice where the record says **77.90%**, and a balance-band pair that existed in no record at all)
 - [x] T41 | Rubric 9 | Build the slide deck | Output: `docs/presentation.pptx`, `src/deck.py`, `models/deck.json` | **done 2026-10-30** (15 slides, business-first: the answer and its scope, the decision, the price, then the evidence, then the eight recommendations; **24/24** in-module checks and **38 independent** ones that open the package as a zip and parse its XML without python-pptx, recomputing **3,296 × 20 − 14,866 × 1.5 = 43,621.00 EUR** from confusion counts and confirming the six embedded charts are byte-identical to `reports/figures/`; **157** decimal tokens trace to a record or document and the **33** slide-foot citations are each verified to exist; geometry, type size and text overflow are checked against the **saved** file; all **15** slides were exported to PNG through PowerPoint and inspected, which is how charts too small to read at 5.8 in were caught; **two inherited report defects found and fixed** — § 7.6 paired a held-out accuracy with a CV balanced accuracy (**61.26%** → **61.28%**) and claimed accuracy peaked at 0.5 when the record's peak is **89.76%** at **0.478284**)
-- [ ] T42 | Rubric 9 | Finalise README and repo hygiene | Output: `README.md` | Done when: a clean clone can reproduce the results by following the README alone
+- [x] T42 | Rubric 9 | Finalise README and repo hygiene | Output: `README.md`, `src/readme.py`, `models/readme.json` | **done 2026-10-30** (249 lines: the decision and its scope, the headline figures beside the record that holds each, a two-line quick start, the **24-command** reproduction sequence in dependency order with per-step runtimes, a repository map, the data's provenance with three SHA-256 prefixes, and a plain statement that `app/` is empty; **33 checks** in `src/readme.py` hold it to the repository — every command names a real module with a `__main__` guard, every runnable module is named, **14** dependency constraints hold, the quoted versions equal the pins, the counts are counted from disk, every link resolves, no absolute path appears and every decimal traces to a record; **15/15** clean-clone checks rebuild a **102-file** tree from `git ls-files`, import all **24** modules there and prove `src.config` resolves to the clone; **four stale counts and one conflation** found — the file's **5,289** subscribers had been paired with the modelling half's **11.6982%** rate in the README, `docs/report.md` § 0 and the deck's decision slide, all three now distinguishing **11.70%** from **11.6982%**)
 - [ ] T43 | Rubric 9 | Build the interactive demo | Output: `app/app.py` (Streamlit) | Done when: it runs locally, accepts client attributes, and returns a probability with the top SHAP drivers
 - [ ] T44 | Rubric 9 | End-to-end rerun from a clean clone | Output: verification checklist recorded in `PROGRESS.md` | Done when: fresh clone + install + run reproduces the reported metrics
 
@@ -2154,6 +2152,60 @@ begin until it exists.
 
 ---
 
+### 2026-10-30 — Session 44  (T42 complete)
+
+**Completed:** **T42** — `README.md` (**248 lines**), `src/readme.py` and `models/readme.json`; criterion 9 is
+**9 / 13**.
+
+**The front door, and the command list that has to be true.** What was missing was the thing a marker reaches
+for first: there is now a README that states the decision and its scope, the headline numbers beside the record
+that holds each one, a two-line quick start, the **24-command** reproduction sequence in dependency order with
+per-step runtimes, a repository map, the data's provenance with checksums, and the verification discipline.
+It also states plainly that `app/` is empty and four tasks remain, because a README that implies a finished
+repository would be the project's only dishonest document.
+
+**The README is checked against the repository, not against its own intentions.** `python -m src.readme` runs
+**33 checks**: every `python -m src.<name>` must name a real module with a `__main__` guard, every runnable
+module must be named somewhere, the command order must satisfy **14 dependency constraints**, the quoted
+versions must equal the pins in `requirements.txt`, the counts (modules, figures, CSV tables, documents,
+decision rows, tasks done) are taken from disk, every relative link must resolve, no absolute path may appear,
+and every decimal must trace to a record. The honesty clause is enforced too: the check fails the moment
+`app/app.py` appears, so T43 cannot land without updating the README.
+
+**A clean clone was then reconstructed, not imagined.** A **102-file** tree was rebuilt from `git ls-files`,
+all **24** modules were imported inside it, `src.config` was confirmed to resolve to the clone rather than the
+original tree (the derived-`ROOT` decision paying off), the smoke test was run there, and the copy was checked
+for leaked `.venv` or bytecode: **15/15**. That is the static half of T44; the timed end-to-end rerun is still
+T44's job.
+
+**Five defects, four of them counts and one that mattered.** The first draft claimed **15** pins where the file
+has **14**, **23** modules where there are **24**, and **4** CSV tables where there are **6** — all caught by
+counting from disk instead of memory. The one that mattered: the README paired the file's **5,289** subscribers
+with the modelling half's **11.6982%** rate. The same conflation was already in `docs/report.md` § 0
+("11.6982% of the 45,211 clients in the file") and on the deck's decision slide ("4,231 subscribed" out of
+45,211) — three documents carrying one shared sentence, which is how a defect propagates. All three now
+distinguish the file's **11.70%** from the modelling half's **11.6982%**, and `src.report` and `src.deck` were
+re-run to rebuild the PDF (27 pages) and the deck (24/24 checks). Two further flaws were in the validator
+itself: the H1 check counted shell comments inside fenced code blocks, and the absolute-path check read the
+`https://` in a URL as a drive letter.
+
+**A carry-in was wrong and is recorded rather than fixed.** The task brief assumed `data/raw` and
+`data/processed` stay uncommitted; they are in fact tracked (**10 files**, 5 MB) — which is what makes the
+clone followable offline. The README publishes the three SHA-256 prefixes so a reader can confirm the CSVs are
+the UCI originals.
+
+**Verified:** `python -m src.readme` exits **0** with **33/33** checks in **1.2 s**; `_t42_clone.py` exits
+**0** with **15/15**; `python -m src.deck` still passes **24/24** and `python -m src.report` **30/30** after the
+base-rate correction.
+
+**Blocked:** the push, as Open Questions item 10 — now **nine** commits local.
+**Uncommitted:** `README.md`, `src/readme.py`, `models/readme.json`, `src/deck.py`,
+`docs/presentation.pptx`, `models/deck.json`, `src/report.py`, `docs/report.md`, `docs/report.pdf`,
+`models/report.json`, `PROGRESS.md`.
+**Next:** T43 — the Streamlit demo, the last substantial piece of code.
+
+---
+
 ## Open Questions / Blockers
 
 1. ~~**BLOCKER — GitHub push pending.**~~ **Resolved 2026-10-27 (Session 18).** The push of `8278fae`
@@ -2184,12 +2236,12 @@ data was altered. Any older path references elsewhere should be updated to `data
    will re-pin — but everything in the plan works on 3.11, so this is optional.
 9. **Will the marker run our code?** If the project is graded by running it, the marker's Python
    version must be ≥ 3.11. Nothing in `requirements.txt` works on 3.9 or older.
-10. **BLOCKER — eight commits unpushed, this one included (item 1 reopened 2026-10-30, Session 41; still open at Session 43).** A push failed again,
+10. **BLOCKER — nine commits unpushed, this one included (item 1 reopened 2026-10-30, Session 41; still open at Session 44).** A push failed again,
     and this time with a name rather than a hang: `GIT_TERMINAL_PROMPT=0 GIT_TERMINAL... git push origin
     main` returns `fatal: could not read Username for 'https://github.com': terminal prompts disabled`, so
     the credential helper that worked non-interactively in Session 26 no longer supplies a token to this
-    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **8 commits ahead**: `33fff7a`
-    (T34), `7bce0c1` (T35), `d149f58` (T36), `7612071` (T37), the T38 commit, the T39–T41 commits and this one, per `git log
+    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **9 commits ahead**: `33fff7a`
+    (T34), `7bce0c1` (T35), `d149f58` (T36), `7612071` (T37), the T38 commit, the T39–T42 commits and this one, per `git log
     --oneline origin/main..main`. Nothing is lost and the tree is clean; the fix is a
     interactive credential sign-in, which the agent's shell cannot drive. Run `git push origin main` from
     your own terminal, or re-authenticate Git Credential Manager, and this closes.

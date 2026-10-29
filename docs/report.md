@@ -23,10 +23,10 @@ than restating their workings.
 
 ## 0. Executive summary
 
-A bank calls clients to sell a term deposit. Most calls fail: **11.6982%** of the 45,211 clients in
-the file subscribed, so an unordered call list wastes roughly seven calls in eight. The campaign does
-not need more calls — it needs to spend the calls it already makes on the clients most likely to say
-yes.
+A bank calls clients to sell a term deposit. Most calls fail: **5,289** of the 45,211 clients in the file
+subscribed — **11.70%**, a rate that holds at **11.6982%** on the **36,168**-row modelling half — so an
+unordered call list wastes roughly seven calls in eight. The campaign does not need more calls; it needs
+to spend the calls it already makes on the clients most likely to say yes.
 
 **The scope sentence, before any euro total is read.** The break-even probability is **7.50%** — a
 call costs **€1.50** and a captured deposit is assumed to be worth **€20.00** — and that sits *below*

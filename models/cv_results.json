@@ -369,6 +369,147 @@
         }
       },
       "artifact": "models\\model_random_forest.joblib"
+    },
+    "xgboost_gbdt": {
+      "role": "candidate",
+      "note": "T28's boosted trees; 400x depth 3, lr 0.05, scale_pos_weight from the training half",
+      "params": {
+        "objective": "binary:logistic",
+        "base_score": null,
+        "booster": null,
+        "callbacks": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": 0.8,
+        "device": null,
+        "early_stopping_rounds": null,
+        "enable_categorical": false,
+        "eval_metric": "aucpr",
+        "feature_types": null,
+        "feature_weights": null,
+        "gamma": null,
+        "grow_policy": null,
+        "importance_type": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.05,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 3,
+        "max_leaves": null,
+        "min_child_weight": 5,
+        "missing": NaN,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_estimators": 400,
+        "n_jobs": 1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": 7.548334,
+        "subsample": 0.9,
+        "tree_method": "hist",
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7928279753260769,
+          "pr_auc": 0.43759564525002503,
+          "brier": 0.1634360548629752,
+          "mean_pred": 0.38691234588623047,
+          "accuracy_at_half": 0.8126900746474979,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.8112849373307813,
+          "pr_auc": 0.43503694278638383,
+          "brier": 0.16099445753881886,
+          "mean_pred": 0.38796401023864746,
+          "accuracy_at_half": 0.8249930881946365,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.791188528794746,
+          "pr_auc": 0.42581166005323656,
+          "brier": 0.16642730275167025,
+          "mean_pred": 0.3904911279678345,
+          "accuracy_at_half": 0.8067459220348355,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7951757985062002,
+          "pr_auc": 0.45702991345816946,
+          "brier": 0.16255745516380632,
+          "mean_pred": 0.3876243829727173,
+          "accuracy_at_half": 0.8186091524955067,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.8061835858224133,
+          "pr_auc": 0.454688301110175,
+          "brier": 0.16494712614172233,
+          "mean_pred": 0.3930352032184601,
+          "accuracy_at_half": 0.8150145167980091,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        }
+      ],
+      "summary": {
+        "roc_auc": {
+          "mean": 0.7993321651560436,
+          "sd": 0.008884106737117193
+        },
+        "pr_auc": {
+          "mean": 0.44203249253159793,
+          "sd": 0.013386848598112807
+        },
+        "brier": {
+          "mean": 0.1636724792917986,
+          "sd": 0.002102662164558409
+        },
+        "mean_pred": {
+          "mean": 0.38920541405677794,
+          "sd": 0.0025307730857998295
+        },
+        "accuracy_at_half": {
+          "mean": 0.8156105508340972,
+          "sd": 0.006791349290146464
+        }
+      },
+      "artifact": "models\\model_xgboost.joblib"
     }
   },
   "reduction_check": {
@@ -676,10 +817,161 @@
             "sign_test_p": null
           }
         }
+      },
+      "xgboost_gbdt": {
+        "folds": [
+          {
+            "fold": 1,
+            "all17": {
+              "rows": 7234,
+              "positives": 846,
+              "roc_auc": 0.7942197508330484,
+              "pr_auc": 0.43632092993983074,
+              "brier": 0.1629900618905399,
+              "mean_pred": 0.38640856742858887,
+              "accuracy_at_half": 0.8117224218965994,
+              "columns": 65,
+              "n_iter": -1
+            },
+            "shipped12": {
+              "rows": 7234,
+              "positives": 846,
+              "roc_auc": 0.7928279753260769,
+              "pr_auc": 0.43759564525002503,
+              "brier": 0.1634360548629752,
+              "mean_pred": 0.38691234588623047,
+              "accuracy_at_half": 0.8126900746474979,
+              "columns": 40,
+              "n_iter": -1
+            }
+          },
+          {
+            "fold": 2,
+            "all17": {
+              "rows": 7234,
+              "positives": 846,
+              "roc_auc": 0.8116179161282014,
+              "pr_auc": 0.4345213506959017,
+              "brier": 0.1610865754276454,
+              "mean_pred": 0.38738909363746643,
+              "accuracy_at_half": 0.8238871993364667,
+              "columns": 65,
+              "n_iter": -1
+            },
+            "shipped12": {
+              "rows": 7234,
+              "positives": 846,
+              "roc_auc": 0.8112849373307813,
+              "pr_auc": 0.43503694278638383,
+              "brier": 0.16099445753881886,
+              "mean_pred": 0.38796401023864746,
+              "accuracy_at_half": 0.8249930881946365,
+              "columns": 40,
+              "n_iter": -1
+            }
+          },
+          {
+            "fold": 3,
+            "all17": {
+              "rows": 7234,
+              "positives": 847,
+              "roc_auc": 0.7912043334777012,
+              "pr_auc": 0.4276079848244229,
+              "brier": 0.1655883275983167,
+              "mean_pred": 0.3888765275478363,
+              "accuracy_at_half": 0.8090959358584462,
+              "columns": 65,
+              "n_iter": -1
+            },
+            "shipped12": {
+              "rows": 7234,
+              "positives": 847,
+              "roc_auc": 0.791188528794746,
+              "pr_auc": 0.42581166005323656,
+              "brier": 0.16642730275167025,
+              "mean_pred": 0.3904911279678345,
+              "accuracy_at_half": 0.8067459220348355,
+              "columns": 40,
+              "n_iter": -1
+            }
+          },
+          {
+            "fold": 4,
+            "all17": {
+              "rows": 7233,
+              "positives": 846,
+              "roc_auc": 0.7947043362681512,
+              "pr_auc": 0.45859035333771236,
+              "brier": 0.16246510867124364,
+              "mean_pred": 0.3872402310371399,
+              "accuracy_at_half": 0.8148762615788746,
+              "columns": 65,
+              "n_iter": -1
+            },
+            "shipped12": {
+              "rows": 7233,
+              "positives": 846,
+              "roc_auc": 0.7951757985062002,
+              "pr_auc": 0.45702991345816946,
+              "brier": 0.16255745516380632,
+              "mean_pred": 0.3876243829727173,
+              "accuracy_at_half": 0.8186091524955067,
+              "columns": 40,
+              "n_iter": -1
+            }
+          },
+          {
+            "fold": 5,
+            "all17": {
+              "rows": 7233,
+              "positives": 846,
+              "roc_auc": 0.8054133303426249,
+              "pr_auc": 0.4568368840185025,
+              "brier": 0.16435681176925934,
+              "mean_pred": 0.3916492760181427,
+              "accuracy_at_half": 0.8133554541683948,
+              "columns": 65,
+              "n_iter": -1
+            },
+            "shipped12": {
+              "rows": 7233,
+              "positives": 846,
+              "roc_auc": 0.8061835858224133,
+              "pr_auc": 0.454688301110175,
+              "brier": 0.16494712614172233,
+              "mean_pred": 0.3930352032184601,
+              "accuracy_at_half": 0.8150145167980091,
+              "columns": 40,
+              "n_iter": -1
+            }
+          }
+        ],
+        "summary": {
+          "roc_auc": {
+            "all17_mean": 0.7994319334099454,
+            "shipped12_mean": 0.7993321651560436,
+            "delta_mean": -9.976825390187738e-05,
+            "delta_sd": 0.0008387439050386404,
+            "folds_improving": 2,
+            "sign_test_p": null
+          },
+          "pr_auc": {
+            "all17_mean": 0.44277550056327397,
+            "shipped12_mean": 0.44203249253159793,
+            "delta_mean": -0.0007430080316760624,
+            "delta_sd": 0.0015336715314351332,
+            "folds_improving": 2,
+            "sign_test_p": null
+          }
+        }
       }
     }
   },
-  "elapsed_seconds": 156.6,
+  "library": {
+    "xgboost": "3.2.0",
+    "scikit-learn": "1.7.2"
+  },
+  "elapsed_seconds": 182.3,
   "checks": [
     {
       "check": "the fold split is deterministic and shared by every estimator",
@@ -694,7 +986,7 @@
     {
       "check": "the estimators differ only in the estimator",
       "passed": true,
-      "detail": "identical preprocessing across 3 estimators, differing estimators: ['DummyClassifier', 'LogisticRegression', 'RandomForestClassifier']"
+      "detail": "identical preprocessing across 4 estimators, differing estimators: ['DummyClassifier', 'LogisticRegression', 'RandomForestClassifier', 'XGBClassifier']"
     },
     {
       "check": "the preprocessor is fitted per fold, never on the pooled frame",
@@ -709,7 +1001,7 @@
     {
       "check": "no prediction is missing or outside [0, 1]",
       "passed": true,
-      "detail": "probabilities span [0.0426, 0.9943]"
+      "detail": "probabilities span [0.0351, 0.9943]"
     },
     {
       "check": "the dummy reproduces D28's three floors exactly",
@@ -719,7 +1011,7 @@
     {
       "check": "every model beats both floors in every fold",
       "passed": true,
-      "detail": "all beat the 0.1170 floor in every fold: logreg_balanced 0.4008 (worst fold 0.3852); random_forest 0.4346 (worst fold 0.4152); failures: none"
+      "detail": "all beat the 0.1170 floor in every fold: logreg_balanced 0.4008 (worst fold 0.3852); random_forest 0.4346 (worst fold 0.4152); xgboost_gbdt 0.4420 (worst fold 0.4258); failures: none"
     },
     {
       "check": "no leaky or target column reached the matrix",
@@ -729,7 +1021,12 @@
     {
       "check": "every saved artifact reloads and predicts identically",
       "passed": true,
-      "detail": "baseline_dummy.joblib ok (max delta 0.0e+00, 40 columns); baseline_logreg.joblib ok (max delta 0.0e+00, 40 columns); model_random_forest.joblib ok (max delta 0.0e+00, 40 columns)"
+      "detail": "baseline_dummy.joblib ok (max delta 0.0e+00, 40 columns); baseline_logreg.joblib ok (max delta 0.0e+00, 40 columns); model_random_forest.joblib ok (max delta 0.0e+00, 40 columns); model_xgboost.joblib ok (max delta 0.0e+00, 40 columns)"
+    },
+    {
+      "check": "the imbalance weight matches the training half",
+      "passed": true,
+      "detail": "SCALE_POS_WEIGHT=7.548334, training half 31,937/4,231 = 7.548334, worst fold-train deviation 1.90e-03"
     },
     {
       "check": "the shipped feature set is T25's frozen decision",
@@ -739,20 +1036,20 @@
     {
       "check": "no model stopped at its iteration cap",
       "passed": true,
-      "detail": "dummy_prior: no iteration cap; logreg_balanced: 35-43 of 2000; random_forest: no iteration cap"
+      "detail": "dummy_prior: no iteration cap; logreg_balanced: 35-43 of 2000; random_forest: no iteration cap; xgboost_gbdt: no iteration cap"
     },
     {
       "check": "every reduction arm re-runs its own estimator, not a second experiment",
       "passed": true,
-      "detail": "logreg_balanced: 5 folds; random_forest: 5 folds, shipped arm identical to each run (drift: none), 65 -> 40 columns"
+      "detail": "logreg_balanced: 5 folds; random_forest: 5 folds; xgboost_gbdt: 5 folds, shipped arm identical to each run (drift: none), 65 -> 40 columns"
     },
     {
       "check": "the CV record on disk matches the run",
       "passed": true,
-      "detail": "cv_results.json: 36,168 rows, 40 columns, 3 estimators x 5 folds"
+      "detail": "cv_results.json: 36,168 rows, 40 columns, 4 estimators x 5 folds"
     }
   ],
-  "checks_passed": 14,
-  "checks_total": 14,
+  "checks_passed": 15,
+  "checks_total": 15,
   "checks_ok": true
 }

@@ -1,11 +1,11 @@
 """
-DepositIQ - the cross-validation harness, the baselines and the candidate models (T26-T28).
+DepositIQ - the cross-validation harness and every candidate model (T26-T28).
 
 Why this file exists
 --------------------
 T26 asks for two baselines, and every model after them is judged against them. More usefully, this is
 where the *harness* lives: one fold split, one preprocessor factory, one scorer, one metric function.
-**T27 adds a Random Forest** below, and T28 an XGBoost model, T29 an imbalance variant, T30 tuned
+**T27 adds a Random Forest and T28 an XGBoost model** below, and T29 an imbalance variant, T30 tuned
 parameters - each a dictionary entry plus a line in the report, not a second experiment with its own
 conventions. The usual way a model comparison goes wrong is not a bad model; it is two models
 evaluated slightly differently.
@@ -82,6 +82,8 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import sklearn
+import xgboost
 from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -151,6 +153,37 @@ ESTIMATORS: dict[str, dict] = {
         "role": "candidate",
         "note": "T27's bagged trees; 300x min_samples_leaf=10, sqrt(40) features per split",
     },
+    # T28, and D08's chosen family. Settings, and where they came from:
+    #
+    # * `max_depth=3` - measured, on fold 1 only, across depths 2/3/4/6: PR-AUC 0.42948 / 0.43760 /
+    #   0.43604 / 0.42985. Depth 6 overfits 40 sparse one-hot columns and depth 2 underfits; the two best
+    #   are within 0.002, so the shallower one wins as the cheaper explanation. That is a one-fold sanity
+    #   check, **not** tuning - T30 tunes properly on all five folds, and this setting is what it starts
+    #   from rather than what it concludes.
+    # * `learning_rate=0.05` with `n_estimators=400` - 1.8 s a fold measured, so the pair is affordable
+    #   sixteen times over. The rate is deliberately not the default 0.3, which at 400 rounds would be
+    #   badly over-trained.
+    # * `scale_pos_weight` is XGBoost's native imbalance handle (D08) and stands in for the other models'
+    #   `class_weight`; see `SCALE_POS_WEIGHT` for where the number comes from and how it is checked.
+    # * `tree_method="hist"` - the only exact-enough method that is fast on 36k x 40 dense floats.
+    # * `n_jobs=1` - as everywhere else in this table, so the runtimes are comparable.
+    "xgboost_gbdt": {
+        "make": lambda: xgboost.XGBClassifier(
+            n_estimators=400,
+            learning_rate=0.05,
+            max_depth=3,
+            min_child_weight=5,
+            subsample=0.9,
+            colsample_bytree=0.8,
+            scale_pos_weight=SCALE_POS_WEIGHT,
+            tree_method="hist",
+            eval_metric="aucpr",
+            random_state=FOLD_SEED,
+            n_jobs=1,
+        ),
+        "role": "candidate",
+        "note": "T28's boosted trees; 400x depth 3, lr 0.05, scale_pos_weight from the training half",
+    },
 }
 
 # Artifacts. The fits are the objects T31 replaces; the JSON is the record of every estimator's CV.
@@ -158,7 +191,17 @@ MODEL_PATHS: dict[str, Path] = {
     "dummy_prior": config.MODELS_DIR / "baseline_dummy.joblib",
     "logreg_balanced": config.MODELS_DIR / "baseline_logreg.joblib",
     "random_forest": config.MODELS_DIR / "model_random_forest.joblib",
+    "xgboost_gbdt": config.MODELS_DIR / "model_xgboost.joblib",
 }
+
+# XGBoost's imbalance handle, as a number computed from the training half: 31,937 negatives against 4,231
+# positives, so `neg / pos`. It is a **training-only** ratio - nothing here has seen the test half - and a
+# check below requires this literal to match the measured ratio, because a hard-coded constant that nobody
+# re-derives is how a weight quietly stops meaning what its comment says. It is fixed here rather than    # recomputed per fold because the folds are stratified: measured, the per-fold **training** ratio deviates
+    # by at most 1.9e-3 (**0.025%** relative, in the one fold that holds back 847 positives rather than 846) -
+    # which cannot matter, while a per-fold weight would make the model's own configuration depend on which
+    # fold it is in.
+SCALE_POS_WEIGHT: float = 7.548334
 
 # Renamed from `baselines_cv.json` in T27: the file now holds a candidate model, not only baselines, and
 # a record named for its contents is worth more than one that needs a footnote.
@@ -166,7 +209,7 @@ CV_PATH: Path = config.MODELS_DIR / "cv_results.json"
 
 # The estimators T25's decision is re-measured on: the linear model that questioned it, and the forest
 # that made it. XGBoost joins this tuple in T28, and D46's revisit trigger is read off that entry.
-REDUCTION_ESTIMATORS: tuple[str, ...] = ("logreg_balanced", "random_forest")
+REDUCTION_ESTIMATORS: tuple[str, ...] = ("logreg_balanced", "random_forest", "xgboost_gbdt")
 
 # Columns that must never reach the matrix (D05, D36). Checked on the fitted transformer's output names.
 FORBIDDEN: tuple[str, ...] = ("duration", "pdays", config.TARGET)
@@ -589,6 +632,27 @@ def validate(
 
     compare("every saved artifact reloads and predicts identically", artifacts_reload)
 
+    def imbalance_weight_is_current() -> tuple[bool, str]:
+        """`SCALE_POS_WEIGHT` must equal the ratio measured on the training half, to 1e-5."""
+        negatives = int((y == 0).sum())
+        positives = int((y == 1).sum())
+        measured = negatives / positives
+        # The comparison is against each fold's **training** rows, because that is the side a per-fold weight
+        # would be computed from. Using the validation fold's ratio instead measures the wrong thing - and
+        # reports a 2.5e-3 "drift" that is really just the held-out share, the same wrong-denominator
+        # mistake the dummy's floor check made in T26.
+        deviations = []
+        for train_idx, _ in folds:
+            tr = y.iloc[train_idx]
+            deviations.append(abs((len(tr) - int(tr.sum())) / max(int(tr.sum()), 1) - SCALE_POS_WEIGHT))
+        return (
+            abs(measured - SCALE_POS_WEIGHT) < 1e-5 and max(deviations) < 5e-3,
+            f"SCALE_POS_WEIGHT={SCALE_POS_WEIGHT:.6f}, training half {negatives:,}/{positives:,} = "
+            f"{measured:.6f}, worst fold-train deviation {max(deviations):.2e}",
+        )
+
+    compare("the imbalance weight matches the training half", imbalance_weight_is_current)
+
     add("the shipped feature set is T25's frozen decision",
         columns == select.shipped_features() and len(columns) == 12,
         f"{len(columns)} features; frozen drops {list(select.SHIPPED_DROPPED)}")
@@ -704,6 +768,7 @@ def report(variant: str = "full") -> dict:
             for name, run in runs.items()
         },
         "reduction_check": reduction,
+        "library": {"xgboost": xgboost.__version__, "scikit-learn": sklearn.__version__},
         "elapsed_seconds": round(time.perf_counter() - started, 1),
     }
 

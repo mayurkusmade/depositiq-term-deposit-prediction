@@ -16,9 +16,9 @@
 | 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
-| 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
+| 8 | Business Insights & Recommendations | 10 | 1 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **36 / 46** | |
+| | **Total** | **100** | **37 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,28 +28,28 @@
 
 ## NEXT TASK
 
-**T37 | Phase 8 – Explainability | Global SHAP analysis.**
-Open: `reports/figures/09_shap_summary.png`, notes in a new `docs/08_explainability.md`.
-Explain the shipped model globally: a beeswarm of per-client SHAP values and an importance bar, both on the
-**12 shipped features into 40 columns**, with the top drivers written up in plain language a branch manager
-could act on.
-**Done when:** the beeswarm plus the importance bar are saved and the top drivers are explained in plain
-language.
-**Carry in:** six constraints, each from something already measured. **(1) Explain the shipped model, not a
-convenience model.** The artifact is `models/final_model.joblib` (sha256 **7a40752f...**), which is XGBoost
-untuned-but-tuned (`max_depth=5`, `lr=0.08`, `n_estimators=300`, unweighted) over the **40-column** matrix -
-a SHAP plot from a fresh fit or from the forest would explain a model the project does not ship. **(2) The
-held-out half is report-only** (D53, D54) and has now been scored twice; if SHAP is computed there, the
-sample must be stated and no decision taken from it. **(3) `duration` is not in the matrix** and must not
-appear in a plot: T36 measured what it is worth (**+0.1788 PR-AUC, +20,340 EUR**) and why it cannot ship
-(§9.4). **(4) Correlated one-hot levels split credit.** The 40 columns are one-hot expansions of 12
-features, so per-column attribution understates each feature's importance; §8.2 of the leakage audit already
-found the two rankings disagree about exactly this, and T25's rule applies - aggregate to the **source
-feature** and say so. **(5) T25's instrument was a forest and T32's was this model.** The comparison to make
-is between **SHAP on the shipped model** and **T25's permutation ranking**, with the disagreements named
-rather than averaged away. **(6) Explain in business language.** The deliverable is not a plot; it is a
-sentence like "previous campaign outcome dominates, and it is mostly a statement about who was contacted"
-that a non-technical reader can check against their own intuition.
+**T38 | Phase 8 – Explainability | Local SHAP explanations for three exemplar clients.**
+Open: `reports/figures/10_shap_local.png`, notes appended to `docs/08_explainability.md`.
+Explain **one true positive, one false positive and one false negative** against the adopted cut, client by
+client, and put each client's local drivers beside the global ranking from T37 so the difference is visible.
+**Done when:** all three clients are explained in the figure and in prose, each with its own numbers.
+**Carry in:** seven constraints, each from something already measured. **(1) Same artifact, same view.**
+`models/final_model.joblib` (sha256 **7a40752f...**), the 40-column matrix, and **feature-level** blocks -
+T37 §8.2 measured that per-column attribution fragments a feature (`month`'s largest column is only 9th of
+40), so a local explanation drawn per column would be inconsistent with the global table it sits beside.
+**(2) "Positive" and "negative" mean against the price, not 0.5.** T34 adopted **0.0750**, and at that cut
+**41.10%** of the list is called; a client at p = 0.09 is called, so a 0.5 rule would relabel most of the
+list and make the three exemplars unrepresentative of the campaign. **(3) Which half, and why it is now a
+third character of the same problem.** Labels are needed to know a client is a false positive, so the
+exemplars come from the **training half**; the held-out half stays unread (D53/D54) and must not be used to
+pick a flattering example. **(4) The selection rule is fixed before the clients are looked at** - e.g. the
+most confident member of each cell, deterministically, with the index recorded - because choosing exemplars
+after seeing their explanations is how an illustration becomes an argument. **(5) The reference value is
+T37's -2.04695**, not the mean prediction (§8.1); local contributions must add to that client's margin, and
+the check is the same additivity identity per row. **(6) Exemplars are illustrative, not average.** A false
+negative picked as the most confident error is the worst case of its kind; the prose must say so, or the
+reader will read one client as the population. **(7) `duration` stays out**, and no explanation may be
+phrased causally (T36 §9.4, T37 §8.7).
 
 
 ---
@@ -117,6 +117,7 @@ the same rule: T35 and T36 may **report** on these rows and may not **choose** o
 stops being evidence |
 | D55 | 2026-10-30 | **The operating threshold is `C/V = 0.0750`, set by the cost model's assumptions and chosen on the training folds from out-of-fold scores - never from an empirical argmax** (training peak **0.0821**, held-out peak **0.0909**, neither adopted) | Three reasons, in the order they would survive a challenge. **It is a price, not a hyperparameter:** `p* = C/V` follows from `EV = pV - C`, so it is set by `src/cost.py`'s two assumptions (**1.50 EUR** per call, **20.00 EUR** per subscription) rather than by this dataset - which is why the answer to "what if those are wrong" is a 20-cell table (**0.013-0.300** across C in 0.75-3.00 and V in 10-60), not a caveat. **The argmax is not stable and the price is:** adopting the empirical peak would have meant **0.0821** on the training folds and **0.0909** on the held-out rows, for **388.50 EUR (0.883%)** on 36,168 rows - a sampled maximum swapped for a stated rule, and it would have been chosen on the half that T33 had already been scored against. **Which edge matters:** the 1% plateau runs **0.0746-0.1016** and **0.0750 is 0.0004 above its floor**, so the rule is the most aggressive cut still within 1% of the peak - exactly what a break-even threshold should be, and said out loud rather than letting a reader assume the price sits mid-plateau. What it does **not** claim: the euros are the model's assumptions (no cross-sell, no fixed costs, no contact fatigue), no confidence interval is attached to a 0.9% difference on a flat curve, and the held-out half has now been scored twice (**T33**, **T34**) so T35 and T36 may report on those rows and may not choose on them. The capacity table is the live qualification: at **5%** of the list the campaign reaches **26%** of subscribers, so a call-capped bank should read the top of that table, not `p*` |
 | D57 | 2026-10-30 | **`duration` costs the deployable model +0.1788 PR-AUC and +20,340 EUR — measured, reported as the price of honesty, and not a shortfall; arm A ships and arm B's numbers are an upper bound** | The rule was written in §4.5 of `docs/05_leakage_audit.md` before any number existed (D40), and this is it discharged. **Why arm A anyway:** the gap cannot change the decision, because the column does not exist at the moment the bank chooses whom to call — it is recorded when the call ends. **Why the gap is leakage rather than skill**, decided by three clauses fixed before the arms were fitted and none of which reads the gap's size: arm B wins **5/5** folds, the band table is non-decreasing (**0.16%** of 0-59s calls subscribe against **48.56%** of 600s+ calls, a **302x** swing), and **`duration` alone, with no model and no fitting, reaches ROC-AUC 0.8078 and PR-AUC 0.3897** — better than most of the project's purpose-built models on PR-AUC. The arrow runs outcome → length: a client who says yes keeps talking. **Why it is not money left on the table:** the 20,340 EUR is the cost of a deployable model, not of a wrong one, and presenting it as a shortfall would measure the wrong thing. **Why the numbers are quotable at all:** arm A's per-fold scores reproduce T30's arm to **0.0e+00** and its campaign value reproduces T34's **43,621.00 EUR** to the cent, so the shipping arm is the documented one rather than a neighbour of it. Two details that would mislead if skimmed: mean predicted probability barely moves (**0.1166** vs **0.1162**) while **Brier improves** (**0.0818 → 0.0621**), because a model that has seen the outcome is well calibrated — calibration is not evidence of skill. The gap is cross-validated, not held out, and the **held-out 9,043 rows were not read by either arm** |
+| D58 | 2026-10-30 | **SHAP explains the shipped artifact on its own 40-column matrix, aggregated to the 12 features by signed sum within each one-hot block; global importance is 55.7% campaign-side against 44.3% client-side, `contact` leads at 22.14%, and the reference value -2.04695 is the booster's bias rather than the mean prediction** | The aggregation rule is the technical crux and it was chosen by a property, not by taste: summing the **signed** contributions inside a feature keeps additivity exact (**5.010e-06** at feature level), so the table can be checked against the model instead of merely computed from it, whereas summing absolute values counts a client's `month=may` column and its `month=jun` column both, inflating `month` by **58.52%**. The inflation is not the real cost though - **fragmentation** is: `month=jun` alone ranks 9th of 40, so a per-level reader would rank the model's second-most-important feature mid-field, which is the same one-hot effect T25 §8.2 flagged from the other direction. **Why the reference is documented instead of assumed:** -2.04695 equals xgboost's own `pred_contribs` bias to **0.0** and sits **0.0256** below `logit(base_score)`, while the mean margin is -2.49678 and the mean probability 11.6990%; calling it "the average log-odds" would misdescribe the model by 0.45 log-odds, so the three numbers are tabulated and a check fails if a future refactor quotes the base as the mean. **Why the 55.7% split is recorded:** it is the sentence the rubric asks for - the model is more about **how the bank calls** than **who the client is** - and it supports D18's scoped claim (a fixed call budget converts better) while blocking the unsupported one (targeting reduces spend). **Why T25's disagreement is named rather than averaged:** SHAP credits information *used* and permutation measures information *unique*, so `balance_arsinh` ranking 4th for SHAP and 9th for the forest: 0.1733 log-odds of credit against 0.0039 AUC of unique contribution, with MI ranking it 3rd - an average of the two ranks would be a third number belonging to neither method and would hide exactly that mechanism. **Scope:** training half only (**36,168** rows, D53/D54), log-odds not percentage points, attributions not causal effects, and no generalisation claim |
 | D56 | 2026-10-30 | **Lift and gain are reported per half against that half's own base rate, the adopted cut is translated into 13,309 calls saved / 19,964 EUR, and calls saved is explicitly *not* treated as the objective** | Four reasons. **The tables are threshold-free**, which is the only property that lets a Phase 7 step report on the held-out rows without spending them (D53, D54) - and it is why the held-out deciles (**4.51x** top decile) can be quoted beside the training ones (**4.37x**) rather than held back. **Each half keeps its own denominator:** the two rates are **1.5 basis points** apart, which is close enough to look interchangeable and is not, and lift is a ratio to a base rate. **D15 is met by a factor of two** (**4.3652x** / **4.5100x** against >2x), so the target is a measured result rather than an aspiration. **And the savings peak is reported against the cut rather than being adopted as it:** it sits at **18.89%** coverage (**15,188 calls**) while the cut sits at **41.10%** (**13,309**), because `saved(k) = gain x N - k` has a marginal step of `(N/positives) x y - 1` and so peaks where the *local* rate crosses the *list average* (11.7%), not the price (7.5%). Adopting it would be the same error as adopting an F1 argmax, one level up: a rate dressed as a decision. The two are reconciled by pricing the block between them, which converts at **8.96%** (**+2,350 EUR**) and **7.76%** (**+79.50 EUR**) against the **7.50%** price - inefficient calls that are still profitable ones. The self-test (**shuffled scores give a mean lift of 1.000001**) is what licenses these numbers to mean what their labels say |
 | D53 | 2026-10-30 | **Thresholded metrics are reported at three cuts — leave-one-fold-out F1-optimal (the operating point), D17's 7.50% break-even (the business cut), and 0.5 (the rejected number) — and 0.5 is never the headline** | T32 measured what T29 predicted, this time across **two different models**: at 0.5 the forest beats the shipped model by **10.6 F1 points** (**0.4565** vs **0.3509**) and at the nested cut the shipped model wins by **2.4** (**0.4877** vs **0.4641**). Neither model changed. The mechanism is visible in the flag rates: the forest's mean prediction is **0.3404** so 0.5 sits inside its distribution (**17.89%** flagged), while the shipped model's mean is **0.1166** so 0.5 is near its **95th percentile** (**4.67%** flagged) — the calibrated model is being scored at a bar almost nothing clears. Each fold's cut is chosen on the **other four folds**, so no row is judged at a threshold fitted to itself, and the module re-derives all five cuts as a check. The **7.50%** cut is the only one *not* fitted to data, and it is also the one that makes the business case: **41.10%** of the list yields **77.90%** of subscribers at **22.18%** precision, against the "call everyone" baseline's F1 of **0.2095**. Which of the two live cuts to run is a capacity question for T34, not a metric's |
 | D52 | 2026-10-29 | **The shipped model is XGBoost, untreated, at T30's tuned point** — **PR-AUC 0.4460 ± 0.0110**, ROC-AUC **0.7990**, Brier **0.0818**, mean p **0.1166** against a **0.1170** base rate — persisted as `models/final_model.joblib` (**180,520 bytes**, sha256 **7a40752f...**), with **no threshold baked in**, and justified by ranking, calibration and T29's measurement rather than by the tuned margin | The three reasons are ordered by how much they survive scrutiny. **Ranking**: it is the best PR-AUC of the seven builds and ties the best ROC-AUC. **Calibration**: mean p **0.1166** against a base rate of **0.1170** means D17's **7.50%** break-even can be applied to its output *as a probability*, which no weighted build could offer (they score the average client at **0.34–0.42**) — that is why recalibration is a refinement for T34 rather than a prerequisite. **T29**: the weight bought **+0.0023** at **1.11 SE against it** and cost half the Brier score; at the tuned point the loss widened to **−0.00291 in 0/5 folds**. What the decision explicitly does **not** rest on is the tuning: **+0.00165 at 0.58 SE**, with T28's configuration **4th of 40**, so the justification for the tuned build is that it is no worse, is equally calibrated and is reproducible from a file. **No threshold is persisted** because the operating point is T34's decision (D45), and freezing a cut into the artifact would ship an unmade decision. **No held-out score exists in this step** — T32/T33 own it, and computing it inside the step that chooses the model would make the choice look better than it is |
@@ -195,7 +196,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T36 | Rubric 7 | With-vs-without `duration` comparison | Output: `reports/duration_comparison.csv`, notes in `docs/05_leakage_audit.md` | **done 2026-10-30** (`src/duration_compare.py` + `reports/duration_comparison.csv` (**14 rows**, fold/mean/sd per arm) + **§9** of `docs/05_leakage_audit.md` + `models/duration_comparison.json` (**24,338 B**); one estimator, one fold list, one scorer, toggled only through `leakage.feature_columns` — feature lists differ by exactly `['duration']` and the matrices by one column (**40** vs **41**, measured, since T24 demonstrated the same toggle at the 17-feature width); **arm A reproduces T30's tuned arm to 0.0e+00 per fold and T34's 43,621.00 EUR to the cent**, so the shipping arm is the documented one; **the gap is +0.1788 PR-AUC and +20,340.00 EUR** (**+562.38 EUR per 1,000 clients**) from **4,320 fewer calls** reaching **693 more subscribers**, with **5/5 fold wins** and an SE ratio of **23.12** (ROC-AUC +0.1369, Brier -0.0197, euros +4,068.00/fold); **mean p barely moves** (0.1166 vs 0.1162) while Brier *improves* (0.0818 → 0.0621), which is what a model that has seen the outcome looks like; **the verdict is computed from §4.5's pre-registered mechanism clauses, not from the gap's size** — arm B wins ≥4/5 folds, T22's band table is non-decreasing (**0.16% → 48.56%** across call length, a **302x** swing, longest band supplying **35.03%** of subscribers) and **`duration` alone as a score reaches ROC-AUC 0.8078 / PR-AUC 0.3897** — all three true, so `gap_is_leakage = True` and **arm A ships regardless** (the column does not exist at decision time); **13/13 checks** and `python -m src.duration_compare` exits **0** in **7.1 s**; **no held-out row is read** (source scan for the held-out load finds 0 references, needle assembled at run time); **one defect fixed** — the settings check compared XGBoost's `missing` parameter with `!=`, and `nan != nan` reported a difference between two arms that were both unset (now NaN-aware)
 
 ### Phase 8 — Explainability & Business Insights
-- [ ] T37 | Rubric 8 | Global SHAP analysis | Output: `reports/figures/09_shap_summary.png` | Done when: beeswarm plus importance bar are saved and the top drivers are explained in plain language
+- [x] T37 | Rubric 8 | Global SHAP analysis | Output: `reports/figures/09_shap_summary.png` | **done 2026-10-30** (`src/explain.py`; TreeSHAP on **the artifact** - sha256 **7a40752f...**, checked first - on the **training half**, **36,168 rows x 40 columns over 12 features**; additivity **5.010e-06** and `sigmoid(margin)` vs `predict_proba` **7.521e-08**; contributions equal xgboost's `pred_contribs` to **0.0**; **aggregated by signed sum within each one-hot block** so the twelve feature values stay additive, with the naive per-column alternative measured as **inflation** (`month` **+58.52%**, `campaign_bucket` **+49.63%**, `poutcome` **+35.91%**) and fragmentation named as the real cost (`month=jun` alone is only 9th of 40); top drivers **`contact` 22.14%**, **`month` 17.55%**, `day` 10.60%, `balance_arsinh` 8.49%, `housing` 8.05%, `poutcome` 7.97%; **`contact=unknown` is 28.72% of clients and contributes -1.0150 on a 4.11% rate**, the top column of forty; **`poutcome=success` +1.6841 on 3.33% of clients** is the largest single-level effect but the feature is 7.97% overall, which is why mean|SHAP| is not per-client influence; **55.7% of importance is campaign-side** (`contact`/`month`/`day`/`campaign_bucket`) against **44.3%** client-side; against T25's permutation ranking **Spearman +0.755** with four gaps of 3+ explained rather than averaged (`balance_arsinh` 4 vs 9, `poutcome` 6 vs 3, `age` 8 vs 5, `recency_band` 11 vs 7); the reference value **-2.04695** is the booster's bias, not the mean margin **-2.49678**, so the average contribution is **-0.44983**; **17/17 in-module checks** pass and `python -m src.explain` exits **0** in **38.8 s**; **32 further checks** recompute the whole table from `pred_contribs` without importing the module or `shap`, re-derive every level/rate quoted in the prose, and trace **115 numeric tokens** in `docs/08_explainability.md` to the records with **0 unmatched**)
 - [ ] T38 | Rubric 8 | Local SHAP explanations for exemplar clients | Output: `reports/figures/10_shap_local.png` | Done when: a true positive, a false positive and a false negative are each explained
 - [ ] T39 | Rubric 8 | Business recommendations and campaign playbook | Output: `docs/08_recommendations.md` | Done when: at least 6 actionable recommendations are backed by the actual measured metrics
 
@@ -216,6 +217,8 @@ Tick only after the deliverable is verified to exist and run.
 
 | File | Contents | Created |
 |---|---|---|
+| `src/explain.py`, `reports/shap_importance.csv`, `reports/figures/09_shap_summary.png`, `models/shap_global.json` | Phase 8 (**T37**): `load_artifact()` pins T31's digest so a re-fit cannot be explained silently; `design_matrix()` takes the matrix the estimator actually saw; `explain()` returns TreeSHAP values, the margin they must reconstruct, and xgboost's own `pred_contribs` for comparison (the sklearn wrapper rejects a `DMatrix` argument to `predict` in this version, which is why the array goes in and the DMatrix is built only for `pred_contribs`); `feature_table()` sums **signed** contributions per one-hot block and carries the naive per-column alternative as a measured `inflation`; `column_table()` keeps the un-aggregated view the figure's beeswarm needs; `compare_with_t25()` ranks T25's pinned permutation values **within the twelve** and marks gaps of 3+; `directions()` reads which level (or which end of a numeric range) moves a client, with `level_rates()` filling in the measured subscription rate behind each sentence. `validate()`'s **17 checks** cover the digest, the pipeline shape, the absent leak, the 12/40 partition, T25's kept set, additivity, the probability identity, the `pred_contribs` agreement, feature-level additivity, the aggregation bound, the shares, both rank permutations, the pin, the per-column table, the reference-vs-mean distinction, the unread held-out half and the figure. The figure is a beeswarm over 40 columns (**6,000** of **36,168** rows, seed 42, `color_bar=False` because a 0/1 scale is meaningless), the 12-feature importance bar with the naive sum overlaid, and a dumbbell of the two rankings | 2026-10-30 |
+| `docs/08_explainability.md` | Criterion 8 (**T37**): the instrument and the artifact it explains, the reference-value table and the 0.0256 gap, the aggregation rule with the measured inflation and the fragmentation cost, the twelve-feature table, eight business-language driver paragraphs each with its level contribution and measured rate, the four disagreements with T25 and why neither ranking is corrected, the 55.7%/44.3% campaign-versus-client split with its three consequences, what the step does not claim, and the verification table including the two defects it caught | 2026-10-30 |
 | `src/threshold.py`, `models/threshold_choice.json`, `reports/figures/07_threshold_curve.png` | Phase 7 (**T34**): `choose()` takes the training arrays and nothing else - the signature is the guarantee that the held-out half cannot influence the choice; `sweep()`, `capacity_table()` and `sensitivity()` all price their cuts through `cost.expected_campaign_value` rather than re-deriving euros, and `held_out_check()` runs after the cut is fixed and records the held-out optimum so a check can prove it was **not** adopted. `validate()`'s **15 checks** cover the price identity, one out-of-fold score per row, the T30 fold reproduction, the money arithmetic at all 403 points, the plateau, the three rejected cuts, cost per captured subscription, capacity fill, sensitivity monotonicity, training-only provenance, held-out profitability, the figure, and a read-back of the file against the run. The JSON records the decision with its provenance, the five compared cuts, the 403-point curve, the capacity and sensitivity tables, the held-out block and the figure's path and size | 2026-10-30 |
 | `docs/07_threshold.md` | Phase 7 (**T34**): the price and where it comes from, why the choice was made on the training folds, money at five cuts, the flat optimum and which edge the price sits on, capacity when calls are capped, the held-out check, why ROI and net value disagree, the 20-cell sensitivity grid, what the step does not prove, and the verification table with the two defects it caught | 2026-10-30 |
 | `src/lift.py`, `reports/lift_table.csv`, `reports/figures/08_lift_gain.png`, `models/lift_results.json` | Phase 7 (**T35**): `decile_table()` cuts the descending ranking into ten positional blocks and derives every precision, lift, cumulative column and saving from the counts; `at_coverage()` interpolates the cumulative curve so T32's published coverage points can be compared rather than approximated; `savings_peak()` finds the exact coverage where calls saved peaks (via `saved(k) - saved(k-1) = (N/positives) x y[k] - 1`) and `marginal_block()` prices the clients between that peak and the adopted cut; `random_self_test()` reruns the whole table on shuffled scores as a code test. `validate()`'s **17 checks** cover the two base rates, the partition, the ratio arithmetic, the running sums, D15, the decline down the list, the shuffled self-test, the T32 reconciliation, the agreement with T34's cut, the saving identity, the recall table, the savings peak, the marginal block, the artifact, the CSV and the figure - plus a read-back of the record | 2026-10-30 |
@@ -1853,6 +1856,68 @@ comparison is now NaN-aware and names the parameter it matched that way.
 `PROGRESS.md`.
 **Next:** T37 — global SHAP on the shipped artifact, opening Phase 8.
 
+### 2026-10-30 — Session 39  (T37 complete, Phase 8 started)
+
+**Completed:** **T37** — `src/explain.py`, `reports/figures/09_shap_summary.png` (445 KB),
+`reports/shap_importance.csv` (12 rows x 12 columns), `models/shap_global.json` and
+`docs/08_explainability.md` (criterion 8 opens at **1 / 3**).
+
+**The instrument, and what it is pointed at.** TreeSHAP on `models/final_model.joblib` — sha256
+**7a40752f75a264a0...**, **180,520** bytes, checked before anything else runs — over the training half,
+**36,168 rows x 40 columns x 12 features**. Not a refit, not the forest, not the untuned configuration:
+a plot of a different model is a plot of a different model. Contributions are in log-odds and they
+reconstruct the model's own margin to **5.010e-06**, with `sigmoid(margin)` matching `predict_proba` on the
+twelve raw columns to **7.521e-08** and `pred_contribs` agreeing to **0.0**.
+
+**The aggregation rule, which was the crux.** Twelve features become forty columns, so the table sums the
+**signed** contributions inside each one-hot block — the only aggregation that keeps additivity (verified at
+feature level, 5.010e-06). The naive per-column absolute sum inflates `month` by **58.52%**,
+`campaign_bucket` by **49.63%** and `poutcome` by **35.91%**, so the usual "one-hot understates importance"
+warning is backwards here. The real cost is **fragmentation**: `month=jun` alone ranks **9th of 40**, so a
+per-level reader would miss that `month` is the second-strongest feature in the model.
+
+**What the model looks at.** `contact` **22.14%**, `month` **17.55%**, `day` **10.60%**, `balance_arsinh`
+**8.49%**, `housing` **8.05%**, `poutcome` **7.97%**, `marital` **7.74%**, `age` **5.61%**,
+`campaign_bucket` **5.45%**, `previous_capped` **4.58%**, `recency_band` **1.46%**, `previously_contacted`
+**0.35%**. Grouped by what they describe — a reading, declared in `CAMPAIGN_SIDE` — **55.7% of importance is
+campaign-side** and **44.3%** is the client's own attributes.
+
+**Three findings worth the phase.** (1) **`contact=unknown` is the top column of forty and it is a blank
+field**: 10,386 clients (**28.72%** of the file) contribute **-1.0150** and subscribe at **4.11%** against
+**14.83%** on `cellular` — the largest available improvement is data quality, not modelling. (2)
+**`poutcome=success` contributes +1.6841, the largest single-level effect anywhere, on 1,205 clients
+(3.33%)**, while **81.81%** have no history at all — which is why the feature is only **7.97%** globally and
+why mean |SHAP| must not be read as per-client influence. (3) **`day` is 10.60% of importance and points
+nowhere**: bottom fifth **-0.1257**, top fifth **-0.1230**, Spearman **-0.060** — its value is in the
+interaction with `month` (D35), so "call on the 5th" is exactly the rule this feature does not support.
+
+**Against T25, reported rather than resolved.** **Spearman +0.755** with four gaps of 3+ places:
+`balance_arsinh` 4 vs 9 (SHAP credits information *used*, permutation measures information *unique* — 0.1733
+log-odds against 0.0039 AUC, and MI said 3rd, so SHAP sides with the marginal view), `recency_band` 11 vs 7,
+`poutcome` 6 vs 3, `age` 8 vs 5. No average of ranks: it would be a third number belonging to neither
+method.
+
+**Verified:** `python -m src.explain` exits **0** with **17/17** checks in **38.8 s**. **32 independent
+checks** in `_t37_trace.py` recompute the whole table from xgboost's `pred_contribs` **without importing the
+module or `shap`**, re-derive every client count, contribution and rate quoted in the prose, and trace
+**115 numeric tokens** in the doc to the records — **0 unmatched**.
+
+**Three defects, all mine, all caught by running it.** (1) The probability check fed the *transformed*
+matrix to `pipeline.predict_proba` and the pipeline raised `columns are missing` — measuring the model
+against a shape it never sees; it now goes through the twelve raw columns. (2) `mean_probability` was
+`1/(1+exp(-margin)).mean()`, which divides by the mean instead of averaging probabilities and printed
+**4.96%** where the truth is **11.6990%** — caught only because 4.96% contradicted T31's recorded 0.1166.
+(3) The doc called −2.04695 "the model's average log-odds", which the mean margin **−2.49678** refutes: it
+is the booster's bias, **0.0256** below `logit(base_score)` (**−2.0213**), and the average feature
+contribution is therefore **−0.44983** rather than zero. A trace tolerance cap of 8 decimals then hid the
+9-decimal `base_score` from its own check, and a first trace run mis-signed the gap — both fixed in the
+verifier, not by weakening a claim.
+
+**Blocked:** none.
+**Uncommitted:** `src/explain.py`, `reports/shap_importance.csv`, `reports/figures/09_shap_summary.png`,
+`docs/08_explainability.md`, `models/shap_global.json`, `PROGRESS.md`.
+**Next:** T38 — local explanations for one true positive, one false positive and one false negative.
+
 ---
 
 ## Open Questions / Blockers
@@ -1885,3 +1950,12 @@ data was altered. Any older path references elsewhere should be updated to `data
    will re-pin — but everything in the plan works on 3.11, so this is optional.
 9. **Will the marker run our code?** If the project is graded by running it, the marker's Python
    version must be ≥ 3.11. Nothing in `requirements.txt` works on 3.9 or older.
+10. **BLOCKER — four commits unpushed (item 1 reopened, 2026-10-30, Session 39).** A push failed again,
+    and this time with a name rather than a hang: `GIT_TERMINAL_PROMPT=0 GIT_TERMINAL... git push origin
+    main` returns `fatal: could not read Username for 'https://github.com': terminal prompts disabled`, so
+    the credential helper that worked non-interactively in Session 26 no longer supplies a token to this
+    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **4 commits ahead**: `33fff7a`
+    (T34), `7bce0c1` (T35), `d149f58` (T36) and `944854a` (T37), per `git log --oneline
+    origin/main..main`. Nothing is lost and the tree is clean; the fix is a
+    interactive credential sign-in, which the agent's shell cannot drive. Run `git push origin main` from
+    your own terminal, or re-authenticate Git Credential Manager, and this closes.

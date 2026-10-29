@@ -15,7 +15,7 @@
 This report is a synthesis, not a new experiment. Every number in it was produced by a script in
 `src/`, written to a JSON or CSV record under `models/` or `reports/`, and re-derived by an
 independent verifier at the time it was made. Where a figure appears here without a
-record behind it, that is a defect; §10 and Appendix C say how the claim was checked. The twelve
+record behind it, that is a defect; §10 and Appendix C say how the claim was checked. The thirteen
 documents in `docs/` carry the full detail behind each section, and this report points to them rather
 than restating their workings.
 
@@ -691,9 +691,9 @@ depositiq-term-deposit-prediction/
 ├── notebooks/           01_data_understanding, 02_preprocessing, 03_eda
 ├── models/              artifacts, plus the JSON record behind every claim
 ├── reports/             metrics_cv.csv, lift_table.csv, playbook.csv, shap_*.csv, 19 figures
-├── docs/                this report plus 12 supporting documents
+├── docs/                this report plus 13 supporting documents
 ├── app/                 Streamlit demo (T43)
-└── PROGRESS.md          46-task checklist, 66-entry decisions log
+└── PROGRESS.md          46-task checklist, 67-entry decisions log
 ```
 
 ### 9.2 Every claim has a module behind it

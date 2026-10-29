@@ -1,9 +1,9 @@
 {
   "task": "T42",
   "readme": "README.md",
-  "bytes": 14959,
-  "sha256": "4084803f86615571d3991dd98a20cfd1d617589dc54383e1fe3aa0ae1d418906",
-  "lines": 275,
+  "bytes": 15250,
+  "sha256": "c54b9b87708b5af88fe4875b128d881452ac8a8a6fa2ef61a5e545e1eeb5b226",
+  "lines": 274,
   "sections": [
     "The result, and what it does not mean",
     "Quick start",
@@ -21,6 +21,7 @@
     "data_loader",
     "deck",
     "demo",
+    "demo_script",
     "duration_compare",
     "evaluate",
     "explain",
@@ -45,7 +46,7 @@
   "pins": 14,
   "tokens_traced": 45,
   "figures": 19,
-  "tasks_done": 45,
+  "tasks_done": 46,
   "tasks_total": 46,
   "checks": 34,
   "failures": []

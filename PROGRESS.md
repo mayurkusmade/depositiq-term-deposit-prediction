@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-30 23:55
-**Overall completion:** 98% (45 / 46 tasks)
+**Last updated:** 2026-10-30 23:59
+**Overall completion:** 100% (46 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -17,8 +17,8 @@
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
-| 9 | Documentation & Presentation | 10 | 12 / 13 | T01–T06, T41–T46 |
-| | **Total** | **100** | **45 / 46** | |
+| 9 | Documentation & Presentation | 10 | 13 / 13 ✅ | T01–T06, T41–T46 |
+| | **Total** | **100** | **46 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,14 +28,10 @@
 
 ## NEXT TASK
 
-**T46 | Phase 10 – Viva Preparation | Demo script and rehearsal checklist.** Output: `docs/demo_script.md`.
-**Done when:** a **five-minute walkthrough** is scripted, with a rehearsal checklist, and **every claim
-traces to a saved figure or metric** — the script may point at a number, but it may not introduce one.
-**Carry in:** `app/app.py` and `src/demo.py` already score the default client and the three T38 exemplars;
-the script should drive the demo, not replace it. The report, deck, playbook and viva bank are the source
-of every sentence, and the three prohibitions and the D18 scope sentence belong in the spoken track, not
-only in the written one. Rehearse the failure paths too: what to say if the app is slow, if a number is
-challenged, or if the examiner asks for a file rather than a slide.
+**None — the 46-task plan is complete.** The final deliverables are `docs/viva_qa.md`, checked by
+`python -m src.viva`, and `docs/demo_script.md`, checked by `python -m src.demo_script`. The project is
+**46 / 46**; the remaining work is maintenance — re-run the validators after any change, and add a new
+question to the viva bank whenever one is asked that the bank cannot answer from a record.
 
 ---
 
@@ -133,6 +129,8 @@ stops being evidence |
 
 | D66 | 2026-10-30 | **The viva bank is a document plus a validator (`src/viva.py`): 37 questions covering all nine rubric criteria, each with an answer and an evidence line, and every decimal traced to a record or an upstream document — with the bank and the demo script excluded from its own sources** | Three reasons. **A viva is a different reading task from a report.** A report can be skimmed; an answer has to survive a follow-up, so the bank carries four questions per criterion, an evidence line per question, and an *If pressed* follow-up where the obvious answer is incomplete. **Coverage is a property of the bank, not of the author's memory.** The validator parses the nine sections, counts the questions per criterion, checks sequential numbering and the 25-question floor, and fails if a criterion is thin — the first draft had only three questions in criterion 9, which is exactly the chapter a viva is most likely to probe. **A number without a record is a liability in a viva, not a rhetorical flourish.** Every decimal is matched against `models/*.json`, `reports/*.csv`, the report, or one of the eleven analysis documents; the bank and the downstream demo script are excluded so it cannot quote itself, and the first draft's three untraceable EDA rates were replaced with figures that a record holds. **Scope:** 37 questions, 8,061 words, 59 links, 364 tokens; 33/33 checks. The bank is not a script to memorise — it is an index to the files that win the argument. |
 
+| D67 | 2026-10-30 | **The demo script is a timed document plus a validator (`src/demo_script.py`): six contiguous segments to 5:00, a spoken-word budget, and a claims table in which every number said is re-found in the file that holds it** | Three reasons. **A demo is where unchecked numbers enter.** The report and deck are parsed, and then the spoken track quietly acquires a rounded euro total or a recall figure remembered from another cut; the script is therefore held to the same trace as the documents, and a number that is not in the claims table is not said. **The clock is part of the requirement.** A five-minute walkthrough that runs seven minutes is not a five-minute walkthrough, so the validator checks six contiguous timecodes to 5:00 and a spoken text of **697 words** at **139 words per minute** — fast enough to be alive, slow enough to be followed. **A script must survive failure.** The rehearsal checklist has **20 items** across five sections, including what to do if Streamlit is slow, if the app fails, if a number is challenged, and if the examiner asks for a file; the fallback is the deck and the record, never a re-derived number. **What is derived is shown as arithmetic:** 13,253.00 = 43,621.00 − 30,368.00, 21,302 = 36,168 − 14,866, 77.60% = 821 / 1,058 × 100, and 30.58% = 11,059 / 36,168 × 100, so a value that no single record stores is still checked against operands that records do store. **Scope:** 34 claims over **9** files, **85** decimal tokens, **37/37** checks. |
+
 ---
 
 ## Task Checklist
@@ -206,7 +204,7 @@ Tick only after the deliverable is verified to exist and run.
 
 ### Phase 10 — Viva Preparation
 - [x] T45 | Rubric 9 | Viva Q&A bank | Output: `docs/viva_qa.md` | **done 2026-10-30** (`docs/viva_qa.md` + `src/viva.py` + `models/viva.json`; **37 questions**, at least four for each of the nine rubric criteria (criterion 7 carries five), every question with an **Answer**, an **Evidence** line naming a record, document or module, and where useful an **If pressed** follow-up; the bank opens with a coverage map and closes with five numbers to know cold, the three prohibitions in one line each and the D18 scope sentence; **8,061 words**, **59 links**, every relative link resolves; the validator checks the nine sections, sequential numbering, the 25-question floor, four-per-criterion coverage, answer and evidence length, the three prohibitions, the scope sentence, the price identity `0.0750 = C/V = 1.50/20.00`, every link, and **every decimal**; **364 decimal tokens** all trace to a `models/*.json` record, a `reports/*.csv` column, the report or one of the eleven analysis documents, with `viva_qa.md` and `demo_script.md` excluded from the sources so the bank cannot quote itself; **33/33 checks** pass and `python -m src.viva` exits **0**)
-- [ ] T46 | Rubric 9 | Demo script and rehearsal checklist | Output: `docs/demo_script.md` | Done when: a 5-minute walkthrough is scripted and every claim traces to a saved figure or metric
+- [x] T46 | Rubric 9 | Demo script and rehearsal checklist | Output: `docs/demo_script.md` | **done 2026-10-30** (`docs/demo_script.md` + `src/demo_script.py` + `models/demo_script.json`; a **five-minute** walkthrough in **six contiguous segments** (0:00–5:00), each with a **Say**, a **Show** and an **Evidence** line; the spoken text is **697 words** at **139 words per minute**, inside the human speaking band; **34 claims**, each spoken once and each traced to one of **9** files, with `record` values re-found in the named file and `derived` values recomputed from operands the file holds (13,253.00 = 43,621.00 − 30,368.00; 21,302 = 36,168 − 14,866; 77.60% = 821 / 1,058 × 100; 30.58% = 11,059 / 36,168 × 100); every decimal spoken appears in the claims table, and **85 decimal tokens** in the whole document trace to a record, the report or an analysis document; the three prohibitions, the D18 scope sentence and the price identity `0.0750 = C / V = 1.50 / 20.00` are in the spoken track; **20 rehearsal items** across **5** sections including failure paths; **37/37 checks** pass and `python -m src.demo_script` exits **0**)
 
 ---
 
@@ -214,6 +212,7 @@ Tick only after the deliverable is verified to exist and run.
 
 | File | Contents | Created |
 |---|---|---|
+| `docs/demo_script.md`, `src/demo_script.py`, `models/demo_script.json` | Phase 10 (**T46**): the five-minute walkthrough and its validator. The document has **six contiguous segments** to **5:00**, each with a **Say**, a **Show** and an **Evidence** line; **697 spoken words** at **139 words per minute**; a **34-row claims table** naming **9** files, with `record` values re-found and `derived` values recomputed (13,253.00 = 43,621.00 − 30,368.00; 21,302 = 36,168 − 14,866; 77.60% = 821 / 1,058 × 100; 30.58% = 11,059 / 36,168 × 100); the three prohibitions, the D18 scope sentence and the price identity in the spoken track; a five-number summary; and a **20-item** rehearsal checklist across five sections including failure paths. `src/demo_script.py` checks the clock, the shape, every claim against its named file, the spoken-word budget, the checklist and the global decimal trace. **37/37 checks** pass over **85** decimal tokens | 2026-10-30 |
 | `docs/viva_qa.md`, `src/viva.py`, `models/viva.json` | Phase 10 (**T45**): the viva bank and its validator. The document holds **37 questions** - four per rubric criterion, five for evaluation - each with an **Answer**, an **Evidence** line naming a record, document or module, and an optional **If pressed** follow-up; it opens with a coverage map and closes with five numbers to know cold, the three prohibitions in one line each and the D18 scope sentence. `src/viva.py` parses the nine sections, checks sequential numbering, the 25-question floor, four-per-criterion coverage, answer and evidence length, the prohibitions, the scope sentence, the price identity `0.0750 = C/V = 1.50/20.00`, and every relative link; its provenance trace admits numbers from `models/*.json`, `reports/*.csv`, the report and the eleven analysis documents, excluding `viva_qa.md` and `demo_script.md` so the bank cannot quote itself. **33/33 checks** pass over **364** decimal tokens | 2026-10-30 |
 | `src/demo.py`, `app/app.py`, `models/demo.json` | Phase 9 (**T43**): the interactive demo. `src/demo.py` is the tested core - `load_model()` loads `models/final_model.joblib` only after its sha256 and size match `models/final_model.json`; `training_profile()` reads the categorical vocabulary and median/mode defaults from the processed training half through `split.load_split`; `client_frame()` turns **11 business facts** into the **12 shipped features** using `features.engineer`'s own derivations (`previous > 0` flag, the cap, `balance_arsinh`, `campaign_bucket`, `recency_band` with the explicit `never` level); `shipped_frame()` selects `select.shipped_features()` in order; `explain_client()` scores with `predict_proba`, builds the 40-column matrix, aggregates TreeSHAP by **signed sum within each one-hot block** (D58) and sorts by absolute contribution; `should_call()` / `expected_value()` price the call at **C = 1.50 EUR / V = 20.00 EUR** and compare against **0.0750 = C/V**, never 0.5; `example_clients()` rebuilds the three T38 exemplars from `models/shap_local.json` + the training split. `validate()`'s **22 checks** cover the artifact digest, the 12/40 shape, the price identity, the 0.5 counter-example, the EV arithmetic, the labelled assumptions, the absent `duration`/`pdays`/`y`, the categorical defaults, the shipped column order, the 12-feature partition of 40 columns, additivity, the margin-versus-probability identity, the driver sort, the finite score, the three exemplars' scores and cells, their additivity, the app compiling, and the unread held-out half. `app/app.py` is the thin Streamlit UI: an 11-field sidebar, three exemplar presets, live score, decision and EV, the top-five and all-twelve driver tables, a bar chart, the model/assumptions expanders and the sensitivity grid | 2026-10-30 |
 | `src/local_explain.py`, `reports/shap_local.csv`, `reports/figures/10_shap_local.png`, `models/shap_local.json` | Phase 8 (**T38**): `cell_of()` labels rows `TP`/`FP`/`FN`/`TN` against the **price** from T34's record, re-derived through `cost.break_even_threshold()` rather than typed; `pick_exemplars()` executes the pre-registered rule (closest to the cell median, ties by lowest row index) and keeps the distances so `validate()` can re-derive the minimum from the scores alone; `value_of()` reads a categorical's level off its one-hot block and formats a numeric, so the figure labels what the model actually saw; `local_profile()` sums each block's **signed** contributions, keeping the aggregation rule and the reference value identical to T37 so local and global are comparable. The cells are built on the served `predict_proba`, and `validate()`'s **16 checks** cover the digest, the C/V identity, the four-cell partition, cell membership, distinctness, the selection rule, per-client additivity, the margin-versus-`predict_proba` identity, the derivation-stability count, `pred_contribs`, the 12/40 partition, the absent leak, the global ranks read back from T37, the 0.5-misrule counter-example, the unread held-out half and the figure | 2026-10-30 |
@@ -2363,6 +2362,49 @@ values. The record is `models/viva.json`.
 **Uncommitted:** `docs/viva_qa.md`, `src/viva.py`, `models/viva.json`, `src/report.py`, `README.md`,
 `PROGRESS.md`, and the regenerated report/deck/readme records.
 **Next:** T46 — the five-minute demo script and rehearsal checklist.
+
+---
+
+### 2026-10-30 — Session 48  (T46 complete)
+
+**Completed:** **T46** — the five-minute demo script and rehearsal checklist; criterion 9 is **13 / 13**
+and the project is **46 / 46**.
+
+**The script is written to be spoken, and checked as a document.** `docs/demo_script.md` divides the five
+minutes into **six contiguous segments**: the decision and the price; the data and the leak; the model and
+the cut; the live demo; what it is worth; the limits. Each segment carries a **Say** block, a **Show**
+line naming what is on screen, and an **Evidence** line naming the record or figure behind it. The spoken
+text is **697 words** — **139 words per minute**, which is a deliberate, unhurried pace — and the validator
+refuses a script that falls outside the human speaking band.
+
+**The claims table is the part that makes it honest.** Every number spoken appears once in a **34-row**
+table, each row naming one of **9** files. A `record` value is re-found in that file at the precision the
+script uses; a `derived` value is recomputed from operands the file holds. Four claims are derived rather
+than stored: **13,253.00 = 43,621.00 − 30,368.00**, **21,302 = 36,168 − 14,866**, **77.60% = 821 /
+1,058 × 100**, and **30.58% = 11,059 / 36,168 × 100**. The validator also checks that every decimal in
+the **Say** blocks is in the table, so the script cannot acquire a number that the table does not cover.
+
+**Three checks failed on the first run, and all three were the validator being right.** Section
+references in the evidence lines (`§7.3`, `§7.4`, `§8.2`) were being counted as spoken decimals, so the
+check now reads only the **Say** blocks. Claim values were compared raw (`45,211`, `11.70%`, `−0.2504`)
+against a normalised set, so both sides are normalised first. And the derived-recall formula required the
+scaling constant `100` to be stored in `holdout_eval.json`, which it is not; the operand check now excludes
+the scale factor while still requiring the data operands. The first run was **34/37**; the fixes are in the
+validator, not in a weakened claim.
+
+**The rehearsal checklist is a failure plan, not a ritual.** **20 items** across five sections: the day
+before, five minutes before, during, if something breaks, and after. The failure paths name the fallbacks
+— `python -m src.demo` if Streamlit is slow, the deck and `docs/report.pdf` §7 if the app fails, the
+claims table if a file is requested — and the closing item is to add any new question to the viva bank.
+
+**Verified:** `python -m src.demo_script` exits **0** with **37/37** checks; **6** segments, **0–300 s**,
+**697** spoken words, **2.32** words per second, **34** claims, **9** files, **20** checklist items,
+**85** decimal tokens, **53,205** admissible values. The record is `models/demo_script.json`.
+
+**Blocked:** none.
+**Uncommitted:** `docs/demo_script.md`, `src/demo_script.py`, `models/demo_script.json`, `README.md`,
+`PROGRESS.md`, `docs/report.md`, and the regenerated report/deck/readme records.
+**Next:** none — the 46-task plan is complete.
 
 ---
 

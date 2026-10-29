@@ -1,0 +1,71 @@
+{
+  "task": "T46",
+  "document": "docs/demo_script.md",
+  "bytes": 14819,
+  "sha256": "69481e5fb041f16716531b1e07d69a9113c24213e9894ddcb80c49722f468400",
+  "lines": 272,
+  "words": 2322,
+  "spoken_words": 697,
+  "words_per_second": 2.3233,
+  "segments": [
+    {
+      "start": 0,
+      "end": 30,
+      "title": "Open with the decision"
+    },
+    {
+      "start": 30,
+      "end": 70,
+      "title": "The data and the leak"
+    },
+    {
+      "start": 70,
+      "end": 120,
+      "title": "The model and the price"
+    },
+    {
+      "start": 120,
+      "end": 200,
+      "title": "The live demo"
+    },
+    {
+      "start": 200,
+      "end": 260,
+      "title": "What it is worth"
+    },
+    {
+      "start": 260,
+      "end": 300,
+      "title": "Limits and close"
+    }
+  ],
+  "total_seconds": 300,
+  "claims": 34,
+  "claim_sources": [
+    "data/raw/bank-full.csv",
+    "models/demo.json",
+    "models/duration_comparison.json",
+    "models/holdout_eval.json",
+    "models/lift_results.json",
+    "models/metrics_cv.json",
+    "models/playbook.json",
+    "models/shap_local.json",
+    "models/threshold_choice.json"
+  ],
+  "five_numbers": 5,
+  "checklist_items": 20,
+  "checklist_sections": 5,
+  "prohibitions": [
+    "`duration` is never an input",
+    "accuracy is never a headline",
+    "`month` is never read as a cause"
+  ],
+  "scope_phrase": "converts a fixed call budget",
+  "numeric_tokens": 85,
+  "admissible_values": 53205,
+  "unmatched": [],
+  "links": 1,
+  "checks_passed": 37,
+  "checks_total": 37,
+  "checks_ok": true
+}

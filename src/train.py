@@ -1,14 +1,14 @@
 """
-DepositIQ - the baselines and the cross-validation harness (T26).
+DepositIQ - the cross-validation harness, the baselines and the candidate models (T26-T28).
 
 Why this file exists
 --------------------
-T26 asks for two models, and every model from T26 to T31 is judged against them. More usefully, it
-is where the *harness* lives: one fold split, one preprocessor factory, one scorer, one metric
-function. T27 adds a Random Forest, T28 an XGBoost model, T29 an imbalance variant, T30 tuned
-parameters - and each of them is a dictionary entry below plus a line in the report, not a second
-experiment with its own conventions. The usual way a model comparison goes wrong is not a bad
-model; it is two models evaluated slightly differently.
+T26 asks for two baselines, and every model after them is judged against them. More usefully, this is
+where the *harness* lives: one fold split, one preprocessor factory, one scorer, one metric function.
+**T27 adds a Random Forest** below, and T28 an XGBoost model, T29 an imbalance variant, T30 tuned
+parameters - each a dictionary entry plus a line in the report, not a second experiment with its own
+conventions. The usual way a model comparison goes wrong is not a bad model; it is two models
+evaluated slightly differently.
 
 What the two baselines are for
 ------------------------------
@@ -25,6 +25,12 @@ What the two baselines are for
 kept (D44), with `class_weight="balanced"` and the `StandardScaler` that T24's transformer already
 supplies. Its coefficients are also the cheapest available check on T25's decision - if dropping
 `job` and `education` cost the linear model something, this is where it would show.
+
+**`random_forest`** (T27) is 300 bagged trees at `min_samples_leaf=10`, `max_features="sqrt"` and
+`class_weight="balanced_subsample"` - the weights are recomputed from each bootstrap sample rather
+than applied as one global ratio, which is the documented variant for forests and why it is not
+simply `"balanced"`. Its settings are deliberately close to T25's instrument so the reduction check
+below re-runs that measurement with a model that is actually a candidate.
 
 Why there is no F1 or precision column here
 -------------------------------------------
@@ -58,8 +64,13 @@ From the repository root, inside the virtual environment:
 
     python -m src.train      # ~30 s: 2 estimators x 5 folds, then 2 full fits and the artifact reload
 
-Writes `models/baseline_dummy.joblib`, `models/baseline_logreg.joblib` and `models/baselines_cv.json`.
-The JSON is the machine-readable record, so no number in a report has to be re-typed by hand (D06).
+Writes `models/baseline_dummy.joblib`, `models/baseline_logreg.joblib`, `models/model_random_forest.joblib`
+and `models/cv_results.json` (renamed from `baselines_cv.json` in T27, when the file stopped holding only
+baselines). The JSON is the machine-readable record, so no number in a report has to be re-typed by hand
+(D06).
+
+**Runtime:** ~3.8 s for the two baselines, ~156 s with the forest, most of it the forest's 16 fits - 5 CV
+folds, 1 full fit and 10 for its two-arm ablation.
 """
 from __future__ import annotations
 
@@ -72,6 +83,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
@@ -115,14 +127,46 @@ ESTIMATORS: dict[str, dict] = {
         "role": "baseline",
         "note": "the task's required baseline; scaling comes from the T24 preprocessor",
     },
+    # T27. Four settings decided one at a time, and one that is a correction rather than a choice:
+    #
+    # * `class_weight="balanced_subsample"`, not `"balanced"`. A forest bootstraps, so every tree sees a
+    #   different positive share; sklearn's subsample variant recomputes the weights from each bootstrap
+    #   sample instead of applying one global ratio to all of them. It is the documented choice for
+    #   forests, and it keeps the imbalance treatment comparable to the logistic baseline's.
+    # * `min_samples_leaf=10` - with 36k rows and 40 one-hot columns, leaves of one row fit noise; this is
+    #   also what T25's instrument used, so the ablation below is a fair re-run of it.
+    # * `max_features="sqrt"` - 6 of 40 columns per split, the standard forest default and what keeps 300
+    #   correlated one-hot levels from swamping every tree.
+    # * `n_jobs=1` - one process. It makes the runtime comparable across estimators and it is what T25's
+    #   instrument used, so the reduction numbers can be read against each other.
+    "random_forest": {
+        "make": lambda: RandomForestClassifier(
+            n_estimators=300,
+            min_samples_leaf=10,
+            max_features="sqrt",
+            class_weight="balanced_subsample",
+            random_state=FOLD_SEED,
+            n_jobs=1,
+        ),
+        "role": "candidate",
+        "note": "T27's bagged trees; 300x min_samples_leaf=10, sqrt(40) features per split",
+    },
 }
 
-# Artifacts. The two fits are the objects T31 replaces; the JSON is the record.
+# Artifacts. The fits are the objects T31 replaces; the JSON is the record of every estimator's CV.
 MODEL_PATHS: dict[str, Path] = {
     "dummy_prior": config.MODELS_DIR / "baseline_dummy.joblib",
     "logreg_balanced": config.MODELS_DIR / "baseline_logreg.joblib",
+    "random_forest": config.MODELS_DIR / "model_random_forest.joblib",
 }
-CV_PATH: Path = config.MODELS_DIR / "baselines_cv.json"
+
+# Renamed from `baselines_cv.json` in T27: the file now holds a candidate model, not only baselines, and
+# a record named for its contents is worth more than one that needs a footnote.
+CV_PATH: Path = config.MODELS_DIR / "cv_results.json"
+
+# The estimators T25's decision is re-measured on: the linear model that questioned it, and the forest
+# that made it. XGBoost joins this tuple in T28, and D46's revisit trigger is read off that entry.
+REDUCTION_ESTIMATORS: tuple[str, ...] = ("logreg_balanced", "random_forest")
 
 # Columns that must never reach the matrix (D05, D36). Checked on the fitted transformer's output names.
 FORBIDDEN: tuple[str, ...] = ("duration", "pdays", config.TARGET)
@@ -226,53 +270,67 @@ def reduction_check(
     frame: pd.DataFrame,
     y: pd.Series,
     folds: list[tuple[np.ndarray, np.ndarray]],
+    names: tuple[str, ...] = REDUCTION_ESTIMATORS,
 ) -> dict:
     """
-    Re-measure T25's reduction with the *linear* model, on the same folds.
+    Re-measure T25's reduction, per estimator, on the same folds.
 
     D44 dropped five features because a 200-tree forest could not tell their contribution from zero,
-    and recorded that the decision was **instrument-specific**. The natural objection is that a forest
-    masks `education` or `job` behind correlated columns while a linear model, which gives each level
-    its own coefficient, would feel the loss. This answers it in the only way that settles it: the same
-    estimator, the same folds, the columns toggled.
+    and recorded that the decision was **instrument-specific** - which is an invitation to check it
+    with a different instrument, not a claim that needs no checking.
 
-    The shipped arm is deliberately **the same configuration as `logreg_balanced`**, so its scores must
-    reproduce that run exactly - a check below asserts it, which is what proves the ablation is two
-    column lists and not two experiments.
+    * **`logreg_balanced`** is the estimator most likely to *feel* the loss: each one-hot level gets its
+      own coefficient, so a column carrying signal cannot hide behind a correlated one. T26 measured
+      **-0.0039 +/- 0.0023** ROC-AUC there, with no fold improving.
+    * **`random_forest`** is the instrument the decision was made with, at production settings: 300 trees
+      rather than T25's 200, and `balanced_subsample` weights. T25 reported **-0.00014 +/- 0.00195** for
+      the same toggle on its importance-only forest. The two forest numbers describe the same question
+      with different weights, so they are **related but not identical** and are never quoted against each
+      other; what matters here is whether the forest family still shows no loss when the trees are
+      actually being fitted as candidates.
+
+    Each estimator's shipped arm is built from that estimator's registered factory and the shipped column
+    list, so its five folds must reproduce the corresponding run **bit-identically**. A check asserts it,
+    and that assertion is what makes this an ablation (two column lists) rather than a comparison (two
+    experiments that happen to look similar).
     """
     arms = {"all17": list(features.FEATURES), "shipped12": select.shipped_features()}
-    records: list[dict] = []
+    arms_info = {"features": {label: len(columns) for label, columns in arms.items()}, "columns": {}}
+    results: dict[str, dict] = {}
 
-    for fold, (train_idx, valid_idx) in enumerate(folds, start=1):
-        row: dict = {"fold": fold}
-        for label, columns in arms.items():
-            pipeline = make_pipeline(ESTIMATORS["logreg_balanced"]["make"](), columns)
-            pipeline.fit(frame.iloc[train_idx], y.iloc[train_idx])
-            scores = pipeline.predict_proba(frame.iloc[valid_idx])[:, 1]
-            row[label] = {
-                **fold_metrics(y.iloc[valid_idx].to_numpy(), scores),
-                "columns": int(len(pipeline.named_steps[STEP_PREPROCESS].get_feature_names_out())),
-                "n_iter": int(pipeline.named_steps[STEP_MODEL].n_iter_[0]),
+    for name in names:
+        records: list[dict] = []
+        for fold, (train_idx, valid_idx) in enumerate(folds, start=1):
+            row: dict = {"fold": fold}
+            for label, columns in arms.items():
+                pipeline = make_pipeline(ESTIMATORS[name]["make"](), columns)
+                pipeline.fit(frame.iloc[train_idx], y.iloc[train_idx])
+                scores = pipeline.predict_proba(frame.iloc[valid_idx])[:, 1]
+                row[label] = {
+                    **fold_metrics(y.iloc[valid_idx].to_numpy(), scores),
+                    "columns": int(len(pipeline.named_steps[STEP_PREPROCESS].get_feature_names_out())),
+                    # -1 where the estimator has no iteration count (a forest has no `n_iter_`).
+                    "n_iter": int(getattr(pipeline.named_steps[STEP_MODEL], "n_iter_", [-1])[0]),
+                }
+            records.append(row)
+
+        summary: dict = {}
+        for metric in ("roc_auc", "pr_auc"):
+            deltas = np.array([row["shipped12"][metric] - row["all17"][metric] for row in records])
+            summary[metric] = {
+                "all17_mean": float(np.mean([row["all17"][metric] for row in records])),
+                "shipped12_mean": float(np.mean([row["shipped12"][metric] for row in records])),
+                "delta_mean": float(deltas.mean()),
+                "delta_sd": float(deltas.std(ddof=SD_DDOF)),
+                "folds_improving": int((deltas > 0).sum()),
+                # The paired sign test: with five folds and no ties, "all five went the same way" is
+                # p = 1/32. Quoted because a small mean over five folds is otherwise hard to weigh.
+                "sign_test_p": float(0.5 ** len(deltas)) if (deltas > 0).all() or (deltas < 0).all() else None,
             }
-        records.append(row)
+        results[name] = {"folds": records, "summary": summary}
+        arms_info["columns"] = {label: records[0][label]["columns"] for label in arms}
 
-    summary: dict = {}
-    for metric in ("roc_auc", "pr_auc"):
-        deltas = np.array([row["shipped12"][metric] - row["all17"][metric] for row in records])
-        summary[metric] = {
-            "all17_mean": float(np.mean([row["all17"][metric] for row in records])),
-            "shipped12_mean": float(np.mean([row["shipped12"][metric] for row in records])),
-            "delta_mean": float(deltas.mean()),
-            "delta_sd": float(deltas.std(ddof=SD_DDOF)),
-            "folds_improving": int((deltas > 0).sum()),
-        }
-
-    return {
-        "arms": {label: {"features": len(columns), "columns": records[0][label]["columns"]}
-                 for label, columns in arms.items()},
-        "folds": records,
-        "summary": summary,
-    }
+    return {"arms": arms_info, "estimators": results}
 
 
 def summarise(records: list[dict]) -> dict:
@@ -466,26 +524,30 @@ def validate(
 
     compare("the dummy reproduces D28's three floors exactly", dummy_floors)
 
-    def logistic_beats_floors() -> tuple[bool, str]:
-        model = runs["logreg_balanced"]
+    def every_model_beats_floors() -> tuple[bool, str]:
+        """Every non-floor estimator must clear PR-AUC *and* ROC-AUC in every fold, not on average."""
         dummy = runs["dummy_prior"]
-        worse = [
-            (record["fold"], record["pr_auc"], dummy["folds"][record["fold"] - 1]["pr_auc"])
-            for record in model["folds"]
-            if record["pr_auc"] <= dummy["folds"][record["fold"] - 1]["pr_auc"]
-        ]
-        auc_worse = [
-            (record["fold"], record["roc_auc"])
-            for record in model["folds"] if record["roc_auc"] <= 0.5
-        ]
+        notes, failures = [], []
+        for name, run in runs.items():
+            if run["role"] == "floor":
+                continue
+            pr_fail = [
+                (record["fold"], round(record["pr_auc"], 4))
+                for record in run["folds"]
+                if record["pr_auc"] <= dummy["folds"][record["fold"] - 1]["pr_auc"]
+            ]
+            auc_fail = [(record["fold"], round(record["roc_auc"], 4))
+                        for record in run["folds"] if record["roc_auc"] <= 0.5]
+            notes.append(f"{name} {run['summary']['pr_auc']['mean']:.4f} "
+                         f"(worst fold {min(r['pr_auc'] for r in run['folds']):.4f})")
+            failures.extend((name, pr_fail, auc_fail) for _ in [0] if pr_fail or auc_fail)
         return (
-            not worse and not auc_worse,
-            f"PR-AUC above the base rate in all {len(model['folds'])} folds "
-            f"({model['summary']['pr_auc']['mean']:.4f} vs {dummy['summary']['pr_auc']['mean']:.4f}); "
-            f"failures: PR {worse or 'none'}, ROC {auc_worse or 'none'}",
+            not failures,
+            f"all beat the {dummy['summary']['pr_auc']['mean']:.4f} floor in every fold: "
+            f"{'; '.join(notes)}; failures: {failures or 'none'}",
         )
 
-    compare("the logistic baseline beats both floors in every fold", logistic_beats_floors)
+    compare("every model beats both floors in every fold", every_model_beats_floors)
 
     def no_leak_in_matrix() -> tuple[bool, str]:
         """The fitted pipelines must have been handed a frame that still carried the leak."""
@@ -504,58 +566,79 @@ def validate(
 
     # --- the artifacts are what they claim --------------------------------------------------------
     def artifacts_reload() -> tuple[bool, str]:
-        if not all(path.exists() for path in MODEL_PATHS.values()):
-            return False, f"missing: {[p.name for p in MODEL_PATHS.values() if not p.exists()]}"
-        reloaded = joblib.load(MODEL_PATHS["logreg_balanced"])
+        missing = [path.name for path in MODEL_PATHS.values() if not path.exists()]
+        if missing:
+            return False, f"missing: {missing}"
         sample = frame.iloc[:500]
-        fresh = reloaded.predict_proba(sample)[:, 1]
-        original = finals["logreg_balanced"].predict_proba(sample)[:, 1]
-        width = len(reloaded.named_steps[STEP_PREPROCESS].get_feature_names_out())
-        return (
-            np.array_equal(fresh, original)
-            and width == 40
-            and [step for step, _ in reloaded.steps] == [STEP_PREPROCESS, STEP_MODEL],
-            f"{MODEL_PATHS['logreg_balanced'].name} reloads as a 2-step pipeline, predicts 500 rows "
-            f"identically (max delta {float(np.max(np.abs(fresh - original))):.1e}), {width} columns",
-        )
+        notes = []
+        for name, path in MODEL_PATHS.items():
+            reloaded = joblib.load(path)
+            fresh = reloaded.predict_proba(sample)[:, 1]
+            original = finals[name].predict_proba(sample)[:, 1]
+            width = len(reloaded.named_steps[STEP_PREPROCESS].get_feature_names_out())
+            ok = (
+                np.array_equal(fresh, original)
+                and width == 40
+                and [step for step, _ in reloaded.steps] == [STEP_PREPROCESS, STEP_MODEL]
+            )
+            notes.append(f"{path.name} {'ok' if ok else 'DRIFTED'} "
+                         f"(max delta {float(np.max(np.abs(fresh - original))):.1e}, {width} columns)")
+            if not ok:
+                return False, "; ".join(notes)
+        return True, "; ".join(notes)
 
-    compare("the saved artifacts reload and predict identically", artifacts_reload)
+    compare("every saved artifact reloads and predicts identically", artifacts_reload)
 
     add("the shipped feature set is T25's frozen decision",
         columns == select.shipped_features() and len(columns) == 12,
         f"{len(columns)} features; frozen drops {list(select.SHIPPED_DROPPED)}")
 
-    # --- the coefficients T25's decision rests on must come from a converged fit --------------------
+    # --- a fit that stopped at its iteration cap is a snapshot, not a solution -----------------------
     def converged() -> tuple[bool, str]:
-        limit = ESTIMATORS["logreg_balanced"]["make"]().max_iter
-        iterations = [record["n_iter"] for record in runs["logreg_balanced"]["folds"]]
-        return (max(iterations) < limit, f"n_iter {iterations} against max_iter {limit}")
+        notes, problems = [], []
+        for name in runs:
+            limit = getattr(ESTIMATORS[name]["make"](), "max_iter", None)
+            iterations = [record["n_iter"] for record in runs[name]["folds"]]
+            if limit is None or max(iterations) < 0:
+                notes.append(f"{name}: no iteration cap")
+                continue
+            notes.append(f"{name}: {min(iterations)}-{max(iterations)} of {limit}")
+            if max(iterations) >= limit:
+                problems.append(name)
+        return not problems, "; ".join(notes)
 
-    compare("the logistic model converged in every fold", converged)
+    compare("no model stopped at its iteration cap", converged)
 
     def reduction_is_an_ablation() -> tuple[bool, str]:
         """
-        The reduction check must be the same experiment twice over, not two experiments.
+        Each reduction arm must be the same experiment twice over, not two experiments.
 
-        Its shipped arm uses the identical estimator and column list as `logreg_balanced`, so every fold's
-        two ranking metrics have to come back bit-identical. If they do not, the comparison has acquired
-        a second difference and its delta means nothing.
+        Every estimator's shipped arm is built from that estimator's registered factory and the shipped
+        column list, so all five folds' two ranking metrics have to come back bit-identical to its normal
+        CV run. If they do not, the ablation has acquired a second difference and its delta means nothing.
         """
-        pairs = list(zip(runs["logreg_balanced"]["folds"], reduction["folds"]))
-        drift = [
-            (baseline["fold"], metric)
-            for baseline, row in pairs
-            for metric in ("roc_auc", "pr_auc")
-            if abs(baseline[metric] - row["shipped12"][metric]) > 0.0
-        ]
+        drift, notes = [], []
+        for name, block in reduction["estimators"].items():
+            pairs = list(zip(runs[name]["folds"], block["folds"]))
+            local = [
+                (baseline["fold"], metric)
+                for baseline, row in pairs
+                for metric in ("roc_auc", "pr_auc")
+                if abs(baseline[metric] - row["shipped12"][metric]) > 0.0
+            ]
+            drift.extend((name, *item) for item in local)
+            notes.append(f"{name}: {len(pairs)} folds")
+        columns = reduction["arms"]["columns"]
         return (
-            not drift and len(pairs) == N_FOLDS
-            and reduction["arms"]["all17"]["columns"] > reduction["arms"]["shipped12"]["columns"],
-            f"{len(pairs)} paired folds, shipped arm identical to the baseline (drift: {drift or 'none'}), "
-            f"{reduction['arms']['all17']['columns']} -> {reduction['arms']['shipped12']['columns']} columns",
+            not drift
+            and all(len(block["folds"]) == N_FOLDS for block in reduction["estimators"].values())
+            and columns["all17"] > columns["shipped12"],
+            f"{'; '.join(notes)}, shipped arm identical to each run (drift: {drift or 'none'}), "
+            f"{columns['all17']} -> {columns['shipped12']} columns",
         )
 
-    compare("the reduction check re-runs the baseline, not a second experiment", reduction_is_an_ablation)
+    compare("every reduction arm re-runs its own estimator, not a second experiment",
+            reduction_is_an_ablation)
 
     return checks
 
@@ -564,7 +647,7 @@ def validate(
 # Report
 # ---------------------------------------------------------------------------
 def report(variant: str = "full") -> dict:
-    """Train both baselines, persist them, and return everything the module prints."""
+    """Train every registered estimator, persist the fits, and return everything the module prints."""
     config.ensure_dirs()
     started = time.perf_counter()
 
@@ -585,7 +668,10 @@ def report(variant: str = "full") -> dict:
     for name, path in MODEL_PATHS.items():
         pipeline = make_pipeline(ESTIMATORS[name]["make"](), columns)
         pipeline.fit(frame, y)
-        joblib.dump(pipeline, path)
+        # `compress=3`: a 300-tree forest stores every leaf it grew and lands at 41 MB uncompressed,
+        # which is 10x the size of everything else this project commits. Compressed it is a few MB and
+        # reloads to the same arrays (checked below), so the size is paid once rather than per clone.
+        joblib.dump(pipeline, path, compress=3)
         finals[name] = pipeline
 
     # D44's decision was measured with a forest; this is the same question asked of a linear model.
@@ -594,7 +680,7 @@ def report(variant: str = "full") -> dict:
     checks = validate(frame, y, folds, runs, finals, columns, reduction)
 
     payload = {
-        "task": "T26",
+        "task": "T26-T27",
         "variant": variant,
         "training_rows": int(len(frame)),
         "positives": int(y.sum()),
@@ -659,7 +745,8 @@ def validate_record(reading: dict, measured: dict) -> list[dict]:
         and reading["estimators"]["dummy_prior"]["summary"]["roc_auc"]["mean"] == 0.5
         and reading["training_rows"] == measured["training_rows"]
         and reading["matrix_columns"] == 40
-        and len(reading["estimators"]["logreg_balanced"]["folds"]) == N_FOLDS,
+        and len(reading["estimators"]) == len(ESTIMATORS)
+        and all(len(block["folds"]) == N_FOLDS for block in reading["estimators"].values()),
         f"{CV_PATH.name}: {reading['training_rows']:,} rows, {reading['matrix_columns']} columns, "
         f"{len(reading['estimators'])} estimators x {N_FOLDS} folds",
     ))
@@ -710,19 +797,24 @@ def print_report(result: dict) -> None:
         print(line)
     print()
     reduction = result["reduction_check"]
-    print("DOES T25's REDUCTION COST THE LINEAR MODEL ANYTHING?")
-    print("  (D44 was measured with a forest; same folds, same estimator, columns toggled)")
-    print(f"  {'arm':<12}{'features':>10}{'columns':>9}" + "".join(f"{m:>20}" for m in ("ROC-AUC", "PR-AUC")))
-    for arm, info in reduction["arms"].items():
-        line = f"  {arm:<12}{info['features']:>10}{info['columns']:>9}"
-        for metric in ("roc_auc", "pr_auc"):
-            line += f"{reduction['summary'][metric][arm + '_mean']:>20.4f}"
-        print(line)
-    for metric, label in (("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC")):
-        stats = reduction["summary"][metric]
-        print(f"  delta {label:<8}{stats['delta_mean']:+.4f} +/- {stats['delta_sd']:.4f}, "
-              f"{stats['folds_improving']}/{result['folds']} folds improve on the 12-feature set")
-    print(f"  n_iter    {[row['shipped12']['n_iter'] for row in reduction['folds']]} (shipped arm)")
+    print("DOES T25's REDUCTION COST ANYTHING?  (same folds, same estimator, columns toggled)")
+    for name, block in reduction["estimators"].items():
+        print(f"  {name}")
+        print(f"    {'arm':<12}{'features':>10}{'columns':>9}" +
+              "".join(f"{m:>20}" for m in ("ROC-AUC", "PR-AUC")))
+        for arm, features_count in reduction["arms"]["features"].items():
+            line = f"    {arm:<12}{features_count:>10}{reduction['arms']['columns'][arm]:>9}"
+            for metric in ("roc_auc", "pr_auc"):
+                line += f"{block['summary'][metric][arm + '_mean']:>20.4f}"
+            print(line)
+        for metric, label in (("roc_auc", "ROC-AUC"), ("pr_auc", "PR-AUC")):
+            stats = block["summary"][metric]
+            sign = f", sign test p = {stats['sign_test_p']:.3f}" if stats["sign_test_p"] else ""
+            print(f"    delta {label:<8}{stats['delta_mean']:+.4f} +/- {stats['delta_sd']:.4f}, "
+                  f"{stats['folds_improving']}/{result['folds']} folds improve on 12 features{sign}")
+        iterations = [row["shipped12"]["n_iter"] for row in block["folds"]]
+        if max(iterations) >= 0:
+            print(f"    n_iter    {iterations} (shipped arm)")
     print()
     artifacts = ", ".join(
         [Path(item["artifact"]).name for item in result["estimators"].values()] + [CV_PATH.name]
@@ -730,7 +822,7 @@ def print_report(result: dict) -> None:
     print(f"artifacts: {artifacts}")
     print(f"elapsed  : {result['elapsed_seconds']} s")
     print()
-    print(f"T26 checks: {result['checks_passed']}/{result['checks_total']} passed")
+    print(f"Phase 6 checks: {result['checks_passed']}/{result['checks_total']} passed")
     for check in result["checks"]:
         marker = "PASS" if check["passed"] else "FAIL"
         detail = f"  ({check['detail']})" if check["detail"] else ""
@@ -744,6 +836,6 @@ if __name__ == "__main__":
     outcome = report()
     print_report(outcome)
     print("=" * 112)
-    print(f"result : {'PASS - both baselines trained in one Pipeline and scored on the same folds' if outcome['checks_ok'] else 'FAIL'}")
-    print("Next   : T27 adds a Random Forest as one more entry in ESTIMATORS, inheriting this harness.")
+    print(f"result : {'PASS - every model trained in one Pipeline and scored on the same folds' if outcome['checks_ok'] else 'FAIL'}")
+    print("Next   : T28 adds XGBoost as one more entry in ESTIMATORS, inheriting this harness.")
     sys.exit(0 if outcome["checks_ok"] else 1)

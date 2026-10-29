@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-29 15:10
-**Overall completion:** 57% (26 / 46 tasks)
+**Last updated:** 2026-10-29 15:55
+**Overall completion:** 59% (27 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -14,11 +14,11 @@
 | 3 | Data Preprocessing & Cleaning | 10 | 4 / 4 ✅ | T12–T15 |
 | 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
-| 6 | Model Selection & Implementation | 15 | 1 / 6 | T26–T31 |
+| 6 | Model Selection & Implementation | 15 | 2 / 6 | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 0 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **26 / 46** | |
+| | **Total** | **100** | **27 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,23 +28,23 @@
 
 ## NEXT TASK
 
-**T27 | Phase 6 – Model Selection | Random Forest.**
-Open: `src/train.py`, artifacts in `models/`, notes in `docs/06_modeling.md` §3 and §7.
-Add a Random Forest as one more entry in `ESTIMATORS` and re-run the same harness, so its CV ROC-AUC and
-PR-AUC sit in the same table as the baselines with no second convention anywhere.
-**Done when:** it is trained in the same pipeline and its CV scores are logged next to the baselines.
-**Carry in:** the number to beat is `logreg_balanced` at **PR-AUC 0.4008 (3.43× the base rate) and
-ROC-AUC 0.7640**, against the floor of PR-AUC **0.1170** / ROC-AUC **0.5000** (`models/baselines_cv.json`).
-The harness is already written: a new model is `ESTIMATORS[name]` + `MODEL_PATHS[name]`, and it inherits
-the one materialised fold list, the per-fold `build_preprocessor`, and `fold_metrics`. Do **not** add a
-threshold metric — `class_weight="balanced"` is deliberately miscalibrated (D45: mean p **0.4161** against
-a **0.1170** base rate, Brier **0.1852**, worse than the dummy's 0.1033) and the operating point is T34's
-after recalibration. A forest needs no scaling but must still sit behind the same preprocessor, or the
-comparison acquires a second difference. Set `n_jobs=1` for a comparable runtime and record the fitted
-`n_estimators`/`max_depth` in the JSON. One more thing belongs in the write-up: T26's reduction check
-measured that the 12-feature set costs a **linear** model **-0.0039 ± 0.0023** ROC-AUC with **0/5 folds
-improving** (D46) while the forest that chose it saw no loss — so report where the forest lands on the
-40-column set, because that is the instrument D44 was decided with.
+**T28 | Phase 6 – Model Selection | Gradient boosting (XGBoost).**
+Open: `src/train.py`, artifacts in `models/`, notes in `docs/06_modeling.md` §1, §3 and §5.
+Add XGBoost as one more entry in `ESTIMATORS` (and to `REDUCTION_ESTIMATORS`) and re-run the harness, so
+its CV scores land in the same table as the two baselines and the forest.
+**Done when:** it is trained in the same pipeline and its CV scores are logged for direct comparison.
+**Carry in:** the number to beat is now the forest — **PR-AUC 0.4346 ± 0.0146 (3.72×) and ROC-AUC
+0.7906 ± 0.0089** (`models/cv_results.json`) — against the floor of **0.1170 / 0.5000**. XGBoost is D08's
+chosen family, so this is the model T31 is likely to persist; `xgboost==3.2.0` is pinned because the
+machine runs Python 3.11 (D09), and `scale_pos_weight` is the native imbalance handle rather than
+`class_weight`. Keep it behind the same preprocessor: the matrix is one-hot dense, so XGBoost's native
+categorical support buys nothing here and using it would make this model's input differ from every other
+row in the table. Expect it to be the slowest yet — the forest's 16 fits already cost **156 s** — so time
+one fold before committing to a round count, and keep `n_jobs=1` for comparability. Two specific things to
+write down: (a) **D46's trigger** reads off this model — a 40-column XGBoost landing below the logistic
+baseline's PR-AUC **0.4008** reopens the feature set, and the forest's **-0.0014 ± 0.0024** ROC / **+0.0012
+± 0.0027** PR ablation says that is unlikely; (b) whether it beats the forest at all, because a tuned XGBoost
+that does not would change what T30 tunes.
 
 ---
 
@@ -89,6 +89,7 @@ improving** (D46) while the forest that chose it saw no loss — so report where
 | D35 | 2026-10-28 | `day` is kept as a raw feature but **no rule is built on it**; `campaign` enters T23 as a **capped count or bucket**, not the raw 1–63 scale | `day`'s marginal band difference (12.66% for 1–10 against 10.92% for 11–20, intervals not overlapping) **reverses inside `may`** (5.94% against 7.14% for 21–31) and changes direction month to month, and the column is entangled with `month` by construction (`jan` never runs below day 6, `feb` stops at 27, `may` starts at 4) — so a day rule would encode this file's calendar rather than the behaviour. `campaign`'s own scale is unusable for the same reason the bucket table exists: median 2, max 63, and the productivity changes by a factor of 3.4 between one call and ten |
 | D36 | 2026-10-28 | T24 keeps **`days_since_contact`** and **`previously_contacted`** and **drops raw `pdays`**; there is no other multicollinearity to defuse, so no PCA and no dropping of `balance` or `campaign` on "correlation" grounds | Measured: of the 28 off-diagonal pairs only two reach an absolute r of 0.20, and one of those is `pdays` ↔ `days_since_contact` at **+1.0000** — the same values, not merely correlated ones. With both present the 8-column complete-case matrix is **rank 7**, the condition number is **5.0×10¹⁶** and both VIFs are **9.0×10¹⁵**; with `pdays` dropped every VIF is **1.01–1.03**. Keeping the raw column would let a linear model split one effect between two names while the VIF appeared tolerable, because the sentinel masks the duplication in the full-column view |
 | D37 | 2026-10-28 | Any correlation involving **`pdays`** is reported on the **previously-contacted rows only** (or not at all); the whole-column value is a sentinel artefact and is never quoted as a finding | The column reads **+0.1007** against the target over all 36,168 rows and **−0.1526** — bit-for-bit `days_since_contact`'s value — once the 29,584 sentinel rows are removed, because −1 is the smallest possible value and therefore sorts as "very recent". A modeller acting on the +0.1007 would invert the effect for every real observation. This is the concrete reason D23 replaced the column instead of re-scaling it |
+| D47 | 2026-10-29 | The Random Forest is **300 trees, `min_samples_leaf=10`, `max_features="sqrt"`, `class_weight="balanced_subsample"`, `n_jobs=1`**, and it **beats the linear baseline in every one of the 5 folds** on both ranking metrics; its own re-run of T25's ablation reproduces the neutral verdict | Each setting is a decision with a reason rather than a default: `balanced_subsample` recomputes the class weights **per bootstrap sample** instead of applying one global ratio to 300 trees whose positive shares all differ, which is the documented choice for forests and keeps the imbalance treatment comparable to the linear baseline's (T29 is where the choice itself gets tested). `min_samples_leaf=10` and `n_jobs=1` deliberately match T25's instrument so §5's ablation is a fair re-run rather than a differently-configured second opinion. The result is **PR-AUC 0.4346 ± 0.0146** against **0.4008 ± 0.0134** and **ROC-AUC 0.7906 ± 0.0089** against **0.7640 ± 0.0114** — **+8.4% relative** on PR-AUC — and unlike the linear model it is also *better calibrated* (Brier **0.1403** vs **0.1852**). The ablation on this estimator gives **-0.0014 ± 0.0024** ROC and **+0.0012 ± 0.0027** PR, so D44's reduction remains free for the tree family and D46's localised loss really is a linear-model effect |
 | D46 | 2026-10-29 | T25's drop is re-measured on the **linear** model — the one instrument that could plausibly feel it — and **D44 stands**, with the loss recorded and a revisit trigger written before the result exists: on ROC-AUC the 12-feature set costs **-0.0039 ± 0.0023** with **0/5 folds improving** (one-sided sign test p = **0.031**), on PR-AUC **-0.0021 ± 0.0022**, inside one sd. **T31 re-runs the same ablation on the shipped XGBoost**, and a 40-column XGBoost landing below the logistic baseline's PR-AUC **0.4008** is the trigger to revisit | D44 was measured with a 200-tree forest, which masks a correlated column; a linear model gives each one-hot level its own coefficient and should feel the loss if there is one, so the objection was answered with a measurement rather than an argument. It found a small, systematic ROC-AUC loss (**1.73** standard errors, no fold improving) and no detectable PR-AUC loss — so the forest's "neutral" and the linear model's "0.004" are both true, on different metrics. The decision is kept because the shipped model is XGBoost (D08), which is tree-based like the instrument that chose the set, and because the price is **38.5%** of the matrix for **0.0039** AUC on a model that does not ship. Recording the trigger in advance is the point: if XGBoost lands under the baseline, the honest reading is that feature selection removed something the whole family needs, and that reading must not be a judgement call made after seeing the number |
 | D45 | 2026-10-29 | One CV harness for all of T26–T31: **one materialised fold list**, one preprocessor factory per fold, one `fold_metrics` call path; and T26 logs **threshold-free** metrics only (ROC-AUC, PR-AUC) with Brier and mean predicted probability as calibration diagnostics — **no F1 or precision** | Three separate reasons, each measured here. One fold list replayed as an object rather than re-derived from a seed is what T36's two arms will require (D40), and it is what makes T26's reduction check able to require its shipped arm to reproduce the baseline **bit-identically**. A threshold metric on `class_weight="balanced"` measures the weighting rather than the model: the fitted mean probability is **0.4161** against a **0.1170** base rate (**7.55 : 1** weights), and the Brier score says so plainly — **0.1852** for the model with ROC-AUC 0.7640 against **0.1033** for a constant. Reporting F1 at 0.5 would have hidden that; reporting Brier beside the ranking metrics surfaces it, and it is why **T34 must recalibrate before D17's 7.50% break-even can be applied** rather than assume the score is a probability |
 | D44 | 2026-10-29 | The shipped feature set drops **5 of 17** features — `education`, `loan`, `default`, `balance_band`, `job` — leaving **12 features and a 40-column matrix**, down from 65; `campaign_bucket` carries a declared carve-out so it can never be dropped | The five were nominated because the forest could not distinguish their contribution from zero, then removed **as a group** and the same 5 folds re-measured: held-out ROC-AUC moved **-0.00014 +/- 0.00195**, with **3 of 5 folds improving**. `balance_band` is redundant with `balance_arsinh`, which keeps the same information at finer resolution; `job` was the largest single block (**12 of 65 columns**) and 17th by the model; `default` carries **0.0004 nats** of mutual information. The decision is **instrument-specific** — the forest is not the shipped XGBoost — so the ablation numbers are recorded in `docs/05_leakage_audit.md` §8.4 as the evidence to revisit if T32 finds the reduced set underperforming |
@@ -144,8 +145,8 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T25 | Rubric 5 | Feature selection / importance with justification | Output: `reports/figures/06_feature_importance.png`, notes in `docs/05_leakage_audit.md` §8 | **done 2026-10-29** (`src/select.py`, and **2,149 words** in §8; **two methods over the same 17 features** — mutual information with a **per-feature permutation null** (narrowest null sd **1.25e-05**) and permutation importance from a 200-tree forest with out-of-fold ROC-AUC **0.7936 +/- 0.0063** — correlating at **Spearman +0.647**, with the five rank gaps of 5+ explained (`marital` 16 vs 8, `day` 11 vs 4, `balance_arsinh` 3 vs 9, `previous_capped` 7 vs 12, `job` 10 vs 17); a **third measurement decides**: the 5 nominated features removed as a group cost **-0.00014 +/- 0.00195** ROC-AUC with **3 of 5 folds improving**, so the **one-standard-error** rule drops them; **5 dropped** (`education`, `loan`, `default`, `balance_band`, `job`), **12 kept**, and the shipped matrix goes from **65 columns to 40**; **17/17 in-module checks** pass and `python -m src.select` exits 0; the figure draws both rankings with each feature's own null and the dropped features hatched)
 
 ### Phase 6 — Model Selection & Implementation
-- [x] T26 | Rubric 6 | Baseline models: `DummyClassifier` + Logistic Regression | Output: `src/train.py`, artifacts in `models/` | **done 2026-10-29** (`src/train.py` (749 lines) is the harness T27–T31 inherit: `make_pipeline()`= T24 `ColumnTransformer` + estimator, `materialise_folds()` (one `StratifiedKFold(5, shuffle, 42)` produced **once** and replayed), `fold_metrics()` and `cross_validate()`; both baselines trained on the **12 features / 40 columns** of D44 with the target half only (**36,168 rows, 4,231 positives**) and the **9,043 held-out rows never loaded**; **`dummy_prior`** reproduces D28's floors in the same folds rather than quoting them — ROC-AUC **0.5000**, PR-AUC **0.116982 ± 0.000059**, accuracy **88.3018%**, Brier **0.103297**, all four re-derived arithmetically per fold (`q - 2pq + p^2` for Brier, the scored rate for AP, the fitted rate for the constant score); **`logreg_balanced`** scores **ROC-AUC 0.7640 ± 0.0114** and **PR-AUC 0.4008 ± 0.0134 = 3.43× the base rate**, beating both floors in **all 5 folds** and clearing D15's ≥ 0.75 target; the calibration finding is stated not hidden — mean p **0.4161** and Brier **0.1852** against the dummy's **0.1033**, i.e. a better ranker is a worse probability forecaster, so **no threshold metric is reported** and T34 must recalibrate (D45); the reduction check answers the carry-in: on ROC-AUC the 12-feature set costs the linear model **-0.0039 ± 0.0023** with **0/5 folds improving** (sign test p = **0.031**), on PR-AUC **-0.0021 ± 0.0022** — inside one sd (D46); **14/14 in-module checks** pass and `python -m src.train` exits **0**; **127 independent checks** refit everything from `train.csv` and recompute every metric with hand-written rank-based AUC and threshold-step AP first validated against scikit-learn to **1e-12**, including the all-tied constant case; artifacts `models/baseline_dummy.joblib`, `models/baseline_logreg.joblib` and `models/baselines_cv.json` written, the joblib reloading as a 2-step pipeline and reproducing a fresh full fit to **1e-12**; runtime **3.8 s**)
-- [ ] T27 | Rubric 6 | Random Forest model | Output: `src/train.py`, `models/` | Done when: trained in the same pipeline and CV scores are logged for direct comparison
+- [x] T26 | Rubric 6 | Baseline models: `DummyClassifier` + Logistic Regression | Output: `src/train.py`, artifacts in `models/` | **done 2026-10-29** (`src/train.py` (749 lines) is the harness T27–T31 inherit: `make_pipeline()`= T24 `ColumnTransformer` + estimator, `materialise_folds()` (one `StratifiedKFold(5, shuffle, 42)` produced **once** and replayed), `fold_metrics()` and `cross_validate()`; both baselines trained on the **12 features / 40 columns** of D44 with the target half only (**36,168 rows, 4,231 positives**) and the **9,043 held-out rows never loaded**; **`dummy_prior`** reproduces D28's floors in the same folds rather than quoting them — ROC-AUC **0.5000**, PR-AUC **0.116982 ± 0.000059**, accuracy **88.3018%**, Brier **0.103297**, all four re-derived arithmetically per fold (`q - 2pq + p^2` for Brier, the scored rate for AP, the fitted rate for the constant score); **`logreg_balanced`** scores **ROC-AUC 0.7640 ± 0.0114** and **PR-AUC 0.4008 ± 0.0134 = 3.43× the base rate**, beating both floors in **all 5 folds** and clearing D15's ≥ 0.75 target; the calibration finding is stated not hidden — mean p **0.4161** and Brier **0.1852** against the dummy's **0.1033**, i.e. a better ranker is a worse probability forecaster, so **no threshold metric is reported** and T34 must recalibrate (D45); the reduction check answers the carry-in: on ROC-AUC the 12-feature set costs the linear model **-0.0039 ± 0.0023** with **0/5 folds improving** (sign test p = **0.031**), on PR-AUC **-0.0021 ± 0.0022** — inside one sd (D46); **14/14 in-module checks** pass and `python -m src.train` exits **0**; **127 independent checks** refit everything from `train.csv` and recompute every metric with hand-written rank-based AUC and threshold-step AP first validated against scikit-learn to **1e-12**, including the all-tied constant case; artifacts `models/baseline_dummy.joblib`, `models/baseline_logreg.joblib` and `models/baselines_cv.json` (now `models/cv_results.json`) written, the joblib reloading as a 2-step pipeline and reproducing a fresh full fit to **1e-12**; runtime **3.8 s**)
+- [x] T27 | Rubric 6 | Random Forest model | Output: `src/train.py`, `models/` | **done 2026-10-29** (a second `ESTIMATORS` entry, not a second script: `RandomForestClassifier(n_estimators=300, min_samples_leaf=10, max_features="sqrt", class_weight="balanced_subsample", n_jobs=1)`, inheriting the one materialised fold list, the per-fold preprocessor and `fold_metrics`; **ROC-AUC 0.7906 ± 0.0089** and **PR-AUC 0.4346 ± 0.0146 = 3.72× the base rate**, beating `logreg_balanced` in **every one of the 5 folds** on both metrics and **+8.4% relative** on PR-AUC, while also being better calibrated (Brier **0.1403** against **0.1852**); `balanced_subsample` chosen over `balanced` because a forest's trees each see a different positive share (D47); the D44 ablation was **generalised to run per estimator** (`REDUCTION_ESTIMATORS`) so the forest re-measures the decision it made — **-0.0014 ± 0.0024** ROC and **+0.0012 ± 0.0027** PR, reproducing T25's neutral verdict at production settings and leaving the linear model's **-0.0039** as a linear-model effect; `models/model_random_forest.joblib` written and the JSON **renamed to `models/cv_results.json`** now that it holds a candidate; **14/14 in-module checks** pass and `python -m src.train` exits **0** in **156 s**; **69 further independent checks** refit all 5 folds plus the 16-feature arm from `train.csv`, confirm **300** trees survived the `joblib` round-trip, and reproduce every per-fold figure with the hand-written AUC/AP functions)
 - [ ] T28 | Rubric 6 | Gradient boosting model (XGBoost or LightGBM) | Output: `src/train.py`, `models/` | Done when: trained in the same pipeline and CV scores are logged for direct comparison
 - [ ] T29 | Rubric 6 | Compare imbalance handling (`class_weight` vs SMOTE) | Output: `docs/06_imbalance.md` | Done when: variants are compared on PR-AUC/F1 with resampling applied **only inside CV folds** (no leakage)
 - [ ] T30 | Rubric 6 | Hyperparameter tuning | Output: `src/tune.py`, `models/best_params.json` | Done when: `RandomizedSearchCV` with 5-fold StratifiedKFold completes and tuned model beats untuned on CV PR-AUC
@@ -202,7 +203,7 @@ Tick only after the deliverable is verified to exist and run.
 | `notebooks/02_preprocessing.ipynb` | Phase 3 (rubric 3, **T13**): 18-cell outlier/skew analysis with stored outputs — T12 invariance re-proved, skew/kurtosis/quantile profile of all four named columns, tail-vs-body subscription rates, a five-option treatment comparison (keep, arcsinh, robust scale, winsorise 1–99, winsorise 5–95) with rows-rewritten / distinct-values-lost / order-preserved, the `log1p`-on-negatives trap quantified, the **IQR = 0** degenerate case detected, 7 written findings and the D24 decision | 2026-10-27 |
 | `reports/figures/00_preprocessing_distributions.png`, `00_preprocessing_treatments.png`, `00_preprocessing_signal_in_tail.png` | Phase 3 (**T13**) figures: raw vs `arcsinh` distributions, skew remaining per treatment, and the tail signal (balance deciles, campaign bands) that decided D24 | 2026-10-27 |
 | `src/train.py` | Phase 6 (rubric 6, **T26**): the cross-validation harness every later model inherits — `make_pipeline()` (T24 preprocessor + estimator, feature list from `select.shipped_features()`), `materialise_folds()` (one 5-fold stratified split, produced once and replayed), `fold_metrics()`, `summarise()` (mean ± sample sd), `cross_validate()`, `reduction_check()` (D44's drop re-measured on the linear model) and `validate()`'s **14 checks**; `ESTIMATORS`/`MODEL_PATHS` are the two registries a model is added to. CLI prints the table, the per-fold PR-AUC and the checks, exits non-zero on any failure | 2026-10-29 |
-| `models/baseline_dummy.joblib`, `models/baseline_logreg.joblib`, `models/baselines_cv.json` | Phase 6 (**T26**) artifacts: the two fitted pipelines (40-column preprocessor included, so a reload is self-contained) and the machine-readable record — per-fold and summary metrics for both estimators, the reduction check, the feature list, fold seed, `sd_ddof`, estimator parameters and the 14 check results. **Every number in `docs/06_modeling.md` comes from this file** | 2026-10-29 |
+| `models/baseline_dummy.joblib`, `models/baseline_logreg.joblib`, `models/model_random_forest.joblib`, `models/cv_results.json` | Phase 6 (**T26–T27**) artifacts: the fitted pipelines (40-column preprocessor included, so a reload is self-contained) and the machine-readable record — per-fold and summary metrics for every estimator, the per-estimator reduction ablation, the feature list, fold seed, `sd_ddof`, estimator parameters and the 14 check results. Renamed from `baselines_cv.json` in T27, when it stopped holding only baselines. **Every number in `docs/06_modeling.md` comes from this file** | 2026-10-29 |
 | `docs/06_modeling.md` | Phase 6 (**T26**, extended by T27–T29): the floors derived rather than quoted, the CV table with per-fold evidence, why no F1 column exists (the Brier-vs-base-rate calibration finding), the reduction check against D44 with its revisit trigger, the held-fixed contract and how each element is proven, and the hand-off to T27–T31 | 2026-10-29 |
 | `docs/01_problem_definition.md` | Phase 1 (rubric 1): 179-word problem statement, business objective, six measurable objectives O1–O6 each traced to a task, six out-of-scope exclusions, canonical dataset/target naming table (**T07**), plus **T08**: a six-stakeholder table (S1–S6) with decision + typed KPI + measurability per row, concrete KPI definitions with numeric targets, why accuracy is excluded, and the named stakeholder tension over the threshold | 2026-10-27 |
 | `data/raw/`, `data/processed/`, `notebooks/`, `src/`, `models/`, `reports/figures/`, `app/`, `docs/` | Project folder skeleton, each empty directory held open by a `.gitkeep` | 2026-10-27 |
@@ -1211,7 +1212,8 @@ Pipeline, with CV ROC-AUC and PR-AUC logged.
 ### 2026-10-29 — Session 28  (T26 complete, Phase 6 started)
 
 **Completed:** **T26** — `src/train.py` (749 lines), `models/baseline_dummy.joblib`,
-`models/baseline_logreg.joblib`, `models/baselines_cv.json`, and `docs/06_modeling.md` (201 lines).
+`models/baseline_logreg.joblib`, `models/baselines_cv.json` (renamed `cv_results.json` in T27), and
+`docs/06_modeling.md`.
 Phase 6 is open: **26 / 46 (57%)**, criterion 6 at **1 / 6**.
 
 **The numbers.** Training half only, **36,168 rows / 4,231 positives**, 12 features -> 40 columns.
@@ -1274,6 +1276,65 @@ rather than backfilling three sessions of description here.
 `PROGRESS.md`.
 **Next:** T27 — the Random Forest as one more `ESTIMATORS` entry, scored by the same harness against
 PR-AUC **0.4008** and ROC-AUC **0.7640**.
+
+---
+
+### 2026-10-29 — Session 29  (T27 complete)
+
+**Completed:** **T27** — `random_forest` added to `src/train.py` as a second registry entry,
+`models/model_random_forest.joblib`, the JSON renamed to `models/cv_results.json`, and `docs/06_modeling.md`
+extended to §1–§8. **27 / 46 (59%)**, criterion 6 at **2 / 6**.
+
+**The numbers.** `RandomForestClassifier(n_estimators=300, min_samples_leaf=10, max_features="sqrt",
+class_weight="balanced_subsample", n_jobs=1)` on the same 40 columns and the same five folds:
+**ROC-AUC 0.7906 ± 0.0089** and **PR-AUC 0.4346 ± 0.0146**, which is **3.72×** the base rate. It beats
+`logreg_balanced` in **every one of the 5 folds** on **both** metrics — no mean is carrying a losing fold —
+and by **+8.4% relative** on PR-AUC. It is also better calibrated than the balanced linear model
+(Brier **0.1403** against **0.1852**), though both remain worse than the constant's 0.1033.
+
+**One setting is a correction rather than a choice.** `class_weight="balanced_subsample"`, not
+`"balanced"`: a forest bootstraps, so each of the 300 trees sees a different positive share, and the
+subsample variant recomputes the weights per bootstrap sample instead of applying one global ratio to all
+of them. That is the documented variant for forests and it keeps the imbalance treatment comparable to
+the linear baseline's, which is T29's question to test rather than T27's to assume.
+
+**The ablation was generalised rather than duplicated.** T26 measured D44's reduction on the linear model
+only; the forest is the instrument the decision was made with, so `REDUCTION_ESTIMATORS` now drives the
+same toggle for any registered estimator. Result: the forest gives **-0.0014 ± 0.0024** ROC and **+0.0012
+± 0.0027** PR — inside the noise, with the PR *sign favouring* the drop — which **reproduces T25's
+-0.00014 ± 0.00195** at production settings. So the reading sharpens: the reduction is free for the tree
+family that ships, and D46's **-0.0039** ROC loss is specifically a **linear-model** effect, not evidence
+about XGBoost.
+
+**A defect worth recording, because the check caught it and my reading did not.** Three of the forest's
+ablation figures were first written into the notes from the 4-decimal printout — the all-17 PR-AUC, both
+delta means and both delta sds — and every one of them was wrong in the third or fourth decimal
+(`0.792007` for `0.791999`, `-0.001401 ± 0.002372` for `-0.001393 ± 0.002425`). The token-by-token trace
+against `cv_results.json` found them; the arithmetic I had done by eye had not. That is the whole reason
+D06 says no number is ever re-typed by hand, and it is a reminder that "I read it off the screen" is
+re-typing with extra steps.
+
+**Runtime is now a real number, not a rounding error:** **156 s**, of which the baselines are 3.8 s and the
+rest is the forest's 16 fits (5 CV, 1 full, 10 for the two-arm ablation). T28 should time one XGBoost fold
+before choosing a round count rather than discovering the total afterwards.
+
+**Verified:** `python -m src.train` exits **0** with **14/14** checks — with four of them now generalised
+over the registry rather than named after one estimator (every model beats both floors in every fold, every
+artifact round-trips, no model stops at its iteration cap, and **every** reduction arm reproduces its own
+estimator bit-identically; drift was `none`). Then **69 independent checks** that refit all five folds and
+the all-17 arm from `train.csv` without importing `src.train`, confirm the artifact carries **300** trees
+and `balanced_subsample`, and reproduce every per-fold figure with the hand-written AUC/AP functions first
+validated against scikit-learn. Every numeric token in `docs/06_modeling.md` re-traced to the run output or
+the JSON.
+
+**Disclosed:** the `Files Created` table was behind for T23–T25 before this session and a fourth session
+has now passed without backfilling it; the rows added here cover `src/train.py`, the artifacts and
+`docs/06_modeling.md` only.
+
+**Blocked:** none.
+**Uncommitted:** `src/train.py`, `models/` (4 files), `docs/06_modeling.md`, `PROGRESS.md`.
+**Next:** T28 — XGBoost as the third registry entry, against the forest's **PR-AUC 0.4346 / ROC-AUC
+0.7906**, with D46's revisit trigger read off its result.
 
 ---
 

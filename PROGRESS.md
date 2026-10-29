@@ -15,10 +15,10 @@
 | 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
-| 7 | Model Evaluation & Validation | 15 | 2 / 5 | T32–T36 |
+| 7 | Model Evaluation & Validation | 15 | 3 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **33 / 46** | |
+| | **Total** | **100** | **34 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,29 +28,30 @@
 
 ## NEXT TASK
 
-**T34 | Phase 7 – Model Evaluation | Threshold tuning against the cost model.**
-Open: `docs/07_threshold.md`, a threshold figure under `reports/figures/`.
-Choose the operating threshold from **expected business cost** — D17's cost model in `src/cost.py` — rather
-than from accuracy, and write the argument down.
-**Done when:** the chosen threshold is justified by expected business cost rather than by accuracy.
-**Carry in:** five constraints, each from a measurement. **(1) The score is a probability on unseen rows.**
-T33 measured mean p **0.1151** against a **0.1170** base rate on the 9,043 held-out rows, with Brier
-**0.0804** against CV's **0.0818**, so D17's **7.50%** break-even can be applied to raw output — whether to
-recalibrate anyway is this step's measurement (a reliability curve plus a monotone map, scored out of
-sample), not a prior assumption in either direction. **(2) Two live cuts, and the choice between them is a
-capacity question.** At **7.50%** the model calls **40.04%** of the list and reaches **77.60%** of
-subscribers at **1.94×** the base rate; at T32's cut **0.2103** it calls **12.82%** and reaches **53.02%**
-at **4.14×**. Both sit above break-even in expectation, so the answer is a marginal-value question —
-expected net value per call at each threshold — rather than a metric's. **(3) 0.5 is closed.** It costs
-**0.1526** F1 against the operating cut and misses **801 of the 1,058** subscribers on the held-out half;
-it stays in the tables only as the rejected number (D53). **(4) The held-out half has been read once**
-(T33). This step may **report** on it and must not **choose** on it: pick the threshold on the training
-half, then check it on the held-out rows and report the difference. **(5) Reuse the arithmetic.**
-`src/metrics.at_threshold` is the project's one definition of a threshold metric, and `src/cost.py` holds
-the labelled assumptions (**C = €1.50**, **V = €20.00**, p* = **0.0750**) with a `sensitivity_table()` —
-quote no cost figure that is not in `ASSUMPTIONS`. The figure should carry the expected-cost curve, the
-break-even crossing and the sensitivity band, and the doc must state the expected cost per call at the
-chosen threshold rather than only the threshold itself.
+**T35 | Phase 7 – Model Evaluation | Lift, gain and decile analysis.**
+Open: `reports/figures/08_lift_gain.png`, `reports/lift_table.csv`.
+Turn the ranking into the two artefacts a campaign manager can act on: a decile table (subscribers reached,
+cumulative share of subscribers, lift against that half's own base rate, per decile and cumulative) and a
+cumulative gain curve. Then translate the adopted cut into **calls saved at equal recall**, which is the
+only form of the benefit a bank can book.
+**Done when:** top-decile lift is quantified and translated into calls saved.
+**Carry in:** five constraints, each from a measurement. **(1) Each half gets its own base rate.** The
+training half's is **11.6982%** (4,231 / 36,168) and the held-out half's is **11.6997%** (1,058 / 9,043) -
+close enough to look interchangeable and not the same number: a lift computed on pooled rows would use a
+denominator from neither half, so each table states which rows it is over. **(2) Deciles are of the ranking,
+so this task is threshold-free** - which is what makes it the one Phase 7 step that can report on the
+held-out rows without spending them (D53, D54). **(3) The cut is D55's 0.0750 and is not re-chosen here.**
+At it the training half calls **14,866** of 36,168 and reaches **3,296** of 4,231 - **21,302 fewer calls for
+935 subscribers forgone**. That trade is the quantity T35 has to price, because "calls saved" is a benefit
+only if the forgone subscribers cost less than the calls they were not worth; the answer is in D55's 43,621
+EUR against call-everyone's 30,368 EUR, and the lift table must reproduce it rather than restate it.
+**(4) Reconcile, do not add a third number.** D15's target was top-decile lift **> 2x**; T32 has already
+measured **3.92x** at the nested cut's **13.26%** coverage and **1.90x** at the business cut's **41.10%**,
+so the decile table has to land on both of those or explain the difference. **(5) Report-only on the held-out
+rows**, as D53 and D54 require.
+Figure and table namespacing: `08_lift_gain.png`, `reports/lift_table.csv`, continuing the `reports/figures/`
+convention T16-T33 established.
+
 
 ---
 
@@ -115,6 +116,7 @@ positives carries the error the bootstrap quantifies. What this does **not** cla
 configuration was correct — the 40-candidate ranking is not re-tested by one point. Governance follows from
 the same rule: T35 and T36 may **report** on these rows and may not **choose** on them, or the number above
 stops being evidence |
+| D55 | 2026-10-30 | **The operating threshold is `C/V = 0.0750`, set by the cost model's assumptions and chosen on the training folds from out-of-fold scores - never from an empirical argmax** (training peak **0.0821**, held-out peak **0.0909**, neither adopted) | Three reasons, in the order they would survive a challenge. **It is a price, not a hyperparameter:** `p* = C/V` follows from `EV = pV - C`, so it is set by `src/cost.py`'s two assumptions (**1.50 EUR** per call, **20.00 EUR** per subscription) rather than by this dataset - which is why the answer to "what if those are wrong" is a 20-cell table (**0.013-0.300** across C in 0.75-3.00 and V in 10-60), not a caveat. **The argmax is not stable and the price is:** adopting the empirical peak would have meant **0.0821** on the training folds and **0.0909** on the held-out rows, for **388.50 EUR (0.883%)** on 36,168 rows - a sampled maximum swapped for a stated rule, and it would have been chosen on the half that T33 had already been scored against. **Which edge matters:** the 1% plateau runs **0.0746-0.1016** and **0.0750 is 0.0004 above its floor**, so the rule is the most aggressive cut still within 1% of the peak - exactly what a break-even threshold should be, and said out loud rather than letting a reader assume the price sits mid-plateau. What it does **not** claim: the euros are the model's assumptions (no cross-sell, no fixed costs, no contact fatigue), no confidence interval is attached to a 0.9% difference on a flat curve, and the held-out half has now been scored twice (**T33**, **T34**) so T35 and T36 may report on those rows and may not choose on them. The capacity table is the live qualification: at **5%** of the list the campaign reaches **26%** of subscribers, so a call-capped bank should read the top of that table, not `p*` |
 | D53 | 2026-10-30 | **Thresholded metrics are reported at three cuts — leave-one-fold-out F1-optimal (the operating point), D17's 7.50% break-even (the business cut), and 0.5 (the rejected number) — and 0.5 is never the headline** | T32 measured what T29 predicted, this time across **two different models**: at 0.5 the forest beats the shipped model by **10.6 F1 points** (**0.4565** vs **0.3509**) and at the nested cut the shipped model wins by **2.4** (**0.4877** vs **0.4641**). Neither model changed. The mechanism is visible in the flag rates: the forest's mean prediction is **0.3404** so 0.5 sits inside its distribution (**17.89%** flagged), while the shipped model's mean is **0.1166** so 0.5 is near its **95th percentile** (**4.67%** flagged) — the calibrated model is being scored at a bar almost nothing clears. Each fold's cut is chosen on the **other four folds**, so no row is judged at a threshold fitted to itself, and the module re-derives all five cuts as a check. The **7.50%** cut is the only one *not* fitted to data, and it is also the one that makes the business case: **41.10%** of the list yields **77.90%** of subscribers at **22.18%** precision, against the "call everyone" baseline's F1 of **0.2095**. Which of the two live cuts to run is a capacity question for T34, not a metric's |
 | D52 | 2026-10-29 | **The shipped model is XGBoost, untreated, at T30's tuned point** — **PR-AUC 0.4460 ± 0.0110**, ROC-AUC **0.7990**, Brier **0.0818**, mean p **0.1166** against a **0.1170** base rate — persisted as `models/final_model.joblib` (**180,520 bytes**, sha256 **7a40752f...**), with **no threshold baked in**, and justified by ranking, calibration and T29's measurement rather than by the tuned margin | The three reasons are ordered by how much they survive scrutiny. **Ranking**: it is the best PR-AUC of the seven builds and ties the best ROC-AUC. **Calibration**: mean p **0.1166** against a base rate of **0.1170** means D17's **7.50%** break-even can be applied to its output *as a probability*, which no weighted build could offer (they score the average client at **0.34–0.42**) — that is why recalibration is a refinement for T34 rather than a prerequisite. **T29**: the weight bought **+0.0023** at **1.11 SE against it** and cost half the Brier score; at the tuned point the loss widened to **−0.00291 in 0/5 folds**. What the decision explicitly does **not** rest on is the tuning: **+0.00165 at 0.58 SE**, with T28's configuration **4th of 40**, so the justification for the tuned build is that it is no worse, is equally calibrated and is reproducible from a file. **No threshold is persisted** because the operating point is T34's decision (D45), and freezing a cut into the artifact would ship an unmade decision. **No held-out score exists in this step** — T32/T33 own it, and computing it inside the step that chooses the model would make the choice look better than it is |
 | D51 | 2026-10-29 | **Tuning is a 40-draw `RandomizedSearchCV` over six axes (4,800 points, 0.8% drawn), scored on `average_precision` over the project's materialised folds, with the feature set and the imbalance treatment held out of the space**; the winner is **300 rounds / lr 0.08 / depth 5 / `min_child_weight=10` / `subsample=1.0` / `colsample_bytree=0.6`**, and its **+0.00165 ± 0.00286 PR-AUC over the untuned configuration is reported as small (0.58 SE) rather than as an improvement** | The budget is declared because a search is a sample of a space, not an optimum: 40 of 4,800 is stated in the doc, so a better configuration found later is a larger `n_iter` rather than a defect here. Two exclusions are the substance of the decision. The **feature set** is T25's and stays there (D44, and T28's trigger did not fire). The **treatment** is excluded because a search may legitimately trade calibration for ranking, and letting it re-choose `scale_pos_weight` would silently reopen T29: the weight is instead evaluated at the tuned point and reproduces T29's verdict (**-0.00291 ± 0.00300 PR-AUC, 0/5 folds**, Brier **0.1535** vs **0.0818**). The search's own score is never quoted as a result - the arms are **refits** whose per-fold numbers equal the search's split scores to **0.0e+00**, and the record carries all 40 candidate scores and both bands so the optimism is visible: **14 of 40** within one standard error of the winner, median candidate **0.4389**, and the **shipped configuration 4th of 40** at **0.4449**. That last number is the finding: T28's hand-picked settings were already inside the noise of the best of forty, which is why tuning bought a hundredth of a point rather than a model |
@@ -187,7 +189,7 @@ Tick only after the deliverable is verified to exist and run.
 ### Phase 7 — Model Evaluation & Validation
 - [x] T32 | Rubric 7 | Cross-validated metric table | Output: `reports/metrics_cv.csv` | **done 2026-10-30** (28-row CSV + `models/metrics_cv.json`: **4 models × 5 folds + mean + sd**, on the project's materialised folds; **three cuts reported** — **nested** (F1-maximising on the other four folds), **D17's 7.50%** break-even, and **0.5 as the rejected number**; shipped model leads **every** column — PR-AUC **0.4460 ± 0.0110**, ROC-AUC **0.7990 ± 0.0086**, precision **0.4591 ± 0.0130**, recall **0.5202 ± 0.0133**, F1 **0.4877 ± 0.0110** at a mean cut of **0.2103**; **the 0.5 reversal now measured across two models** — at 0.5 the forest wins by **10.6 points** (**0.4565** vs **0.3509**) and at the nested cut the shipped model wins by **2.4 points** (**0.4877** vs **0.4641**), because 0.5 is the shipped model's **95th percentile** (flags **4.67%**) but sits inside the forest's inflated distribution (flags **17.89%**); **at the business cut the baseline is “call everyone”** — shipped flags **41.10%** of the list for **77.90%** of subscribers at **22.18%** precision (**1.90×** the base rate, vs **3.92×** at the nested cut's **13.26%** coverage); the dummy's **±0.4472** recall is a constant score alternating all/nothing, left unsmoothed; **11/11 checks** pass and `python -m src.metrics` exits **0** in **30.8 s** (forest 24.9 s); **151 independent checks** refit all four models from `train.csv` without importing `src.metrics`, `src.train` or `choose_threshold` — catching that the verifier itself was reading the **six-decimal CSV** at **1e-12** tolerance)
 - [x] T33 | Rubric 7 | Confusion matrix, ROC curve and PR curve on held-out test data | Output: `reports/figures/07_*.png` | **done 2026-10-30** (`src/evaluate.py` + three figures + `models/holdout_eval.json`; the artifact was **loaded, not refitted** — **0** fitting calls and **0** training-half loads, asserted by a source scan — and scored **once** on the **9,043** held-out rows (**1,058** subscribed, **11.6997%**): **PR-AUC 0.4616**, **ROC-AUC 0.8052**, Brier **0.0804**, mean p **0.1151**; **three cuts on every figure** — **7.50%** flags **3,621 (40.04%)** for precision **0.2267** / recall **0.7760** / F1 **0.3509**, T32's **0.2103** flags **1,159 (12.82%)** for **0.4840** / **0.5302** / **0.5061**, and **0.5** flags **396 (4.38%)** for **0.6490** / **0.2429** / **0.3535** at the **95.6th percentile** of the score distribution; **the expected fall did not happen** — held-out PR-AUC is **+0.0155** (**+1.41 CV sd**) above T30's **0.4460**, but the bootstrap over these rows puts it in **[0.4304, 0.4969]** (sd **0.0169**, **1.53×** the CV sd) with **15.4%** of draws below the CV mean, so the gap is **0.92 bootstrap sd** and the verdict is **no measurable gap**; T32's CV-derived cut lands **0.001725** from the held-out F1 optimum and costs **0.000481** F1, which is the rule's real vindication; **15/15 checks** and `python -m src.evaluate` exits **0** in **9.2 s**; **144 independent checks** recompute everything with different implementations (midranks, step-block AP, `searchsorted` counts); **two defects found and fixed** — a `rank_auc` that masked the wrong order (**0.7783** vs **0.8052**) and a **float32** Brier score (**4.4e-9**, the same family as T30's §9.5); **§11** of `docs/06_modeling.md` records it and **214** numeric tokens trace to the records, and the **accuracy** block in §11.3 - **89.6052%** at 0.5 against the **88.3003%** always-no baseline, with balanced accuracy reversing the order - is derived from the same record)
-- [ ] T34 | Rubric 7 | Threshold tuning against the cost model | Output: `docs/07_threshold.md`, threshold figure | Done when: the chosen threshold is justified by expected business cost rather than by accuracy
+- [x] T34 | Rubric 7 | Threshold tuning against the cost model | Output: `docs/07_threshold.md`, `reports/figures/07_threshold_curve.png` | **done 2026-10-30** (`src/threshold.py` + `docs/07_threshold.md` + `07_threshold_curve.png` (**221,145 B**) + `models/threshold_choice.json` (**77,751 B** with a **403**-point curve); the threshold **is** the price - **C 1.50 EUR / V 20.00 EUR -> p\* = 0.0750**, imported from `cost.break_even_threshold()` so a check can require the recorded cut to equal `C/V` exactly; chosen on the **training half only** from **out-of-fold** scores (**36,168** rows, **4,231** subscribers, 5 folds) whose per-fold PR-AUCs reproduce T30's tuned arm to **0.0e+00**, then checked once on the **9,043** held-out rows; **0.0750 calls 14,866 (41.10%) and reaches 3,296 (77.87%) for net 43,621 EUR**, ROI **195.6%**, **6.77 EUR** per captured subscription - against the empirical peak **0.0821 / 44,010 EUR** (the adopted cut gives up **388.50 EUR, 0.883%**), T32's F1 cut **0.2103 / 36,891 EUR**, **0.5 / 18,248 EUR** and **call-everyone 30,368 EUR**; the **1%-of-peak plateau spans 0.0746-0.1016 = 14,973-9,970 calls** and **0.0750 sits 0.0004 above its bottom edge**, making the price the most aggressive cut still within 1% - the curve ascends steeply and descends shallowly, which is why both empirical argmaxes land right of it (training **0.0821**, held-out **0.0909**) and why neither is adopted; **held out** the cut nets **10,988.50 EUR** (3,621 calls, 821 reached, ROI **202.3%**) against **9,481.50** at the F1 cut, **4,546.00** at 0.5 and **7,595.50** calling everyone, reaching **77.6%** of subscribers from **40.0%** of the list against training's **77.9%** from **41.1%**; **capacity is a different question** and is tabulated (top 5% reaches **26%** of subscribers for **44%** of the money; the unconstrained optimum sits near **30%** of the list, not 5%); **ROI and net value disagree by construction** (0.5 posts **765%** ROI and loses) so net value is the objective while the campaign is capacity- not capital-limited; **15/15 checks** and `python -m src.threshold` exits **0** in **4.6 s**; **two defects fixed** - a dead self-assignment in `held_out_check`, and a record that stored the peak but **not the curve**, leaving three euro figures quoteable only from a check's detail string)
 - [ ] T35 | Rubric 7 | Lift, gain and decile analysis | Output: `reports/figures/08_lift_gain.png`, `reports/lift_table.csv` | Done when: top-decile lift is quantified and translated into calls saved
 - [ ] T36 | Rubric 7 | With-vs-without `duration` comparison | Output: `reports/duration_comparison.csv`, notes in `docs/05_leakage_audit.md` | Done when: both runs use identical settings and the performance gap is explained as leakage
 
@@ -213,6 +215,8 @@ Tick only after the deliverable is verified to exist and run.
 
 | File | Contents | Created |
 |---|---|---|
+| `src/threshold.py`, `models/threshold_choice.json`, `reports/figures/07_threshold_curve.png` | Phase 7 (**T34**): `choose()` takes the training arrays and nothing else - the signature is the guarantee that the held-out half cannot influence the choice; `sweep()`, `capacity_table()` and `sensitivity()` all price their cuts through `cost.expected_campaign_value` rather than re-deriving euros, and `held_out_check()` runs after the cut is fixed and records the held-out optimum so a check can prove it was **not** adopted. `validate()`'s **15 checks** cover the price identity, one out-of-fold score per row, the T30 fold reproduction, the money arithmetic at all 403 points, the plateau, the three rejected cuts, cost per captured subscription, capacity fill, sensitivity monotonicity, training-only provenance, held-out profitability, the figure, and a read-back of the file against the run. The JSON records the decision with its provenance, the five compared cuts, the 403-point curve, the capacity and sensitivity tables, the held-out block and the figure's path and size | 2026-10-30 |
+| `docs/07_threshold.md` | Phase 7 (**T34**): the price and where it comes from, why the choice was made on the training folds, money at five cuts, the flat optimum and which edge the price sits on, capacity when calls are capped, the held-out check, why ROI and net value disagree, the 20-cell sensitivity grid, what the step does not prove, and the verification table with the two defects it caught | 2026-10-30 |
 | `PROGRESS.md` | This tracker: status, decisions, 46-task checklist, session log | 2026-10-27 |
 | `.gitignore` | Excludes `.venv/`, `__pycache__/`, `.ipynb_checkpoints/`, `*.log`, `.DS_Store`, `._*`, `__MACOSX/`, editor folders | 2026-10-27 |
 | `requirements.txt` | 13 pinned dependencies grouped by purpose, with a header noting the Python 3.11 ceiling on xgboost/shap | 2026-10-27 |
@@ -1691,6 +1695,62 @@ three figure sizes were read directly out of `models/holdout_eval.json` instead 
 `07_pr_curve.png`, `models/holdout_eval.json`, `docs/06_modeling.md`, `PROGRESS.md`.
 **Next:** T34 — choose the operating threshold from the cost model, with a reliability check and a
 sensitivity band, on the training half and checked on the held-out rows.
+
+### 2026-10-30 — Session 36  (T34 complete)
+
+**Completed:** **T34** — `src/threshold.py`, `docs/07_threshold.md`,
+`reports/figures/07_threshold_curve.png` (221,145 B) and `models/threshold_choice.json` (77,751 B).
+
+**The decision.** The operating threshold is **`C/V = 1.50 / 20.00 = 0.0750`**, imported from
+`cost.break_even_threshold()` rather than typed, so the doc's claim "the threshold is a price" is true by
+construction: a check requires the recorded cut to equal `C/V` exactly.
+
+**Where it was chosen.** On the training half's **out-of-fold** scores — 36,168 rows, 4,231 subscribers,
+five folds — because choosing from in-fold predictions would be choosing from rows the model had memorised.
+That those are the project's folds is checked, not asserted: the per-fold PR-AUCs reproduce T30's tuned arm
+to **0.0e+00** (`0.4435, 0.4378, 0.4339, 0.4588, 0.4561`). The held-out half is scored in a separate function
+called afterwards, and its own optimum is recorded so a reader can see it was not the answer.
+
+**The money.** At 0.0750 the campaign calls **14,866 (41.10%)** and reaches **3,296 (77.87%)** for
+**43,621 EUR**, ROI **195.6%**, **6.77 EUR** per captured subscription. T32's F1 cut nets **36,891 EUR** and
+0.5 nets **18,248 EUR**; calling everyone nets **30,368 EUR**, less than the priced cut because the marginal
+client below 0.075 is worth `p x 20.00 < 1.50`.
+
+**The shape of the optimum, which is the real finding.** The empirical peak is **0.0821 / 44,009.50 EUR**, so
+the adopted rule gives up **388.50 EUR (0.883%)** and nothing else. Every threshold within 1% of the peak
+spans **0.0746–0.1016** — **14,973 to 9,970 calls**, i.e. 27.6% to 41.4% of the list. The curve climbs
+steeply and falls shallowly, so both empirical argmaxes land *right* of the price (training 0.0821, held-out
+0.0909); that is why neither is adopted, and why the plateau is the honest statement of how delicate the
+threshold is rather than the argmax. **0.0750 sits 0.0004 above the plateau's floor** — the price is the most
+aggressive cut still within 1%, which is what a break-even rule should be.
+
+**Held out.** The persisted artifact, scored once on the 9,043 held-out rows: **10,988.50 EUR** from 3,621
+calls and **821** subscribers, against **9,481.50** at the F1 cut, **4,546.00** at 0.5 and **7,595.50** calling
+everyone. **77.6%** of subscribers from **40.0%** of the list, against training's **77.9%** from **41.1%** —
+the cut transferred. The held-out rows would have chosen **0.0909** (**11,198.00 EUR**, **209.50 EUR** better)
+and it is recorded, not adopted.
+
+**Two things the tables say that a single number would hide.** A capacity-limited bank is reading the wrong
+table: **top 5%** reaches **26%** of subscribers for **44%** of the money, and the unconstrained optimum sits
+near **30%** of the list, so the campaign is capacity- not capital-limited — which is also why **ROI** is a
+diagnostic and not the objective (0.5 posts **765%** ROI and loses **3,393 EUR** to the adopted cut). And the
+whole answer moves with the assumptions, tabulated across **20 cells**: **0.300** if a call costs 3.00 EUR and
+a subscription is worth 10.00 EUR, **0.0125** at the other corner.
+
+**Verified:** `python -m src.threshold` exits **0** with **15/15** checks in **4.6 s**, on **403** swept
+thresholds. The record carries the curve points, so the left panel is rebuildable from the file, and a final
+check reads the record back and compares it field by field against the run.
+
+**Two defects, both mine.** A dead branch in `held_out_check` reassigned the peak's threshold to itself —
+harmless, unreadable, removed. And the first record stored the plateau, the peak and the capacity table but
+**not the curve**, so the three euro figures for the rejected cuts existed only inside a check's detail
+string: quoteable and unverifiable. The record now carries the 403 points and a `comparisons` array.
+
+**Blocked:** none.
+**Uncommitted:** `src/threshold.py`, `docs/07_threshold.md`, `reports/figures/07_threshold_curve.png`,
+`models/threshold_choice.json`, `PROGRESS.md`.
+**Next:** T35 — lift, gain and decile analysis, with the adopted cut translated into calls saved at equal
+recall.
 
 ---
 

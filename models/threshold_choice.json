@@ -1,0 +1,2912 @@
+{
+  "task": "T34",
+  "variant": "full",
+  "decision": {
+    "threshold": 0.075,
+    "rule": "call a client when P(subscribe) exceeds C/V",
+    "chosen_on": "training half, out-of-fold scores from the shipped configuration",
+    "checked_on": "held-out half, persisted artifact, after the choice was fixed",
+    "why_not_f1": "the F1 cut optimises a count of errors; the bank pays for calls and subscriptions, which is a price, not a rate",
+    "why_not_accuracy": "accuracy peaks at 0.5 on this class balance and would call almost nobody (D53, and T33's 801 missed subscribers)"
+  },
+  "prices": {
+    "call_cost_eur": 1.5,
+    "value_per_subscription_eur": 20.0,
+    "break_even": 0.075,
+    "assumptions": [
+      {
+        "name": "AGENT_COST_PER_HOUR_EUR",
+        "value": 18.0,
+        "unit": "EUR/hour",
+        "status": "ASSUMED",
+        "note": "Fully-loaded agent cost: wage, employer contributions, supervision, telephony. No bank figures are public, so this is a stated assumption."
+      },
+      {
+        "name": "MINUTES_PER_CALL",
+        "value": 5.0,
+        "unit": "minutes",
+        "status": "ASSUMED",
+        "note": "Dialling + talk + notes. Corroborated by this dataset: mean talk time (`duration`) is 258 s = 4.3 min, so 5.0 min total is not optimistic."
+      },
+      {
+        "name": "CALL_COST_EUR",
+        "value": 1.5,
+        "unit": "EUR",
+        "status": "DERIVED",
+        "note": "= AGENT_COST_PER_HOUR_EUR * MINUTES_PER_CALL / 60"
+      },
+      {
+        "name": "AVERAGE_DEPOSIT_EUR",
+        "value": 2000.0,
+        "unit": "EUR",
+        "status": "ASSUMED",
+        "note": "Typical term deposit size. Not in the data: `balance` is the client's average yearly balance (median EUR 448), not the amount deposited."
+      },
+      {
+        "name": "TERM_MONTHS",
+        "value": 12,
+        "unit": "months",
+        "status": "ASSUMED",
+        "note": "Standard 12-month term used for the comparison."
+      },
+      {
+        "name": "NET_INTEREST_MARGIN_ANNUAL",
+        "value": 0.01,
+        "unit": "fraction per year",
+        "status": "ASSUMED",
+        "note": "Margin the bank keeps on the deposited funds."
+      },
+      {
+        "name": "VALUE_PER_SUBSCRIPTION_EUR",
+        "value": 20.0,
+        "unit": "EUR",
+        "status": "DERIVED",
+        "note": "= AVERAGE_DEPOSIT_EUR * NET_INTEREST_MARGIN_ANNUAL * (TERM_MONTHS / 12). Conservative: excludes cross-sell and long-term customer value."
+      }
+    ]
+  },
+  "training": {
+    "rows": 36168,
+    "positives": 4231,
+    "base_rate": 0.11698186241981863,
+    "folds": 5,
+    "fold_seed": 42
+  },
+  "at_chosen": {
+    "threshold": 0.075,
+    "clients_called": 14866,
+    "subscribers_reached": 3296,
+    "subscribers_missed": 935,
+    "wasted_calls": 11570,
+    "revenue_eur": 65920.0,
+    "call_cost_eur": 22299.0,
+    "net_value_eur": 43621.0,
+    "roi": 1.956186376070676,
+    "cost_per_subscription_eur": 6.765473300970874
+  },
+  "empirical_best": {
+    "threshold": 0.08206766917293233,
+    "clients_called": 13247,
+    "subscribers_reached": 3194,
+    "subscribers_missed": 1037,
+    "wasted_calls": 10053,
+    "revenue_eur": 63880.0,
+    "call_cost_eur": 19870.5,
+    "net_value_eur": 44009.5,
+    "roi": 2.214815933167258,
+    "cost_per_subscription_eur": 6.221195992485911
+  },
+  "comparisons": [
+    {
+      "threshold": 0.0,
+      "clients_called": 36168,
+      "subscribers_reached": 4231,
+      "subscribers_missed": 0,
+      "wasted_calls": 31937,
+      "revenue_eur": 84620.0,
+      "call_cost_eur": 54252.0,
+      "net_value_eur": 30368.0,
+      "roi": 0.5597581655975816,
+      "cost_per_subscription_eur": 12.822500590876862
+    },
+    {
+      "threshold": 0.075,
+      "clients_called": 14866,
+      "subscribers_reached": 3296,
+      "subscribers_missed": 935,
+      "wasted_calls": 11570,
+      "revenue_eur": 65920.0,
+      "call_cost_eur": 22299.0,
+      "net_value_eur": 43621.0,
+      "roi": 1.956186376070676,
+      "cost_per_subscription_eur": 6.765473300970874
+    },
+    {
+      "threshold": 0.210325,
+      "clients_called": 4806,
+      "subscribers_reached": 2205,
+      "subscribers_missed": 2026,
+      "wasted_calls": 2601,
+      "revenue_eur": 44100.0,
+      "call_cost_eur": 7209.0,
+      "net_value_eur": 36891.0,
+      "roi": 5.117353308364544,
+      "cost_per_subscription_eur": 3.269387755102041
+    },
+    {
+      "threshold": 0.5,
+      "clients_called": 1688,
+      "subscribers_reached": 1039,
+      "subscribers_missed": 3192,
+      "wasted_calls": 649,
+      "revenue_eur": 20780.0,
+      "call_cost_eur": 2532.0,
+      "net_value_eur": 18248.0,
+      "roi": 7.20695102685624,
+      "cost_per_subscription_eur": 2.436958614051973
+    },
+    {
+      "threshold": 0.08206766917293233,
+      "clients_called": 13247,
+      "subscribers_reached": 3194,
+      "subscribers_missed": 1037,
+      "wasted_calls": 10053,
+      "revenue_eur": 63880.0,
+      "call_cost_eur": 19870.5,
+      "net_value_eur": 44009.5,
+      "roi": 2.214815933167258,
+      "cost_per_subscription_eur": 6.221195992485911
+    }
+  ],
+  "plateau": {
+    "tolerance": 0.01,
+    "low": 0.07456140350877193,
+    "high": 0.10158395989974937,
+    "share_of_grid": 0.04962779156327544,
+    "net_floor_eur": 43569.405
+  },
+  "chosen_within_plateau": true,
+  "shortfall_vs_best_eur": 388.5,
+  "shortfall_pct": 0.8827639486928959,
+  "curve_points": 403,
+  "curve": [
+    {
+      "threshold": 0.001,
+      "clients_called": 36168,
+      "subscribers_reached": 4231,
+      "net_value_eur": 30368.0
+    },
+    {
+      "threshold": 0.00250125313283208,
+      "clients_called": 36168,
+      "subscribers_reached": 4231,
+      "net_value_eur": 30368.0
+    },
+    {
+      "threshold": 0.00400250626566416,
+      "clients_called": 36165,
+      "subscribers_reached": 4231,
+      "net_value_eur": 30372.5
+    },
+    {
+      "threshold": 0.005503759398496241,
+      "clients_called": 36160,
+      "subscribers_reached": 4231,
+      "net_value_eur": 30380.0
+    },
+    {
+      "threshold": 0.0070050125313283204,
+      "clients_called": 36134,
+      "subscribers_reached": 4231,
+      "net_value_eur": 30419.0
+    },
+    {
+      "threshold": 0.0085062656641604,
+      "clients_called": 36070,
+      "subscribers_reached": 4229,
+      "net_value_eur": 30475.0
+    },
+    {
+      "threshold": 0.010007518796992482,
+      "clients_called": 35974,
+      "subscribers_reached": 4228,
+      "net_value_eur": 30599.0
+    },
+    {
+      "threshold": 0.011508771929824562,
+      "clients_called": 35805,
+      "subscribers_reached": 4224,
+      "net_value_eur": 30772.5
+    },
+    {
+      "threshold": 0.013010025062656642,
+      "clients_called": 35601,
+      "subscribers_reached": 4220,
+      "net_value_eur": 30998.5
+    },
+    {
+      "threshold": 0.014511278195488721,
+      "clients_called": 35292,
+      "subscribers_reached": 4215,
+      "net_value_eur": 31362.0
+    },
+    {
+      "threshold": 0.0160125313283208,
+      "clients_called": 34968,
+      "subscribers_reached": 4205,
+      "net_value_eur": 31648.0
+    },
+    {
+      "threshold": 0.01751378446115288,
+      "clients_called": 34634,
+      "subscribers_reached": 4198,
+      "net_value_eur": 32009.0
+    },
+    {
+      "threshold": 0.019015037593984964,
+      "clients_called": 34234,
+      "subscribers_reached": 4193,
+      "net_value_eur": 32509.0
+    },
+    {
+      "threshold": 0.020516290726817044,
+      "clients_called": 33814,
+      "subscribers_reached": 4182,
+      "net_value_eur": 32919.0
+    },
+    {
+      "threshold": 0.022017543859649123,
+      "clients_called": 33345,
+      "subscribers_reached": 4172,
+      "net_value_eur": 33422.5
+    },
+    {
+      "threshold": 0.023518796992481203,
+      "clients_called": 32846,
+      "subscribers_reached": 4157,
+      "net_value_eur": 33871.0
+    },
+    {
+      "threshold": 0.025020050125313283,
+      "clients_called": 32352,
+      "subscribers_reached": 4149,
+      "net_value_eur": 34452.0
+    },
+    {
+      "threshold": 0.026521303258145362,
+      "clients_called": 31797,
+      "subscribers_reached": 4126,
+      "net_value_eur": 34824.5
+    },
+    {
+      "threshold": 0.028022556390977442,
+      "clients_called": 31209,
+      "subscribers_reached": 4104,
+      "net_value_eur": 35266.5
+    },
+    {
+      "threshold": 0.02952380952380952,
+      "clients_called": 30615,
+      "subscribers_reached": 4089,
+      "net_value_eur": 35857.5
+    },
+    {
+      "threshold": 0.0310250626566416,
+      "clients_called": 30027,
+      "subscribers_reached": 4074,
+      "net_value_eur": 36439.5
+    },
+    {
+      "threshold": 0.03252631578947368,
+      "clients_called": 29419,
+      "subscribers_reached": 4043,
+      "net_value_eur": 36731.5
+    },
+    {
+      "threshold": 0.03402756892230576,
+      "clients_called": 28855,
+      "subscribers_reached": 4023,
+      "net_value_eur": 37177.5
+    },
+    {
+      "threshold": 0.03552882205513784,
+      "clients_called": 28253,
+      "subscribers_reached": 3994,
+      "net_value_eur": 37500.5
+    },
+    {
+      "threshold": 0.03703007518796993,
+      "clients_called": 27661,
+      "subscribers_reached": 3977,
+      "net_value_eur": 38048.5
+    },
+    {
+      "threshold": 0.03853132832080201,
+      "clients_called": 27074,
+      "subscribers_reached": 3951,
+      "net_value_eur": 38409.0
+    },
+    {
+      "threshold": 0.040032581453634086,
+      "clients_called": 26495,
+      "subscribers_reached": 3932,
+      "net_value_eur": 38897.5
+    },
+    {
+      "threshold": 0.041533834586466166,
+      "clients_called": 25903,
+      "subscribers_reached": 3901,
+      "net_value_eur": 39165.5
+    },
+    {
+      "threshold": 0.043035087719298246,
+      "clients_called": 25300,
+      "subscribers_reached": 3873,
+      "net_value_eur": 39510.0
+    },
+    {
+      "threshold": 0.044536340852130325,
+      "clients_called": 24694,
+      "subscribers_reached": 3844,
+      "net_value_eur": 39839.0
+    },
+    {
+      "threshold": 0.046037593984962405,
+      "clients_called": 24081,
+      "subscribers_reached": 3806,
+      "net_value_eur": 39998.5
+    },
+    {
+      "threshold": 0.047538847117794485,
+      "clients_called": 23501,
+      "subscribers_reached": 3783,
+      "net_value_eur": 40408.5
+    },
+    {
+      "threshold": 0.049040100250626564,
+      "clients_called": 22919,
+      "subscribers_reached": 3758,
+      "net_value_eur": 40781.5
+    },
+    {
+      "threshold": 0.050541353383458644,
+      "clients_called": 22358,
+      "subscribers_reached": 3739,
+      "net_value_eur": 41243.0
+    },
+    {
+      "threshold": 0.052042606516290724,
+      "clients_called": 21827,
+      "subscribers_reached": 3720,
+      "net_value_eur": 41659.5
+    },
+    {
+      "threshold": 0.0535438596491228,
+      "clients_called": 21286,
+      "subscribers_reached": 3686,
+      "net_value_eur": 41791.0
+    },
+    {
+      "threshold": 0.05504511278195488,
+      "clients_called": 20773,
+      "subscribers_reached": 3654,
+      "net_value_eur": 41920.5
+    },
+    {
+      "threshold": 0.05654636591478696,
+      "clients_called": 20243,
+      "subscribers_reached": 3628,
+      "net_value_eur": 42195.5
+    },
+    {
+      "threshold": 0.05804761904761904,
+      "clients_called": 19753,
+      "subscribers_reached": 3603,
+      "net_value_eur": 42430.5
+    },
+    {
+      "threshold": 0.05954887218045112,
+      "clients_called": 19237,
+      "subscribers_reached": 3571,
+      "net_value_eur": 42564.5
+    },
+    {
+      "threshold": 0.0610501253132832,
+      "clients_called": 18766,
+      "subscribers_reached": 3541,
+      "net_value_eur": 42671.0
+    },
+    {
+      "threshold": 0.06255137844611529,
+      "clients_called": 18284,
+      "subscribers_reached": 3517,
+      "net_value_eur": 42914.0
+    },
+    {
+      "threshold": 0.06405263157894736,
+      "clients_called": 17834,
+      "subscribers_reached": 3489,
+      "net_value_eur": 43029.0
+    },
+    {
+      "threshold": 0.06555388471177945,
+      "clients_called": 17360,
+      "subscribers_reached": 3446,
+      "net_value_eur": 42880.0
+    },
+    {
+      "threshold": 0.06705513784461152,
+      "clients_called": 16964,
+      "subscribers_reached": 3422,
+      "net_value_eur": 42994.0
+    },
+    {
+      "threshold": 0.06855639097744361,
+      "clients_called": 16562,
+      "subscribers_reached": 3401,
+      "net_value_eur": 43177.0
+    },
+    {
+      "threshold": 0.07005764411027568,
+      "clients_called": 16138,
+      "subscribers_reached": 3374,
+      "net_value_eur": 43273.0
+    },
+    {
+      "threshold": 0.07155889724310777,
+      "clients_called": 15716,
+      "subscribers_reached": 3347,
+      "net_value_eur": 43366.0
+    },
+    {
+      "threshold": 0.07306015037593985,
+      "clients_called": 15338,
+      "subscribers_reached": 3325,
+      "net_value_eur": 43493.0
+    },
+    {
+      "threshold": 0.07456140350877193,
+      "clients_called": 14973,
+      "subscribers_reached": 3305,
+      "net_value_eur": 43640.5
+    },
+    {
+      "threshold": 0.075,
+      "clients_called": 14866,
+      "subscribers_reached": 3296,
+      "net_value_eur": 43621.0
+    },
+    {
+      "threshold": 0.07606265664160401,
+      "clients_called": 14629,
+      "subscribers_reached": 3281,
+      "net_value_eur": 43676.5
+    },
+    {
+      "threshold": 0.07756390977443609,
+      "clients_called": 14260,
+      "subscribers_reached": 3253,
+      "net_value_eur": 43670.0
+    },
+    {
+      "threshold": 0.07906516290726817,
+      "clients_called": 13913,
+      "subscribers_reached": 3233,
+      "net_value_eur": 43790.5
+    },
+    {
+      "threshold": 0.08056641604010024,
+      "clients_called": 13559,
+      "subscribers_reached": 3212,
+      "net_value_eur": 43901.5
+    },
+    {
+      "threshold": 0.08206766917293233,
+      "clients_called": 13247,
+      "subscribers_reached": 3194,
+      "net_value_eur": 44009.5
+    },
+    {
+      "threshold": 0.0835689223057644,
+      "clients_called": 12931,
+      "subscribers_reached": 3161,
+      "net_value_eur": 43823.5
+    },
+    {
+      "threshold": 0.08507017543859649,
+      "clients_called": 12643,
+      "subscribers_reached": 3145,
+      "net_value_eur": 43935.5
+    },
+    {
+      "threshold": 0.08657142857142856,
+      "clients_called": 12324,
+      "subscribers_reached": 3120,
+      "net_value_eur": 43914.0
+    },
+    {
+      "threshold": 0.08807268170426065,
+      "clients_called": 12071,
+      "subscribers_reached": 3104,
+      "net_value_eur": 43973.5
+    },
+    {
+      "threshold": 0.08957393483709272,
+      "clients_called": 11806,
+      "subscribers_reached": 3079,
+      "net_value_eur": 43871.0
+    },
+    {
+      "threshold": 0.09107518796992481,
+      "clients_called": 11506,
+      "subscribers_reached": 3059,
+      "net_value_eur": 43921.0
+    },
+    {
+      "threshold": 0.09257644110275688,
+      "clients_called": 11265,
+      "subscribers_reached": 3037,
+      "net_value_eur": 43842.5
+    },
+    {
+      "threshold": 0.09407769423558897,
+      "clients_called": 11047,
+      "subscribers_reached": 3020,
+      "net_value_eur": 43829.5
+    },
+    {
+      "threshold": 0.09557894736842104,
+      "clients_called": 10787,
+      "subscribers_reached": 2998,
+      "net_value_eur": 43779.5
+    },
+    {
+      "threshold": 0.09708020050125313,
+      "clients_called": 10562,
+      "subscribers_reached": 2980,
+      "net_value_eur": 43757.0
+    },
+    {
+      "threshold": 0.09858145363408521,
+      "clients_called": 10353,
+      "subscribers_reached": 2966,
+      "net_value_eur": 43790.5
+    },
+    {
+      "threshold": 0.10008270676691729,
+      "clients_called": 10149,
+      "subscribers_reached": 2945,
+      "net_value_eur": 43676.5
+    },
+    {
+      "threshold": 0.10158395989974937,
+      "clients_called": 9970,
+      "subscribers_reached": 2927,
+      "net_value_eur": 43585.0
+    },
+    {
+      "threshold": 0.10308521303258145,
+      "clients_called": 9786,
+      "subscribers_reached": 2910,
+      "net_value_eur": 43521.0
+    },
+    {
+      "threshold": 0.10458646616541353,
+      "clients_called": 9623,
+      "subscribers_reached": 2893,
+      "net_value_eur": 43425.5
+    },
+    {
+      "threshold": 0.1060877192982456,
+      "clients_called": 9438,
+      "subscribers_reached": 2868,
+      "net_value_eur": 43203.0
+    },
+    {
+      "threshold": 0.10758897243107769,
+      "clients_called": 9271,
+      "subscribers_reached": 2851,
+      "net_value_eur": 43113.5
+    },
+    {
+      "threshold": 0.10909022556390977,
+      "clients_called": 9101,
+      "subscribers_reached": 2830,
+      "net_value_eur": 42948.5
+    },
+    {
+      "threshold": 0.11059147869674185,
+      "clients_called": 8952,
+      "subscribers_reached": 2818,
+      "net_value_eur": 42932.0
+    },
+    {
+      "threshold": 0.11209273182957392,
+      "clients_called": 8787,
+      "subscribers_reached": 2799,
+      "net_value_eur": 42799.5
+    },
+    {
+      "threshold": 0.11359398496240601,
+      "clients_called": 8633,
+      "subscribers_reached": 2781,
+      "net_value_eur": 42670.5
+    },
+    {
+      "threshold": 0.11509523809523808,
+      "clients_called": 8484,
+      "subscribers_reached": 2761,
+      "net_value_eur": 42494.0
+    },
+    {
+      "threshold": 0.11659649122807017,
+      "clients_called": 8344,
+      "subscribers_reached": 2746,
+      "net_value_eur": 42404.0
+    },
+    {
+      "threshold": 0.11809774436090224,
+      "clients_called": 8226,
+      "subscribers_reached": 2732,
+      "net_value_eur": 42301.0
+    },
+    {
+      "threshold": 0.11959899749373433,
+      "clients_called": 8103,
+      "subscribers_reached": 2716,
+      "net_value_eur": 42165.5
+    },
+    {
+      "threshold": 0.1211002506265664,
+      "clients_called": 7979,
+      "subscribers_reached": 2696,
+      "net_value_eur": 41951.5
+    },
+    {
+      "threshold": 0.12260150375939849,
+      "clients_called": 7859,
+      "subscribers_reached": 2685,
+      "net_value_eur": 41911.5
+    },
+    {
+      "threshold": 0.12410275689223058,
+      "clients_called": 7746,
+      "subscribers_reached": 2677,
+      "net_value_eur": 41921.0
+    },
+    {
+      "threshold": 0.12560401002506263,
+      "clients_called": 7642,
+      "subscribers_reached": 2664,
+      "net_value_eur": 41817.0
+    },
+    {
+      "threshold": 0.12710526315789472,
+      "clients_called": 7536,
+      "subscribers_reached": 2654,
+      "net_value_eur": 41776.0
+    },
+    {
+      "threshold": 0.1286065162907268,
+      "clients_called": 7449,
+      "subscribers_reached": 2641,
+      "net_value_eur": 41646.5
+    },
+    {
+      "threshold": 0.1301077694235589,
+      "clients_called": 7360,
+      "subscribers_reached": 2630,
+      "net_value_eur": 41560.0
+    },
+    {
+      "threshold": 0.13160902255639098,
+      "clients_called": 7277,
+      "subscribers_reached": 2619,
+      "net_value_eur": 41464.5
+    },
+    {
+      "threshold": 0.13311027568922304,
+      "clients_called": 7184,
+      "subscribers_reached": 2608,
+      "net_value_eur": 41384.0
+    },
+    {
+      "threshold": 0.13461152882205513,
+      "clients_called": 7101,
+      "subscribers_reached": 2603,
+      "net_value_eur": 41408.5
+    },
+    {
+      "threshold": 0.1361127819548872,
+      "clients_called": 7016,
+      "subscribers_reached": 2595,
+      "net_value_eur": 41376.0
+    },
+    {
+      "threshold": 0.1376140350877193,
+      "clients_called": 6934,
+      "subscribers_reached": 2583,
+      "net_value_eur": 41259.0
+    },
+    {
+      "threshold": 0.13911528822055136,
+      "clients_called": 6833,
+      "subscribers_reached": 2576,
+      "net_value_eur": 41270.5
+    },
+    {
+      "threshold": 0.14061654135338345,
+      "clients_called": 6756,
+      "subscribers_reached": 2564,
+      "net_value_eur": 41146.0
+    },
+    {
+      "threshold": 0.14211779448621553,
+      "clients_called": 6666,
+      "subscribers_reached": 2554,
+      "net_value_eur": 41081.0
+    },
+    {
+      "threshold": 0.14361904761904762,
+      "clients_called": 6583,
+      "subscribers_reached": 2540,
+      "net_value_eur": 40925.5
+    },
+    {
+      "threshold": 0.1451203007518797,
+      "clients_called": 6498,
+      "subscribers_reached": 2529,
+      "net_value_eur": 40833.0
+    },
+    {
+      "threshold": 0.14662155388471176,
+      "clients_called": 6417,
+      "subscribers_reached": 2516,
+      "net_value_eur": 40694.5
+    },
+    {
+      "threshold": 0.14812280701754385,
+      "clients_called": 6358,
+      "subscribers_reached": 2505,
+      "net_value_eur": 40563.0
+    },
+    {
+      "threshold": 0.14962406015037594,
+      "clients_called": 6299,
+      "subscribers_reached": 2500,
+      "net_value_eur": 40551.5
+    },
+    {
+      "threshold": 0.15112531328320802,
+      "clients_called": 6242,
+      "subscribers_reached": 2492,
+      "net_value_eur": 40477.0
+    },
+    {
+      "threshold": 0.15262656641604008,
+      "clients_called": 6177,
+      "subscribers_reached": 2483,
+      "net_value_eur": 40394.5
+    },
+    {
+      "threshold": 0.15412781954887217,
+      "clients_called": 6111,
+      "subscribers_reached": 2476,
+      "net_value_eur": 40353.5
+    },
+    {
+      "threshold": 0.15562907268170426,
+      "clients_called": 6045,
+      "subscribers_reached": 2464,
+      "net_value_eur": 40212.5
+    },
+    {
+      "threshold": 0.15713032581453634,
+      "clients_called": 5983,
+      "subscribers_reached": 2456,
+      "net_value_eur": 40145.5
+    },
+    {
+      "threshold": 0.1586315789473684,
+      "clients_called": 5931,
+      "subscribers_reached": 2443,
+      "net_value_eur": 39963.5
+    },
+    {
+      "threshold": 0.1601328320802005,
+      "clients_called": 5869,
+      "subscribers_reached": 2429,
+      "net_value_eur": 39776.5
+    },
+    {
+      "threshold": 0.16163408521303257,
+      "clients_called": 5825,
+      "subscribers_reached": 2420,
+      "net_value_eur": 39662.5
+    },
+    {
+      "threshold": 0.16313533834586466,
+      "clients_called": 5782,
+      "subscribers_reached": 2414,
+      "net_value_eur": 39607.0
+    },
+    {
+      "threshold": 0.16463659147869672,
+      "clients_called": 5739,
+      "subscribers_reached": 2405,
+      "net_value_eur": 39491.5
+    },
+    {
+      "threshold": 0.1661378446115288,
+      "clients_called": 5686,
+      "subscribers_reached": 2392,
+      "net_value_eur": 39311.0
+    },
+    {
+      "threshold": 0.1676390977443609,
+      "clients_called": 5644,
+      "subscribers_reached": 2382,
+      "net_value_eur": 39174.0
+    },
+    {
+      "threshold": 0.16914035087719298,
+      "clients_called": 5600,
+      "subscribers_reached": 2374,
+      "net_value_eur": 39080.0
+    },
+    {
+      "threshold": 0.17064160401002507,
+      "clients_called": 5566,
+      "subscribers_reached": 2370,
+      "net_value_eur": 39051.0
+    },
+    {
+      "threshold": 0.17214285714285713,
+      "clients_called": 5528,
+      "subscribers_reached": 2361,
+      "net_value_eur": 38928.0
+    },
+    {
+      "threshold": 0.1736441102756892,
+      "clients_called": 5484,
+      "subscribers_reached": 2356,
+      "net_value_eur": 38894.0
+    },
+    {
+      "threshold": 0.1751453634085213,
+      "clients_called": 5450,
+      "subscribers_reached": 2351,
+      "net_value_eur": 38845.0
+    },
+    {
+      "threshold": 0.17664661654135339,
+      "clients_called": 5416,
+      "subscribers_reached": 2341,
+      "net_value_eur": 38696.0
+    },
+    {
+      "threshold": 0.17814786967418544,
+      "clients_called": 5385,
+      "subscribers_reached": 2335,
+      "net_value_eur": 38622.5
+    },
+    {
+      "threshold": 0.17964912280701753,
+      "clients_called": 5352,
+      "subscribers_reached": 2327,
+      "net_value_eur": 38512.0
+    },
+    {
+      "threshold": 0.18115037593984962,
+      "clients_called": 5325,
+      "subscribers_reached": 2322,
+      "net_value_eur": 38452.5
+    },
+    {
+      "threshold": 0.1826516290726817,
+      "clients_called": 5299,
+      "subscribers_reached": 2314,
+      "net_value_eur": 38331.5
+    },
+    {
+      "threshold": 0.18415288220551376,
+      "clients_called": 5278,
+      "subscribers_reached": 2307,
+      "net_value_eur": 38223.0
+    },
+    {
+      "threshold": 0.18565413533834585,
+      "clients_called": 5250,
+      "subscribers_reached": 2301,
+      "net_value_eur": 38145.0
+    },
+    {
+      "threshold": 0.18715538847117794,
+      "clients_called": 5223,
+      "subscribers_reached": 2296,
+      "net_value_eur": 38085.5
+    },
+    {
+      "threshold": 0.18865664160401002,
+      "clients_called": 5189,
+      "subscribers_reached": 2292,
+      "net_value_eur": 38056.5
+    },
+    {
+      "threshold": 0.19015789473684208,
+      "clients_called": 5162,
+      "subscribers_reached": 2284,
+      "net_value_eur": 37937.0
+    },
+    {
+      "threshold": 0.19165914786967417,
+      "clients_called": 5129,
+      "subscribers_reached": 2278,
+      "net_value_eur": 37866.5
+    },
+    {
+      "threshold": 0.19316040100250625,
+      "clients_called": 5102,
+      "subscribers_reached": 2273,
+      "net_value_eur": 37807.0
+    },
+    {
+      "threshold": 0.19466165413533834,
+      "clients_called": 5078,
+      "subscribers_reached": 2265,
+      "net_value_eur": 37683.0
+    },
+    {
+      "threshold": 0.19616290726817043,
+      "clients_called": 5051,
+      "subscribers_reached": 2261,
+      "net_value_eur": 37643.5
+    },
+    {
+      "threshold": 0.1976641604010025,
+      "clients_called": 5024,
+      "subscribers_reached": 2259,
+      "net_value_eur": 37644.0
+    },
+    {
+      "threshold": 0.19916541353383457,
+      "clients_called": 4991,
+      "subscribers_reached": 2256,
+      "net_value_eur": 37633.5
+    },
+    {
+      "threshold": 0.20066666666666666,
+      "clients_called": 4960,
+      "subscribers_reached": 2247,
+      "net_value_eur": 37500.0
+    },
+    {
+      "threshold": 0.20216791979949875,
+      "clients_called": 4941,
+      "subscribers_reached": 2242,
+      "net_value_eur": 37428.5
+    },
+    {
+      "threshold": 0.2036691729323308,
+      "clients_called": 4912,
+      "subscribers_reached": 2235,
+      "net_value_eur": 37332.0
+    },
+    {
+      "threshold": 0.2051704260651629,
+      "clients_called": 4886,
+      "subscribers_reached": 2222,
+      "net_value_eur": 37111.0
+    },
+    {
+      "threshold": 0.20667167919799498,
+      "clients_called": 4864,
+      "subscribers_reached": 2216,
+      "net_value_eur": 37024.0
+    },
+    {
+      "threshold": 0.20817293233082707,
+      "clients_called": 4843,
+      "subscribers_reached": 2211,
+      "net_value_eur": 36955.5
+    },
+    {
+      "threshold": 0.20967418546365912,
+      "clients_called": 4819,
+      "subscribers_reached": 2206,
+      "net_value_eur": 36891.5
+    },
+    {
+      "threshold": 0.210325,
+      "clients_called": 4806,
+      "subscribers_reached": 2205,
+      "net_value_eur": 36891.0
+    },
+    {
+      "threshold": 0.2111754385964912,
+      "clients_called": 4798,
+      "subscribers_reached": 2204,
+      "net_value_eur": 36883.0
+    },
+    {
+      "threshold": 0.2126766917293233,
+      "clients_called": 4779,
+      "subscribers_reached": 2199,
+      "net_value_eur": 36811.5
+    },
+    {
+      "threshold": 0.21417794486215538,
+      "clients_called": 4760,
+      "subscribers_reached": 2195,
+      "net_value_eur": 36760.0
+    },
+    {
+      "threshold": 0.21567919799498744,
+      "clients_called": 4730,
+      "subscribers_reached": 2191,
+      "net_value_eur": 36725.0
+    },
+    {
+      "threshold": 0.21718045112781953,
+      "clients_called": 4703,
+      "subscribers_reached": 2185,
+      "net_value_eur": 36645.5
+    },
+    {
+      "threshold": 0.21868170426065162,
+      "clients_called": 4680,
+      "subscribers_reached": 2173,
+      "net_value_eur": 36440.0
+    },
+    {
+      "threshold": 0.2201829573934837,
+      "clients_called": 4651,
+      "subscribers_reached": 2164,
+      "net_value_eur": 36303.5
+    },
+    {
+      "threshold": 0.2216842105263158,
+      "clients_called": 4626,
+      "subscribers_reached": 2161,
+      "net_value_eur": 36281.0
+    },
+    {
+      "threshold": 0.22318546365914785,
+      "clients_called": 4610,
+      "subscribers_reached": 2157,
+      "net_value_eur": 36225.0
+    },
+    {
+      "threshold": 0.22468671679197993,
+      "clients_called": 4586,
+      "subscribers_reached": 2155,
+      "net_value_eur": 36221.0
+    },
+    {
+      "threshold": 0.22618796992481202,
+      "clients_called": 4561,
+      "subscribers_reached": 2146,
+      "net_value_eur": 36078.5
+    },
+    {
+      "threshold": 0.2276892230576441,
+      "clients_called": 4536,
+      "subscribers_reached": 2138,
+      "net_value_eur": 35956.0
+    },
+    {
+      "threshold": 0.22919047619047617,
+      "clients_called": 4520,
+      "subscribers_reached": 2132,
+      "net_value_eur": 35860.0
+    },
+    {
+      "threshold": 0.23069172932330825,
+      "clients_called": 4499,
+      "subscribers_reached": 2125,
+      "net_value_eur": 35751.5
+    },
+    {
+      "threshold": 0.23219298245614034,
+      "clients_called": 4476,
+      "subscribers_reached": 2117,
+      "net_value_eur": 35626.0
+    },
+    {
+      "threshold": 0.23369423558897243,
+      "clients_called": 4457,
+      "subscribers_reached": 2113,
+      "net_value_eur": 35574.5
+    },
+    {
+      "threshold": 0.23519548872180449,
+      "clients_called": 4433,
+      "subscribers_reached": 2106,
+      "net_value_eur": 35470.5
+    },
+    {
+      "threshold": 0.23669674185463657,
+      "clients_called": 4403,
+      "subscribers_reached": 2097,
+      "net_value_eur": 35335.5
+    },
+    {
+      "threshold": 0.23819799498746866,
+      "clients_called": 4371,
+      "subscribers_reached": 2084,
+      "net_value_eur": 35123.5
+    },
+    {
+      "threshold": 0.23969924812030075,
+      "clients_called": 4345,
+      "subscribers_reached": 2074,
+      "net_value_eur": 34962.5
+    },
+    {
+      "threshold": 0.2412005012531328,
+      "clients_called": 4335,
+      "subscribers_reached": 2069,
+      "net_value_eur": 34877.5
+    },
+    {
+      "threshold": 0.2427017543859649,
+      "clients_called": 4314,
+      "subscribers_reached": 2064,
+      "net_value_eur": 34809.0
+    },
+    {
+      "threshold": 0.24420300751879698,
+      "clients_called": 4294,
+      "subscribers_reached": 2057,
+      "net_value_eur": 34699.0
+    },
+    {
+      "threshold": 0.24570426065162906,
+      "clients_called": 4278,
+      "subscribers_reached": 2054,
+      "net_value_eur": 34663.0
+    },
+    {
+      "threshold": 0.24720551378446115,
+      "clients_called": 4258,
+      "subscribers_reached": 2050,
+      "net_value_eur": 34613.0
+    },
+    {
+      "threshold": 0.2487067669172932,
+      "clients_called": 4247,
+      "subscribers_reached": 2046,
+      "net_value_eur": 34549.5
+    },
+    {
+      "threshold": 0.25020802005012527,
+      "clients_called": 4226,
+      "subscribers_reached": 2035,
+      "net_value_eur": 34361.0
+    },
+    {
+      "threshold": 0.2517092731829574,
+      "clients_called": 4203,
+      "subscribers_reached": 2029,
+      "net_value_eur": 34275.5
+    },
+    {
+      "threshold": 0.25321052631578944,
+      "clients_called": 4185,
+      "subscribers_reached": 2026,
+      "net_value_eur": 34242.5
+    },
+    {
+      "threshold": 0.25471177944862156,
+      "clients_called": 4161,
+      "subscribers_reached": 2017,
+      "net_value_eur": 34098.5
+    },
+    {
+      "threshold": 0.2562130325814536,
+      "clients_called": 4136,
+      "subscribers_reached": 2003,
+      "net_value_eur": 33856.0
+    },
+    {
+      "threshold": 0.2577142857142857,
+      "clients_called": 4113,
+      "subscribers_reached": 1997,
+      "net_value_eur": 33770.5
+    },
+    {
+      "threshold": 0.2592155388471178,
+      "clients_called": 4097,
+      "subscribers_reached": 1994,
+      "net_value_eur": 33734.5
+    },
+    {
+      "threshold": 0.26071679197994985,
+      "clients_called": 4080,
+      "subscribers_reached": 1987,
+      "net_value_eur": 33620.0
+    },
+    {
+      "threshold": 0.26221804511278196,
+      "clients_called": 4064,
+      "subscribers_reached": 1977,
+      "net_value_eur": 33444.0
+    },
+    {
+      "threshold": 0.263719298245614,
+      "clients_called": 4043,
+      "subscribers_reached": 1973,
+      "net_value_eur": 33395.5
+    },
+    {
+      "threshold": 0.2652205513784461,
+      "clients_called": 4027,
+      "subscribers_reached": 1970,
+      "net_value_eur": 33359.5
+    },
+    {
+      "threshold": 0.2667218045112782,
+      "clients_called": 4006,
+      "subscribers_reached": 1960,
+      "net_value_eur": 33191.0
+    },
+    {
+      "threshold": 0.26822305764411025,
+      "clients_called": 3988,
+      "subscribers_reached": 1956,
+      "net_value_eur": 33138.0
+    },
+    {
+      "threshold": 0.26972431077694237,
+      "clients_called": 3972,
+      "subscribers_reached": 1949,
+      "net_value_eur": 33022.0
+    },
+    {
+      "threshold": 0.2712255639097744,
+      "clients_called": 3955,
+      "subscribers_reached": 1944,
+      "net_value_eur": 32947.5
+    },
+    {
+      "threshold": 0.2727268170426065,
+      "clients_called": 3926,
+      "subscribers_reached": 1939,
+      "net_value_eur": 32891.0
+    },
+    {
+      "threshold": 0.2742280701754386,
+      "clients_called": 3908,
+      "subscribers_reached": 1934,
+      "net_value_eur": 32818.0
+    },
+    {
+      "threshold": 0.27572932330827066,
+      "clients_called": 3889,
+      "subscribers_reached": 1927,
+      "net_value_eur": 32706.5
+    },
+    {
+      "threshold": 0.2772305764411027,
+      "clients_called": 3862,
+      "subscribers_reached": 1919,
+      "net_value_eur": 32587.0
+    },
+    {
+      "threshold": 0.27873182957393483,
+      "clients_called": 3844,
+      "subscribers_reached": 1914,
+      "net_value_eur": 32514.0
+    },
+    {
+      "threshold": 0.2802330827067669,
+      "clients_called": 3821,
+      "subscribers_reached": 1906,
+      "net_value_eur": 32388.5
+    },
+    {
+      "threshold": 0.281734335839599,
+      "clients_called": 3804,
+      "subscribers_reached": 1903,
+      "net_value_eur": 32354.0
+    },
+    {
+      "threshold": 0.28323558897243106,
+      "clients_called": 3781,
+      "subscribers_reached": 1897,
+      "net_value_eur": 32268.5
+    },
+    {
+      "threshold": 0.2847368421052631,
+      "clients_called": 3754,
+      "subscribers_reached": 1891,
+      "net_value_eur": 32189.0
+    },
+    {
+      "threshold": 0.28623809523809524,
+      "clients_called": 3737,
+      "subscribers_reached": 1888,
+      "net_value_eur": 32154.5
+    },
+    {
+      "threshold": 0.2877393483709273,
+      "clients_called": 3718,
+      "subscribers_reached": 1880,
+      "net_value_eur": 32023.0
+    },
+    {
+      "threshold": 0.2892406015037594,
+      "clients_called": 3705,
+      "subscribers_reached": 1879,
+      "net_value_eur": 32022.5
+    },
+    {
+      "threshold": 0.29074185463659147,
+      "clients_called": 3685,
+      "subscribers_reached": 1870,
+      "net_value_eur": 31872.5
+    },
+    {
+      "threshold": 0.2922431077694235,
+      "clients_called": 3667,
+      "subscribers_reached": 1864,
+      "net_value_eur": 31779.5
+    },
+    {
+      "threshold": 0.29374436090225564,
+      "clients_called": 3652,
+      "subscribers_reached": 1858,
+      "net_value_eur": 31682.0
+    },
+    {
+      "threshold": 0.2952456140350877,
+      "clients_called": 3636,
+      "subscribers_reached": 1851,
+      "net_value_eur": 31566.0
+    },
+    {
+      "threshold": 0.29674686716791976,
+      "clients_called": 3617,
+      "subscribers_reached": 1847,
+      "net_value_eur": 31514.5
+    },
+    {
+      "threshold": 0.2982481203007519,
+      "clients_called": 3597,
+      "subscribers_reached": 1837,
+      "net_value_eur": 31344.5
+    },
+    {
+      "threshold": 0.29974937343358393,
+      "clients_called": 3577,
+      "subscribers_reached": 1831,
+      "net_value_eur": 31254.5
+    },
+    {
+      "threshold": 0.30125062656641605,
+      "clients_called": 3559,
+      "subscribers_reached": 1823,
+      "net_value_eur": 31121.5
+    },
+    {
+      "threshold": 0.3027518796992481,
+      "clients_called": 3538,
+      "subscribers_reached": 1816,
+      "net_value_eur": 31013.0
+    },
+    {
+      "threshold": 0.30425313283208016,
+      "clients_called": 3519,
+      "subscribers_reached": 1809,
+      "net_value_eur": 30901.5
+    },
+    {
+      "threshold": 0.3057543859649123,
+      "clients_called": 3498,
+      "subscribers_reached": 1803,
+      "net_value_eur": 30813.0
+    },
+    {
+      "threshold": 0.30725563909774434,
+      "clients_called": 3487,
+      "subscribers_reached": 1799,
+      "net_value_eur": 30749.5
+    },
+    {
+      "threshold": 0.3087568922305764,
+      "clients_called": 3471,
+      "subscribers_reached": 1794,
+      "net_value_eur": 30673.5
+    },
+    {
+      "threshold": 0.3102581453634085,
+      "clients_called": 3457,
+      "subscribers_reached": 1788,
+      "net_value_eur": 30574.5
+    },
+    {
+      "threshold": 0.31175939849624057,
+      "clients_called": 3442,
+      "subscribers_reached": 1784,
+      "net_value_eur": 30517.0
+    },
+    {
+      "threshold": 0.3132606516290727,
+      "clients_called": 3415,
+      "subscribers_reached": 1773,
+      "net_value_eur": 30337.5
+    },
+    {
+      "threshold": 0.31476190476190474,
+      "clients_called": 3399,
+      "subscribers_reached": 1767,
+      "net_value_eur": 30241.5
+    },
+    {
+      "threshold": 0.3162631578947368,
+      "clients_called": 3379,
+      "subscribers_reached": 1758,
+      "net_value_eur": 30091.5
+    },
+    {
+      "threshold": 0.3177644110275689,
+      "clients_called": 3364,
+      "subscribers_reached": 1752,
+      "net_value_eur": 29994.0
+    },
+    {
+      "threshold": 0.319265664160401,
+      "clients_called": 3346,
+      "subscribers_reached": 1743,
+      "net_value_eur": 29841.0
+    },
+    {
+      "threshold": 0.3207669172932331,
+      "clients_called": 3331,
+      "subscribers_reached": 1741,
+      "net_value_eur": 29823.5
+    },
+    {
+      "threshold": 0.32226817042606515,
+      "clients_called": 3316,
+      "subscribers_reached": 1735,
+      "net_value_eur": 29726.0
+    },
+    {
+      "threshold": 0.3237694235588972,
+      "clients_called": 3301,
+      "subscribers_reached": 1731,
+      "net_value_eur": 29668.5
+    },
+    {
+      "threshold": 0.3252706766917293,
+      "clients_called": 3294,
+      "subscribers_reached": 1729,
+      "net_value_eur": 29639.0
+    },
+    {
+      "threshold": 0.3267719298245614,
+      "clients_called": 3282,
+      "subscribers_reached": 1722,
+      "net_value_eur": 29517.0
+    },
+    {
+      "threshold": 0.32827318295739344,
+      "clients_called": 3271,
+      "subscribers_reached": 1719,
+      "net_value_eur": 29473.5
+    },
+    {
+      "threshold": 0.32977443609022555,
+      "clients_called": 3246,
+      "subscribers_reached": 1709,
+      "net_value_eur": 29311.0
+    },
+    {
+      "threshold": 0.3312756892230576,
+      "clients_called": 3232,
+      "subscribers_reached": 1702,
+      "net_value_eur": 29192.0
+    },
+    {
+      "threshold": 0.3327769423558897,
+      "clients_called": 3219,
+      "subscribers_reached": 1697,
+      "net_value_eur": 29111.5
+    },
+    {
+      "threshold": 0.3342781954887218,
+      "clients_called": 3201,
+      "subscribers_reached": 1691,
+      "net_value_eur": 29018.5
+    },
+    {
+      "threshold": 0.33577944862155384,
+      "clients_called": 3186,
+      "subscribers_reached": 1686,
+      "net_value_eur": 28941.0
+    },
+    {
+      "threshold": 0.33728070175438596,
+      "clients_called": 3169,
+      "subscribers_reached": 1678,
+      "net_value_eur": 28806.5
+    },
+    {
+      "threshold": 0.338781954887218,
+      "clients_called": 3153,
+      "subscribers_reached": 1673,
+      "net_value_eur": 28730.5
+    },
+    {
+      "threshold": 0.34028320802005013,
+      "clients_called": 3143,
+      "subscribers_reached": 1673,
+      "net_value_eur": 28745.5
+    },
+    {
+      "threshold": 0.3417844611528822,
+      "clients_called": 3132,
+      "subscribers_reached": 1669,
+      "net_value_eur": 28682.0
+    },
+    {
+      "threshold": 0.34328571428571425,
+      "clients_called": 3118,
+      "subscribers_reached": 1663,
+      "net_value_eur": 28583.0
+    },
+    {
+      "threshold": 0.34478696741854636,
+      "clients_called": 3100,
+      "subscribers_reached": 1656,
+      "net_value_eur": 28470.0
+    },
+    {
+      "threshold": 0.3462882205513784,
+      "clients_called": 3091,
+      "subscribers_reached": 1651,
+      "net_value_eur": 28383.5
+    },
+    {
+      "threshold": 0.3477894736842105,
+      "clients_called": 3074,
+      "subscribers_reached": 1644,
+      "net_value_eur": 28269.0
+    },
+    {
+      "threshold": 0.3492907268170426,
+      "clients_called": 3055,
+      "subscribers_reached": 1634,
+      "net_value_eur": 28097.5
+    },
+    {
+      "threshold": 0.35079197994987465,
+      "clients_called": 3039,
+      "subscribers_reached": 1621,
+      "net_value_eur": 27861.5
+    },
+    {
+      "threshold": 0.35229323308270677,
+      "clients_called": 3026,
+      "subscribers_reached": 1614,
+      "net_value_eur": 27741.0
+    },
+    {
+      "threshold": 0.35379448621553883,
+      "clients_called": 3012,
+      "subscribers_reached": 1611,
+      "net_value_eur": 27702.0
+    },
+    {
+      "threshold": 0.3552957393483709,
+      "clients_called": 2987,
+      "subscribers_reached": 1600,
+      "net_value_eur": 27519.5
+    },
+    {
+      "threshold": 0.356796992481203,
+      "clients_called": 2969,
+      "subscribers_reached": 1594,
+      "net_value_eur": 27426.5
+    },
+    {
+      "threshold": 0.35829824561403506,
+      "clients_called": 2954,
+      "subscribers_reached": 1590,
+      "net_value_eur": 27369.0
+    },
+    {
+      "threshold": 0.3597994987468671,
+      "clients_called": 2941,
+      "subscribers_reached": 1583,
+      "net_value_eur": 27248.5
+    },
+    {
+      "threshold": 0.36130075187969923,
+      "clients_called": 2928,
+      "subscribers_reached": 1573,
+      "net_value_eur": 27068.0
+    },
+    {
+      "threshold": 0.3628020050125313,
+      "clients_called": 2915,
+      "subscribers_reached": 1566,
+      "net_value_eur": 26947.5
+    },
+    {
+      "threshold": 0.3643032581453634,
+      "clients_called": 2895,
+      "subscribers_reached": 1557,
+      "net_value_eur": 26797.5
+    },
+    {
+      "threshold": 0.36580451127819547,
+      "clients_called": 2875,
+      "subscribers_reached": 1551,
+      "net_value_eur": 26707.5
+    },
+    {
+      "threshold": 0.3673057644110275,
+      "clients_called": 2858,
+      "subscribers_reached": 1547,
+      "net_value_eur": 26653.0
+    },
+    {
+      "threshold": 0.36880701754385964,
+      "clients_called": 2841,
+      "subscribers_reached": 1542,
+      "net_value_eur": 26578.5
+    },
+    {
+      "threshold": 0.3703082706766917,
+      "clients_called": 2822,
+      "subscribers_reached": 1534,
+      "net_value_eur": 26447.0
+    },
+    {
+      "threshold": 0.3718095238095238,
+      "clients_called": 2807,
+      "subscribers_reached": 1530,
+      "net_value_eur": 26389.5
+    },
+    {
+      "threshold": 0.37331077694235587,
+      "clients_called": 2793,
+      "subscribers_reached": 1525,
+      "net_value_eur": 26310.5
+    },
+    {
+      "threshold": 0.37481203007518793,
+      "clients_called": 2776,
+      "subscribers_reached": 1519,
+      "net_value_eur": 26216.0
+    },
+    {
+      "threshold": 0.37631328320802004,
+      "clients_called": 2770,
+      "subscribers_reached": 1517,
+      "net_value_eur": 26185.0
+    },
+    {
+      "threshold": 0.3778145363408521,
+      "clients_called": 2752,
+      "subscribers_reached": 1511,
+      "net_value_eur": 26092.0
+    },
+    {
+      "threshold": 0.37931578947368416,
+      "clients_called": 2735,
+      "subscribers_reached": 1499,
+      "net_value_eur": 25877.5
+    },
+    {
+      "threshold": 0.3808170426065163,
+      "clients_called": 2720,
+      "subscribers_reached": 1496,
+      "net_value_eur": 25840.0
+    },
+    {
+      "threshold": 0.38231829573934833,
+      "clients_called": 2698,
+      "subscribers_reached": 1486,
+      "net_value_eur": 25673.0
+    },
+    {
+      "threshold": 0.38381954887218045,
+      "clients_called": 2677,
+      "subscribers_reached": 1476,
+      "net_value_eur": 25504.5
+    },
+    {
+      "threshold": 0.3853208020050125,
+      "clients_called": 2663,
+      "subscribers_reached": 1467,
+      "net_value_eur": 25345.5
+    },
+    {
+      "threshold": 0.38682205513784457,
+      "clients_called": 2649,
+      "subscribers_reached": 1463,
+      "net_value_eur": 25286.5
+    },
+    {
+      "threshold": 0.3883233082706767,
+      "clients_called": 2643,
+      "subscribers_reached": 1459,
+      "net_value_eur": 25215.5
+    },
+    {
+      "threshold": 0.38982456140350874,
+      "clients_called": 2627,
+      "subscribers_reached": 1455,
+      "net_value_eur": 25159.5
+    },
+    {
+      "threshold": 0.39132581453634085,
+      "clients_called": 2615,
+      "subscribers_reached": 1448,
+      "net_value_eur": 25037.5
+    },
+    {
+      "threshold": 0.3928270676691729,
+      "clients_called": 2596,
+      "subscribers_reached": 1441,
+      "net_value_eur": 24926.0
+    },
+    {
+      "threshold": 0.394328320802005,
+      "clients_called": 2579,
+      "subscribers_reached": 1436,
+      "net_value_eur": 24851.5
+    },
+    {
+      "threshold": 0.3958295739348371,
+      "clients_called": 2562,
+      "subscribers_reached": 1427,
+      "net_value_eur": 24697.0
+    },
+    {
+      "threshold": 0.39733082706766915,
+      "clients_called": 2551,
+      "subscribers_reached": 1426,
+      "net_value_eur": 24693.5
+    },
+    {
+      "threshold": 0.3988320802005012,
+      "clients_called": 2533,
+      "subscribers_reached": 1421,
+      "net_value_eur": 24620.5
+    },
+    {
+      "threshold": 0.4003333333333333,
+      "clients_called": 2518,
+      "subscribers_reached": 1413,
+      "net_value_eur": 24483.0
+    },
+    {
+      "threshold": 0.4018345864661654,
+      "clients_called": 2505,
+      "subscribers_reached": 1406,
+      "net_value_eur": 24362.5
+    },
+    {
+      "threshold": 0.4033358395989975,
+      "clients_called": 2492,
+      "subscribers_reached": 1399,
+      "net_value_eur": 24242.0
+    },
+    {
+      "threshold": 0.40483709273182955,
+      "clients_called": 2473,
+      "subscribers_reached": 1394,
+      "net_value_eur": 24170.5
+    },
+    {
+      "threshold": 0.4063383458646616,
+      "clients_called": 2461,
+      "subscribers_reached": 1389,
+      "net_value_eur": 24088.5
+    },
+    {
+      "threshold": 0.4078395989974937,
+      "clients_called": 2446,
+      "subscribers_reached": 1385,
+      "net_value_eur": 24031.0
+    },
+    {
+      "threshold": 0.4093408521303258,
+      "clients_called": 2430,
+      "subscribers_reached": 1381,
+      "net_value_eur": 23975.0
+    },
+    {
+      "threshold": 0.4108421052631579,
+      "clients_called": 2417,
+      "subscribers_reached": 1375,
+      "net_value_eur": 23874.5
+    },
+    {
+      "threshold": 0.41234335839598996,
+      "clients_called": 2402,
+      "subscribers_reached": 1369,
+      "net_value_eur": 23777.0
+    },
+    {
+      "threshold": 0.413844611528822,
+      "clients_called": 2384,
+      "subscribers_reached": 1360,
+      "net_value_eur": 23624.0
+    },
+    {
+      "threshold": 0.41534586466165413,
+      "clients_called": 2372,
+      "subscribers_reached": 1354,
+      "net_value_eur": 23522.0
+    },
+    {
+      "threshold": 0.4168471177944862,
+      "clients_called": 2361,
+      "subscribers_reached": 1353,
+      "net_value_eur": 23518.5
+    },
+    {
+      "threshold": 0.41834837092731825,
+      "clients_called": 2349,
+      "subscribers_reached": 1349,
+      "net_value_eur": 23456.5
+    },
+    {
+      "threshold": 0.41984962406015036,
+      "clients_called": 2342,
+      "subscribers_reached": 1348,
+      "net_value_eur": 23447.0
+    },
+    {
+      "threshold": 0.4213508771929824,
+      "clients_called": 2329,
+      "subscribers_reached": 1342,
+      "net_value_eur": 23346.5
+    },
+    {
+      "threshold": 0.42285213032581453,
+      "clients_called": 2317,
+      "subscribers_reached": 1334,
+      "net_value_eur": 23204.5
+    },
+    {
+      "threshold": 0.4243533834586466,
+      "clients_called": 2302,
+      "subscribers_reached": 1324,
+      "net_value_eur": 23027.0
+    },
+    {
+      "threshold": 0.42585463659147865,
+      "clients_called": 2291,
+      "subscribers_reached": 1318,
+      "net_value_eur": 22923.5
+    },
+    {
+      "threshold": 0.42735588972431077,
+      "clients_called": 2283,
+      "subscribers_reached": 1316,
+      "net_value_eur": 22895.5
+    },
+    {
+      "threshold": 0.4288571428571428,
+      "clients_called": 2267,
+      "subscribers_reached": 1307,
+      "net_value_eur": 22739.5
+    },
+    {
+      "threshold": 0.4303583959899749,
+      "clients_called": 2256,
+      "subscribers_reached": 1300,
+      "net_value_eur": 22616.0
+    },
+    {
+      "threshold": 0.431859649122807,
+      "clients_called": 2245,
+      "subscribers_reached": 1294,
+      "net_value_eur": 22512.5
+    },
+    {
+      "threshold": 0.43336090225563906,
+      "clients_called": 2224,
+      "subscribers_reached": 1283,
+      "net_value_eur": 22324.0
+    },
+    {
+      "threshold": 0.43486215538847117,
+      "clients_called": 2207,
+      "subscribers_reached": 1272,
+      "net_value_eur": 22129.5
+    },
+    {
+      "threshold": 0.43636340852130323,
+      "clients_called": 2196,
+      "subscribers_reached": 1268,
+      "net_value_eur": 22066.0
+    },
+    {
+      "threshold": 0.4378646616541353,
+      "clients_called": 2181,
+      "subscribers_reached": 1262,
+      "net_value_eur": 21968.5
+    },
+    {
+      "threshold": 0.4393659147869674,
+      "clients_called": 2163,
+      "subscribers_reached": 1250,
+      "net_value_eur": 21755.5
+    },
+    {
+      "threshold": 0.44086716791979946,
+      "clients_called": 2149,
+      "subscribers_reached": 1243,
+      "net_value_eur": 21636.5
+    },
+    {
+      "threshold": 0.4423684210526316,
+      "clients_called": 2136,
+      "subscribers_reached": 1240,
+      "net_value_eur": 21596.0
+    },
+    {
+      "threshold": 0.44386967418546364,
+      "clients_called": 2127,
+      "subscribers_reached": 1237,
+      "net_value_eur": 21549.5
+    },
+    {
+      "threshold": 0.4453709273182957,
+      "clients_called": 2113,
+      "subscribers_reached": 1230,
+      "net_value_eur": 21430.5
+    },
+    {
+      "threshold": 0.4468721804511278,
+      "clients_called": 2106,
+      "subscribers_reached": 1229,
+      "net_value_eur": 21421.0
+    },
+    {
+      "threshold": 0.44837343358395987,
+      "clients_called": 2086,
+      "subscribers_reached": 1220,
+      "net_value_eur": 21271.0
+    },
+    {
+      "threshold": 0.4498746867167919,
+      "clients_called": 2069,
+      "subscribers_reached": 1217,
+      "net_value_eur": 21236.5
+    },
+    {
+      "threshold": 0.45137593984962404,
+      "clients_called": 2058,
+      "subscribers_reached": 1211,
+      "net_value_eur": 21133.0
+    },
+    {
+      "threshold": 0.4528771929824561,
+      "clients_called": 2047,
+      "subscribers_reached": 1208,
+      "net_value_eur": 21089.5
+    },
+    {
+      "threshold": 0.4543784461152882,
+      "clients_called": 2032,
+      "subscribers_reached": 1204,
+      "net_value_eur": 21032.0
+    },
+    {
+      "threshold": 0.4558796992481203,
+      "clients_called": 2016,
+      "subscribers_reached": 1198,
+      "net_value_eur": 20936.0
+    },
+    {
+      "threshold": 0.45738095238095233,
+      "clients_called": 2005,
+      "subscribers_reached": 1189,
+      "net_value_eur": 20772.5
+    },
+    {
+      "threshold": 0.45888220551378445,
+      "clients_called": 1997,
+      "subscribers_reached": 1183,
+      "net_value_eur": 20664.5
+    },
+    {
+      "threshold": 0.4603834586466165,
+      "clients_called": 1979,
+      "subscribers_reached": 1174,
+      "net_value_eur": 20511.5
+    },
+    {
+      "threshold": 0.4618847117794486,
+      "clients_called": 1966,
+      "subscribers_reached": 1166,
+      "net_value_eur": 20371.0
+    },
+    {
+      "threshold": 0.4633859649122807,
+      "clients_called": 1953,
+      "subscribers_reached": 1160,
+      "net_value_eur": 20270.5
+    },
+    {
+      "threshold": 0.46488721804511274,
+      "clients_called": 1944,
+      "subscribers_reached": 1155,
+      "net_value_eur": 20184.0
+    },
+    {
+      "threshold": 0.46638847117794485,
+      "clients_called": 1935,
+      "subscribers_reached": 1154,
+      "net_value_eur": 20177.5
+    },
+    {
+      "threshold": 0.4678897243107769,
+      "clients_called": 1930,
+      "subscribers_reached": 1153,
+      "net_value_eur": 20165.0
+    },
+    {
+      "threshold": 0.46939097744360897,
+      "clients_called": 1925,
+      "subscribers_reached": 1151,
+      "net_value_eur": 20132.5
+    },
+    {
+      "threshold": 0.4708922305764411,
+      "clients_called": 1913,
+      "subscribers_reached": 1148,
+      "net_value_eur": 20090.5
+    },
+    {
+      "threshold": 0.47239348370927314,
+      "clients_called": 1895,
+      "subscribers_reached": 1137,
+      "net_value_eur": 19897.5
+    },
+    {
+      "threshold": 0.47389473684210526,
+      "clients_called": 1891,
+      "subscribers_reached": 1134,
+      "net_value_eur": 19843.5
+    },
+    {
+      "threshold": 0.4753959899749373,
+      "clients_called": 1879,
+      "subscribers_reached": 1126,
+      "net_value_eur": 19701.5
+    },
+    {
+      "threshold": 0.4768972431077694,
+      "clients_called": 1869,
+      "subscribers_reached": 1123,
+      "net_value_eur": 19656.5
+    },
+    {
+      "threshold": 0.4783984962406015,
+      "clients_called": 1856,
+      "subscribers_reached": 1117,
+      "net_value_eur": 19556.0
+    },
+    {
+      "threshold": 0.47989974937343355,
+      "clients_called": 1849,
+      "subscribers_reached": 1113,
+      "net_value_eur": 19486.5
+    },
+    {
+      "threshold": 0.4814010025062656,
+      "clients_called": 1830,
+      "subscribers_reached": 1104,
+      "net_value_eur": 19335.0
+    },
+    {
+      "threshold": 0.4829022556390977,
+      "clients_called": 1820,
+      "subscribers_reached": 1100,
+      "net_value_eur": 19270.0
+    },
+    {
+      "threshold": 0.4844035087719298,
+      "clients_called": 1806,
+      "subscribers_reached": 1097,
+      "net_value_eur": 19231.0
+    },
+    {
+      "threshold": 0.4859047619047619,
+      "clients_called": 1786,
+      "subscribers_reached": 1083,
+      "net_value_eur": 18981.0
+    },
+    {
+      "threshold": 0.48740601503759395,
+      "clients_called": 1779,
+      "subscribers_reached": 1077,
+      "net_value_eur": 18871.5
+    },
+    {
+      "threshold": 0.488907268170426,
+      "clients_called": 1767,
+      "subscribers_reached": 1070,
+      "net_value_eur": 18749.5
+    },
+    {
+      "threshold": 0.4904085213032581,
+      "clients_called": 1758,
+      "subscribers_reached": 1068,
+      "net_value_eur": 18723.0
+    },
+    {
+      "threshold": 0.4919097744360902,
+      "clients_called": 1749,
+      "subscribers_reached": 1063,
+      "net_value_eur": 18636.5
+    },
+    {
+      "threshold": 0.4934110275689223,
+      "clients_called": 1735,
+      "subscribers_reached": 1056,
+      "net_value_eur": 18517.5
+    },
+    {
+      "threshold": 0.49491228070175436,
+      "clients_called": 1727,
+      "subscribers_reached": 1054,
+      "net_value_eur": 18489.5
+    },
+    {
+      "threshold": 0.4964135338345864,
+      "clients_called": 1715,
+      "subscribers_reached": 1047,
+      "net_value_eur": 18367.5
+    },
+    {
+      "threshold": 0.49791478696741853,
+      "clients_called": 1702,
+      "subscribers_reached": 1042,
+      "net_value_eur": 18287.0
+    },
+    {
+      "threshold": 0.4994160401002506,
+      "clients_called": 1694,
+      "subscribers_reached": 1041,
+      "net_value_eur": 18279.0
+    },
+    {
+      "threshold": 0.5,
+      "clients_called": 1688,
+      "subscribers_reached": 1039,
+      "net_value_eur": 18248.0
+    },
+    {
+      "threshold": 0.5009172932330826,
+      "clients_called": 1682,
+      "subscribers_reached": 1037,
+      "net_value_eur": 18217.0
+    },
+    {
+      "threshold": 0.5024185463659148,
+      "clients_called": 1675,
+      "subscribers_reached": 1032,
+      "net_value_eur": 18127.5
+    },
+    {
+      "threshold": 0.5039197994987469,
+      "clients_called": 1660,
+      "subscribers_reached": 1025,
+      "net_value_eur": 18010.0
+    },
+    {
+      "threshold": 0.5054210526315789,
+      "clients_called": 1651,
+      "subscribers_reached": 1021,
+      "net_value_eur": 17943.5
+    },
+    {
+      "threshold": 0.506922305764411,
+      "clients_called": 1634,
+      "subscribers_reached": 1014,
+      "net_value_eur": 17829.0
+    },
+    {
+      "threshold": 0.5084235588972431,
+      "clients_called": 1621,
+      "subscribers_reached": 1009,
+      "net_value_eur": 17748.5
+    },
+    {
+      "threshold": 0.5099248120300751,
+      "clients_called": 1611,
+      "subscribers_reached": 1006,
+      "net_value_eur": 17703.5
+    },
+    {
+      "threshold": 0.5114260651629072,
+      "clients_called": 1601,
+      "subscribers_reached": 1001,
+      "net_value_eur": 17618.5
+    },
+    {
+      "threshold": 0.5129273182957393,
+      "clients_called": 1591,
+      "subscribers_reached": 995,
+      "net_value_eur": 17513.5
+    },
+    {
+      "threshold": 0.5144285714285713,
+      "clients_called": 1579,
+      "subscribers_reached": 990,
+      "net_value_eur": 17431.5
+    },
+    {
+      "threshold": 0.5159298245614035,
+      "clients_called": 1572,
+      "subscribers_reached": 987,
+      "net_value_eur": 17382.0
+    },
+    {
+      "threshold": 0.5174310776942356,
+      "clients_called": 1564,
+      "subscribers_reached": 984,
+      "net_value_eur": 17334.0
+    },
+    {
+      "threshold": 0.5189323308270677,
+      "clients_called": 1547,
+      "subscribers_reached": 975,
+      "net_value_eur": 17179.5
+    },
+    {
+      "threshold": 0.5204335839598997,
+      "clients_called": 1540,
+      "subscribers_reached": 970,
+      "net_value_eur": 17090.0
+    },
+    {
+      "threshold": 0.5219348370927318,
+      "clients_called": 1530,
+      "subscribers_reached": 963,
+      "net_value_eur": 16965.0
+    },
+    {
+      "threshold": 0.5234360902255639,
+      "clients_called": 1524,
+      "subscribers_reached": 962,
+      "net_value_eur": 16954.0
+    },
+    {
+      "threshold": 0.5249373433583959,
+      "clients_called": 1512,
+      "subscribers_reached": 956,
+      "net_value_eur": 16852.0
+    },
+    {
+      "threshold": 0.526438596491228,
+      "clients_called": 1497,
+      "subscribers_reached": 950,
+      "net_value_eur": 16754.5
+    },
+    {
+      "threshold": 0.5279398496240602,
+      "clients_called": 1488,
+      "subscribers_reached": 945,
+      "net_value_eur": 16668.0
+    },
+    {
+      "threshold": 0.5294411027568922,
+      "clients_called": 1478,
+      "subscribers_reached": 939,
+      "net_value_eur": 16563.0
+    },
+    {
+      "threshold": 0.5309423558897243,
+      "clients_called": 1467,
+      "subscribers_reached": 933,
+      "net_value_eur": 16459.5
+    },
+    {
+      "threshold": 0.5324436090225564,
+      "clients_called": 1460,
+      "subscribers_reached": 929,
+      "net_value_eur": 16390.0
+    },
+    {
+      "threshold": 0.5339448621553884,
+      "clients_called": 1446,
+      "subscribers_reached": 923,
+      "net_value_eur": 16291.0
+    },
+    {
+      "threshold": 0.5354461152882205,
+      "clients_called": 1442,
+      "subscribers_reached": 922,
+      "net_value_eur": 16277.0
+    },
+    {
+      "threshold": 0.5369473684210526,
+      "clients_called": 1435,
+      "subscribers_reached": 920,
+      "net_value_eur": 16247.5
+    },
+    {
+      "threshold": 0.5384486215538847,
+      "clients_called": 1425,
+      "subscribers_reached": 915,
+      "net_value_eur": 16162.5
+    },
+    {
+      "threshold": 0.5399498746867167,
+      "clients_called": 1418,
+      "subscribers_reached": 910,
+      "net_value_eur": 16073.0
+    },
+    {
+      "threshold": 0.5414511278195488,
+      "clients_called": 1410,
+      "subscribers_reached": 904,
+      "net_value_eur": 15965.0
+    },
+    {
+      "threshold": 0.542952380952381,
+      "clients_called": 1402,
+      "subscribers_reached": 900,
+      "net_value_eur": 15897.0
+    },
+    {
+      "threshold": 0.544453634085213,
+      "clients_called": 1393,
+      "subscribers_reached": 895,
+      "net_value_eur": 15810.5
+    },
+    {
+      "threshold": 0.5459548872180451,
+      "clients_called": 1383,
+      "subscribers_reached": 891,
+      "net_value_eur": 15745.5
+    },
+    {
+      "threshold": 0.5474561403508772,
+      "clients_called": 1374,
+      "subscribers_reached": 885,
+      "net_value_eur": 15639.0
+    },
+    {
+      "threshold": 0.5489573934837092,
+      "clients_called": 1365,
+      "subscribers_reached": 881,
+      "net_value_eur": 15572.5
+    },
+    {
+      "threshold": 0.5504586466165413,
+      "clients_called": 1350,
+      "subscribers_reached": 871,
+      "net_value_eur": 15395.0
+    },
+    {
+      "threshold": 0.5519598997493734,
+      "clients_called": 1347,
+      "subscribers_reached": 869,
+      "net_value_eur": 15359.5
+    },
+    {
+      "threshold": 0.5534611528822054,
+      "clients_called": 1335,
+      "subscribers_reached": 864,
+      "net_value_eur": 15277.5
+    },
+    {
+      "threshold": 0.5549624060150375,
+      "clients_called": 1325,
+      "subscribers_reached": 859,
+      "net_value_eur": 15192.5
+    },
+    {
+      "threshold": 0.5564636591478697,
+      "clients_called": 1316,
+      "subscribers_reached": 858,
+      "net_value_eur": 15186.0
+    },
+    {
+      "threshold": 0.5579649122807018,
+      "clients_called": 1304,
+      "subscribers_reached": 854,
+      "net_value_eur": 15124.0
+    },
+    {
+      "threshold": 0.5594661654135338,
+      "clients_called": 1295,
+      "subscribers_reached": 848,
+      "net_value_eur": 15017.5
+    },
+    {
+      "threshold": 0.5609674185463659,
+      "clients_called": 1286,
+      "subscribers_reached": 842,
+      "net_value_eur": 14911.0
+    },
+    {
+      "threshold": 0.562468671679198,
+      "clients_called": 1275,
+      "subscribers_reached": 837,
+      "net_value_eur": 14827.5
+    },
+    {
+      "threshold": 0.56396992481203,
+      "clients_called": 1266,
+      "subscribers_reached": 833,
+      "net_value_eur": 14761.0
+    },
+    {
+      "threshold": 0.5654711779448621,
+      "clients_called": 1257,
+      "subscribers_reached": 828,
+      "net_value_eur": 14674.5
+    },
+    {
+      "threshold": 0.5669724310776942,
+      "clients_called": 1253,
+      "subscribers_reached": 828,
+      "net_value_eur": 14680.5
+    },
+    {
+      "threshold": 0.5684736842105262,
+      "clients_called": 1241,
+      "subscribers_reached": 821,
+      "net_value_eur": 14558.5
+    },
+    {
+      "threshold": 0.5699749373433584,
+      "clients_called": 1234,
+      "subscribers_reached": 817,
+      "net_value_eur": 14489.0
+    },
+    {
+      "threshold": 0.5714761904761905,
+      "clients_called": 1228,
+      "subscribers_reached": 816,
+      "net_value_eur": 14478.0
+    },
+    {
+      "threshold": 0.5729774436090225,
+      "clients_called": 1223,
+      "subscribers_reached": 814,
+      "net_value_eur": 14445.5
+    },
+    {
+      "threshold": 0.5744786967418546,
+      "clients_called": 1216,
+      "subscribers_reached": 811,
+      "net_value_eur": 14396.0
+    },
+    {
+      "threshold": 0.5759799498746867,
+      "clients_called": 1208,
+      "subscribers_reached": 806,
+      "net_value_eur": 14308.0
+    },
+    {
+      "threshold": 0.5774812030075188,
+      "clients_called": 1199,
+      "subscribers_reached": 800,
+      "net_value_eur": 14201.5
+    },
+    {
+      "threshold": 0.5789824561403508,
+      "clients_called": 1185,
+      "subscribers_reached": 794,
+      "net_value_eur": 14102.5
+    },
+    {
+      "threshold": 0.5804837092731829,
+      "clients_called": 1180,
+      "subscribers_reached": 792,
+      "net_value_eur": 14070.0
+    },
+    {
+      "threshold": 0.581984962406015,
+      "clients_called": 1172,
+      "subscribers_reached": 786,
+      "net_value_eur": 13962.0
+    },
+    {
+      "threshold": 0.583486215538847,
+      "clients_called": 1163,
+      "subscribers_reached": 779,
+      "net_value_eur": 13835.5
+    },
+    {
+      "threshold": 0.5849874686716792,
+      "clients_called": 1159,
+      "subscribers_reached": 778,
+      "net_value_eur": 13821.5
+    },
+    {
+      "threshold": 0.5864887218045113,
+      "clients_called": 1153,
+      "subscribers_reached": 774,
+      "net_value_eur": 13750.5
+    },
+    {
+      "threshold": 0.5879899749373433,
+      "clients_called": 1145,
+      "subscribers_reached": 770,
+      "net_value_eur": 13682.5
+    },
+    {
+      "threshold": 0.5894912280701754,
+      "clients_called": 1134,
+      "subscribers_reached": 767,
+      "net_value_eur": 13639.0
+    },
+    {
+      "threshold": 0.5909924812030075,
+      "clients_called": 1123,
+      "subscribers_reached": 763,
+      "net_value_eur": 13575.5
+    },
+    {
+      "threshold": 0.5924937343358395,
+      "clients_called": 1119,
+      "subscribers_reached": 762,
+      "net_value_eur": 13561.5
+    },
+    {
+      "threshold": 0.5939949874686716,
+      "clients_called": 1109,
+      "subscribers_reached": 757,
+      "net_value_eur": 13476.5
+    },
+    {
+      "threshold": 0.5954962406015037,
+      "clients_called": 1100,
+      "subscribers_reached": 750,
+      "net_value_eur": 13350.0
+    },
+    {
+      "threshold": 0.5969974937343357,
+      "clients_called": 1094,
+      "subscribers_reached": 746,
+      "net_value_eur": 13279.0
+    },
+    {
+      "threshold": 0.5984987468671679,
+      "clients_called": 1082,
+      "subscribers_reached": 738,
+      "net_value_eur": 13137.0
+    },
+    {
+      "threshold": 0.6,
+      "clients_called": 1068,
+      "subscribers_reached": 732,
+      "net_value_eur": 13038.0
+    }
+  ],
+  "capacity": [
+    {
+      "threshold": 0.48419831246137623,
+      "clients_called": 1809,
+      "subscribers_reached": 1098,
+      "subscribers_missed": 3133,
+      "wasted_calls": 711,
+      "revenue_eur": 21960.0,
+      "call_cost_eur": 2713.5,
+      "net_value_eur": 19246.5,
+      "roi": 7.092868988391376,
+      "cost_per_subscription_eur": 2.471311475409836,
+      "capacity_share": 0.05
+    },
+    {
+      "threshold": 0.29674265384674064,
+      "clients_called": 3617,
+      "subscribers_reached": 1847,
+      "subscribers_missed": 2384,
+      "wasted_calls": 1770,
+      "revenue_eur": 36940.0,
+      "call_cost_eur": 5425.5,
+      "net_value_eur": 31514.5,
+      "roi": 5.808589070131785,
+      "cost_per_subscription_eur": 2.937466161342718,
+      "capacity_share": 0.1
+    },
+    {
+      "threshold": 0.13220820128917704,
+      "clients_called": 7234,
+      "subscribers_reached": 2613,
+      "subscribers_missed": 1618,
+      "wasted_calls": 4621,
+      "revenue_eur": 52260.0,
+      "call_cost_eur": 10851.0,
+      "net_value_eur": 41409.0,
+      "roi": 3.8161459773292785,
+      "cost_per_subscription_eur": 4.1526980482204365,
+      "capacity_share": 0.2
+    },
+    {
+      "threshold": 0.09520287141203879,
+      "clients_called": 10851,
+      "subscribers_reached": 3003,
+      "subscribers_missed": 1228,
+      "wasted_calls": 7848,
+      "revenue_eur": 60060.0,
+      "call_cost_eur": 16276.5,
+      "net_value_eur": 43783.5,
+      "roi": 2.689982490093079,
+      "cost_per_subscription_eur": 5.42007992007992,
+      "capacity_share": 0.3
+    },
+    {
+      "threshold": 0.07672830820083618,
+      "clients_called": 14467,
+      "subscribers_reached": 3265,
+      "subscribers_missed": 966,
+      "wasted_calls": 11202,
+      "revenue_eur": 65300.0,
+      "call_cost_eur": 21700.5,
+      "net_value_eur": 43599.5,
+      "roi": 2.0091472546715514,
+      "cost_per_subscription_eur": 6.646401225114855,
+      "capacity_share": 0.4
+    }
+  ],
+  "sensitivity": [
+    {
+      "call_cost_eur": 0.75,
+      "value_eur": 10.0,
+      "threshold": 0.075
+    },
+    {
+      "call_cost_eur": 0.75,
+      "value_eur": 20.0,
+      "threshold": 0.0375
+    },
+    {
+      "call_cost_eur": 0.75,
+      "value_eur": 40.0,
+      "threshold": 0.0187
+    },
+    {
+      "call_cost_eur": 0.75,
+      "value_eur": 60.0,
+      "threshold": 0.0125
+    },
+    {
+      "call_cost_eur": 1.0,
+      "value_eur": 10.0,
+      "threshold": 0.1
+    },
+    {
+      "call_cost_eur": 1.0,
+      "value_eur": 20.0,
+      "threshold": 0.05
+    },
+    {
+      "call_cost_eur": 1.0,
+      "value_eur": 40.0,
+      "threshold": 0.025
+    },
+    {
+      "call_cost_eur": 1.0,
+      "value_eur": 60.0,
+      "threshold": 0.0167
+    },
+    {
+      "call_cost_eur": 1.5,
+      "value_eur": 10.0,
+      "threshold": 0.15
+    },
+    {
+      "call_cost_eur": 1.5,
+      "value_eur": 20.0,
+      "threshold": 0.075
+    },
+    {
+      "call_cost_eur": 1.5,
+      "value_eur": 40.0,
+      "threshold": 0.0375
+    },
+    {
+      "call_cost_eur": 1.5,
+      "value_eur": 60.0,
+      "threshold": 0.025
+    },
+    {
+      "call_cost_eur": 2.0,
+      "value_eur": 10.0,
+      "threshold": 0.2
+    },
+    {
+      "call_cost_eur": 2.0,
+      "value_eur": 20.0,
+      "threshold": 0.1
+    },
+    {
+      "call_cost_eur": 2.0,
+      "value_eur": 40.0,
+      "threshold": 0.05
+    },
+    {
+      "call_cost_eur": 2.0,
+      "value_eur": 60.0,
+      "threshold": 0.0333
+    },
+    {
+      "call_cost_eur": 3.0,
+      "value_eur": 10.0,
+      "threshold": 0.3
+    },
+    {
+      "call_cost_eur": 3.0,
+      "value_eur": 20.0,
+      "threshold": 0.15
+    },
+    {
+      "call_cost_eur": 3.0,
+      "value_eur": 40.0,
+      "threshold": 0.075
+    },
+    {
+      "call_cost_eur": 3.0,
+      "value_eur": 60.0,
+      "threshold": 0.05
+    }
+  ],
+  "held_out": {
+    "rows": 9043,
+    "positives": 1058,
+    "base_rate": 0.11699657193409267,
+    "at_chosen": {
+      "threshold": 0.075,
+      "clients_called": 3621,
+      "subscribers_reached": 821,
+      "subscribers_missed": 237,
+      "wasted_calls": 2800,
+      "revenue_eur": 16420.0,
+      "call_cost_eur": 5431.5,
+      "net_value_eur": 10988.5,
+      "roi": 2.0231059559974223,
+      "cost_per_subscription_eur": 6.615712545676005
+    },
+    "at_f1_cut": {
+      "threshold": 0.210325,
+      "clients_called": 1159,
+      "subscribers_reached": 561,
+      "subscribers_missed": 497,
+      "wasted_calls": 598,
+      "revenue_eur": 11220.0,
+      "call_cost_eur": 1738.5,
+      "net_value_eur": 9481.5,
+      "roi": 5.453839516824849,
+      "cost_per_subscription_eur": 3.0989304812834226
+    },
+    "at_conventional": {
+      "threshold": 0.5,
+      "clients_called": 396,
+      "subscribers_reached": 257,
+      "subscribers_missed": 801,
+      "wasted_calls": 139,
+      "revenue_eur": 5140.0,
+      "call_cost_eur": 594.0,
+      "net_value_eur": 4546.0,
+      "roi": 7.653198653198653,
+      "cost_per_subscription_eur": 2.311284046692607
+    },
+    "at_call_everyone": {
+      "threshold": 0.0,
+      "clients_called": 9043,
+      "subscribers_reached": 1058,
+      "subscribers_missed": 0,
+      "wasted_calls": 7985,
+      "revenue_eur": 21160.0,
+      "call_cost_eur": 13564.5,
+      "net_value_eur": 7595.5,
+      "roi": 0.559954292454569,
+      "cost_per_subscription_eur": 12.820888468809073
+    },
+    "held_out_best": {
+      "threshold": 0.0908818244934082,
+      "clients_called": 2868,
+      "subscribers_reached": 775,
+      "subscribers_missed": 283,
+      "wasted_calls": 2093,
+      "revenue_eur": 15500.0,
+      "call_cost_eur": 4302.0,
+      "net_value_eur": 11198.0,
+      "roi": 2.602975360297536,
+      "cost_per_subscription_eur": 5.550967741935484
+    },
+    "chosen_is_not_the_held_out_best": true
+  },
+  "figure": {
+    "path": "reports\\figures\\07_threshold_curve.png",
+    "bytes": 221145
+  },
+  "elapsed_seconds": 4.6,
+  "checks": [
+    {
+      "check": "the chosen threshold is the cost model's break-even, not a searched value",
+      "passed": true,
+      "detail": "chosen 0.075000 = cost.break_even_threshold() = C/V = 1.50/20.00"
+    },
+    {
+      "check": "every training row contributed exactly one out-of-fold score",
+      "passed": true,
+      "detail": "36,168 training rows, each scored once out-of-fold; 36,168 fold predictions over 5 folds, 0 NaN"
+    },
+    {
+      "check": "the out-of-fold scores come from T30's folds and T30's tuned parameters",
+      "passed": true,
+      "detail": "the five fold PR-AUCs reproduce T30's tuned arm to 0.0e+00 (0.4435, 0.4378, 0.4339, 0.4588, 0.4561)"
+    },
+    {
+      "check": "every point on the curve obeys net = revenue - cost and the call arithmetic",
+      "passed": true,
+      "detail": "403 thresholds: net = revenue - cost, cost = calls x C, revenue = hits x V, calls = hits + wasted, hits + missed = 4,231; max drift 0.0e+00"
+    },
+    {
+      "check": "the recorded empirical optimum is the maximum of the recorded curve",
+      "passed": true,
+      "detail": "peak 44,009.50 EUR at 0.0821, which is the maximum of the 403 swept points"
+    },
+    {
+      "check": "the cost model's cut is inside the empirical plateau of near-optimal thresholds",
+      "passed": true,
+      "detail": "the cut at 0.0750 earns 43,621.00 EUR against a peak of 44,009.50 EUR at 0.0821 - a shortfall of 388.50 EUR (0.883%); the within-1% band runs 0.0746-0.1016"
+    },
+    {
+      "check": "the chosen cut outearns calling everyone",
+      "passed": true,
+      "detail": "calling all 36,168 clients nets 30,368.00 EUR; the cut nets 43,621.00 EUR, so the marginal client below the price loses money even though the average one does not"
+    },
+    {
+      "check": "the chosen cut outearns both the F1 cut and 0.5",
+      "passed": true,
+      "detail": "chosen 43,621.00 EUR; T32's F1 cut 36,891.00 EUR; 0.5 18,248.00 EUR"
+    },
+    {
+      "check": "a captured subscription costs less than it is worth at the chosen cut",
+      "passed": true,
+      "detail": "6.77 EUR per captured subscription against 20.00 EUR of value; ROI +195.6%"
+    },
+    {
+      "check": "every capacity row calls the share of the list it claims to",
+      "passed": true,
+      "detail": "each cut calls its capacity share to within 0.03%: 5%->1,809, 10%->3,617, 20%->7,234, 30%->10,851, 40%->14,467"
+    },
+    {
+      "check": "every sensitivity cell is C/V, so a costlier call raises the bar",
+      "passed": true,
+      "detail": "20 cells over C in {0.75, 1, 1.5, 2, 3} x V in {10, 20, 40, 60}, each exactly C/V, monotone in both directions; at V=20 the bar runs 0.0375 as C rises"
+    },
+    {
+      "check": "the choice was made on training folds, and the held-out optimum is not it",
+      "passed": true,
+      "detail": "the held-out half would have chosen 0.0909 (11,198.00 EUR); the recorded choice is 0.0750, made before the held-out scores existed in this run"
+    },
+    {
+      "check": "the decision still earns money on the held-out rows",
+      "passed": true,
+      "detail": "on 9,043 unseen rows the cut calls 3,621 and nets 10,988.50 EUR (1.215 EUR per client), against 4,546.00 EUR at 0.5"
+    },
+    {
+      "check": "the threshold figure was written",
+      "passed": true,
+      "detail": "07_threshold_curve.png is 221,145 bytes and the record carries the threshold it marks (0.0750)"
+    },
+    {
+      "check": "the record on disk is this run's answers, not a transcript of another",
+      "passed": true,
+      "detail": "threshold_choice.json: threshold 0.0750, 403 curve points, held-out net 10,988.50 EUR, 14 checks before this one, figure 221,145 B"
+    }
+  ],
+  "checks_passed": 15,
+  "checks_total": 15,
+  "checks_ok": true
+}

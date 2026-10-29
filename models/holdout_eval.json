@@ -35,6 +35,8 @@
       "true_negative": 5185,
       "false_positive_rate": 0.3506574827802129,
       "specificity": 0.6493425172197871,
+      "accuracy": 0.6641601238527037,
+      "balanced_accuracy": 0.712667477891557,
       "label": "7.50%",
       "role": "D17 break-even: a call pays for itself above this subscription rate",
       "rejected": false,
@@ -56,6 +58,8 @@
       "true_negative": 7387,
       "false_positive_rate": 0.07489041953663118,
       "specificity": 0.9251095804633688,
+      "accuracy": 0.8789118655313503,
+      "balanced_accuracy": 0.7276776635776201,
       "label": "0.2103",
       "role": "T32 mean CV cut: chosen on the training half, never on these rows",
       "rejected": false,
@@ -77,6 +81,8 @@
       "true_negative": 7846,
       "false_positive_rate": 0.017407639323732,
       "specificity": 0.982592360676268,
+      "accuracy": 0.8960521950680084,
+      "balanced_accuracy": 0.6127517568976804,
       "label": "0.5",
       "role": "conventional cut: carried because the task asks for it, rejected by T29-T32",
       "rejected": true,
@@ -87,6 +93,47 @@
     "threshold": 0.21204997599124908,
     "f1": 0.5065700045310377,
     "note": "the F1-maximising cut if it were fitted on the held-out rows; computed to show the adopted cut landed near it, never adopted and never used to re-select anything"
+  },
+  "accuracy": {
+    "baseline_always_no": 0.8830034280659074,
+    "peak_on_held_out": {
+      "threshold": 0.4782841205596924,
+      "accuracy": 0.8976003538648678,
+      "note": "the accuracy-maximising cut on the held-out rows, computed so the claim that 0.5 is not it is measured; not adopted - 0.5 is reported because the task names it"
+    },
+    "note": "accuracy is reported because it is the metric everyone asks for and it is the one that ranks the cuts the wrong way round; `metrics.at_threshold` does not report it (D45) and `cut_table` derives it here so the doc can quote a record",
+    "cv": {
+      "0.5": {
+        "accuracy": {
+          "mean": 0.8938012314996685,
+          "sd": 0.0015977647591564107
+        },
+        "balanced_accuracy": {
+          "mean": 0.6126251112133049,
+          "sd": 0.007022572974001751
+        }
+      },
+      "operating": {
+        "accuracy": {
+          "mean": 0.8721245408518181,
+          "sd": 0.00369460701171892
+        },
+        "balanced_accuracy": {
+          "mean": 0.7194789199717663,
+          "sd": 0.006761913903354048
+        }
+      },
+      "break_even": {
+        "accuracy": {
+          "mean": 0.6542522080222353,
+          "sd": 0.009465909528818775
+        },
+        "balanced_accuracy": {
+          "mean": 0.7083684687661166,
+          "sd": 0.008348721688690766
+        }
+      }
+    }
   },
   "gap_against_cv": {
     "cv_pr_auc": 0.4460153160186124,
@@ -2162,7 +2209,7 @@
     ]
   },
   "cv_source": "models\\metrics_cv.json",
-  "elapsed_seconds": 10.2,
+  "elapsed_seconds": 9.2,
   "checks": [
     {
       "check": "the scored object is the artifact T31 persisted, not a refit",
@@ -2205,6 +2252,16 @@
       "detail": "0.5 flags 4.38% of rows and reaches 24.29% of subscribers (F1 0.3535); 0.2103 flags 12.82% and reaches 53.02% (F1 0.5061); 7.50% flags 40.04% and reaches 77.60%"
     },
     {
+      "check": "accuracy is (TP + TN)/rows and balanced accuracy is the mean of the two class rates",
+      "passed": true,
+      "detail": "accuracy and balanced accuracy re-derived from the counts of 3 held-out cuts and 3 CV cuts; max drift 0.0e+00"
+    },
+    {
+      "check": "the cut with the best accuracy has the weakest balanced accuracy, on both tables",
+      "passed": true,
+      "detail": "held-out accuracy: 0.5 89.6052% > operating 87.8912% > break-even 66.4160%; baseline 88.3003% sits between them; balanced accuracy reverses the order (0.7277 against 0.6128); CV agrees on both orderings; the accuracy maximum is 89.7600% at 0.478284, so 0.5 is not it"
+    },
+    {
       "check": "ROC-AUC and PR-AUC recompute from the ranks without scikit-learn's functions",
       "passed": true,
       "detail": "hand-written rank AUC 0.805166113684 against scikit-learn 0.805166113684; step-wise AP 0.461564969581 against 0.461564969581"
@@ -2230,7 +2287,7 @@
       "detail": "three PNGs on disk (confusion 164,168 B, roc 135,860 B, pr 178,378 B), every panel's drawn text carrying the record's precision and recall; problems: none"
     }
   ],
-  "checks_passed": 13,
-  "checks_total": 13,
+  "checks_passed": 15,
+  "checks_total": 15,
   "checks_ok": true
 }

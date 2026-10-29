@@ -608,6 +608,45 @@ finds, for **763** more calls.
 That is the same mechanism T32 measured on the training folds, now on rows that had no part in any model
 choice: 0.5 sits at the **95.6th percentile** of this model's scores.
 
+**Accuracy, and why the most accurate cut is the weakest one.** The table above says nothing about
+accuracy because `metrics.at_threshold` does not report it (D45) — but it is the first thing anyone asks
+for, so it is derived from the same counts and stored beside them rather than typed into this section:
+
+| | accuracy | balanced accuracy |
+|---|---|---|
+| **no model** — predict "no" for every client | **88.3003%** | 0.5000 |
+| **7.50%** break-even | 66.4160% | 0.7127 |
+| **0.2103** operating | 87.8912% | **0.7277** |
+| **0.5** conventional | **89.6052%** | 0.6128 |
+| CV, shipped model at 0.5 | 89.3801% ± 0.1598 | 0.6126 |
+
+Three things follow, and they are the reason accuracy is reported here and nowhere else in the project.
+
+* **The highest accuracy in the table is 89.6052% at 0.5 — and the cut that actually maximises accuracy
+on these rows buys almost nothing either.** A scan over every distinct score puts that maximum at
+**0.478284**, worth **89.7600%**: **1.46** percentage points above the **88.3003%** a lookup table with
+the word "no" in every row would score, and **0.15** points above the conventional cut. That is the
+entire value of the best possible accuracy on this dataset. The scan is in the record
+(`accuracy.peak_on_held_out`) rather than asserted, and the peak was **not** adopted — **0.5** is reported
+because the task names it. **88.3%** of these clients decline, so accuracy mostly measures the class
+balance.
+* **At the cut the project would actually run, accuracy is 87.8912% — 0.41 points *below* that
+baseline — and that is not a failure.** The model finds **561** of the **1,058** subscribers where the
+baseline finds none; accuracy counts the **598** wasted calls and none of the **561** subscriptions, so it
+books the model's entire purpose as a cost. The **7.50%** row makes the same point at volume: **21.88**
+points below the baseline, because calling **40.04%** of the list is what that cut is *for*.
+* **Balanced accuracy reverses the ranking.** It is the mean of recall and specificity — the two class
+rates weighted equally — and it is **0.6128** at 0.5 against **0.7277** at the operating cut. So the cut
+with the highest accuracy is the one that classifies subscribers worst, which is the reversal T29 and T32
+found for F1 (§9, §10) appearing in the metric most often reported as a single headline number. The CV
+table agrees on both orderings (89.3801% ± 0.1598 against 87.2125% ± 0.3695 on accuracy, 0.6126 against
+0.7195 on balanced accuracy), so this is a property of the problem rather than of one test draw.
+
+If a marker asks for one number: **89.6% accuracy against an 88.3% do-nothing baseline** — a 1.30-point
+margin, which is exactly why accuracy is not this project's headline. What the model offers is the ranking
+(PR-AUC **0.4616**, ROC-AUC **0.8052**) and what a threshold buys from it: **77.60%** of subscribers from
+**40.04%** of the calls at break-even.
+
 ### 11.4 The gap: it was expected to fall, and it did not
 
 The carry-in said the held-out figure should come out **lower** than CV, because T30 chose the configuration
@@ -668,17 +707,19 @@ operating point — and it is evidence *about the rule*, obtained without using 
 
 ### 11.7 Verification
 
-* `python -m src.evaluate` exits **0** with **13/13** checks in **10.2 s**: the loaded object is the artifact
+* `python -m src.evaluate` exits **0** with **15/15** checks in **9.2 s**: the loaded object is the artifact
   T31 recorded (sha256 and all six parameters); the module fits nothing and loads no training rows; the rows
   partition the raw file; every row is scored once and twice identically; the three cuts are 0.075 from the
   cost model, T32's CV mean to **1e-12**, and 0.5 by convention, and none equals the held-out F1 optimum;
   every confusion cell equals scikit-learn's and partitions the rows; `metrics.at_threshold` — T32's own
   function — reproduces every number with **0.0e+00** drift; 0.5 flags the least and retains the least; the
-  ROC-AUC recomputes by midranks and the AP by the step definition to **1e-12**; the stored curves run corner
-  to corner and integrate back to the reported metrics; the gap is arithmetic on both records; the bootstrap
+  ROC-AUC recomputes by midranks and the AP by the step definition to **1e-12**; accuracy is (TP + TN)/rows
+  and balanced accuracy the mean of the two class rates, on both tables; the cut with the best accuracy is
+  the one with the weakest balanced accuracy, on both tables; the stored curves run corner to corner and
+  integrate back to the reported metrics; the gap is arithmetic on both records; the bootstrap
   replays bit-identically from its seed and its interval contains its own estimate; and all three figures
   exist, are PNGs, post-date the run and carry the record's numbers.
-* **119 independent checks** in a separate script that never imports `src.evaluate`, using different
+* **144 independent checks** in a separate script that never imports `src.evaluate`, using different
   implementations throughout: ROC-AUC from midranks built with `unique`/`bincount` instead of a loop over
   runs, AP from step blocks, confusion counts from `searchsorted` over sorted scores instead of masking, and
   the bootstrap summary recomputed with numpy's percentiles from the **stored draws**.

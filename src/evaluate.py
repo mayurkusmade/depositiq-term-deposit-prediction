@@ -188,12 +188,48 @@ def cut_table(y: np.ndarray, scores: np.ndarray, descriptors: tuple[dict, ...]) 
         record["true_negative"] = int(len(y) - record["flagged"] - record["false_negative"])
         record["false_positive_rate"] = record["false_positive"] / negatives if negatives else 0.0
         record["specificity"] = 1.0 - record["false_positive_rate"]
+        # Accuracy is the share of rows classified correctly. `metrics.at_threshold` deliberately does not
+        # report it (D45), so it is derived here - but derived in the module rather than typed into the doc,
+        # because every number in §11 has to come from this record.
+        record["accuracy"] = (record["true_positive"] + record["true_negative"]) / len(y)
+        record["balanced_accuracy"] = (record["recall"] + record["specificity"]) / 2.0
         record["label"] = descriptor["label"]
         record["role"] = descriptor["role"]
         record["rejected"] = descriptor["rejected"]
         record["key"] = descriptor["key"]
         rows.append(record)
     return rows
+
+
+def cv_accuracy(cv_record: dict) -> dict:
+    """
+    Accuracy at each cut from T32's stored per-fold counts, so the CV row can sit beside the held-out one.
+
+    No model is refitted and nothing is recomputed from scratch: every term comes from a count already in
+    `models/metrics_cv.json`, and the derivation is the same arithmetic as `cut_table`'s.
+    """
+    folds = cv_record["models"]["xgboost_tuned"]["folds"]
+    out = {}
+    for prefix, label in (("half", "0.5"), ("nested", "operating"), ("be", "break_even")):
+        accuracies, balanced = [], []
+        for fold in folds:
+            negatives = fold["rows"] - fold["positives"]
+            true_positive = fold[f"{prefix}_true_positive"]
+            false_positive = fold[f"{prefix}_false_positive"]
+            false_negative = fold[f"{prefix}_false_negative"]
+            true_negative = fold["rows"] - fold[f"{prefix}_flagged"] - false_negative
+            accuracies.append((true_positive + true_negative) / fold["rows"])
+            balanced.append(
+                ((true_positive / (true_positive + false_negative))
+                 + (true_negative / negatives)) / 2.0
+            )
+        out[label] = {
+            "accuracy": {"mean": float(np.mean(accuracies)),
+                         "sd": float(np.std(accuracies, ddof=metric_table.SD_DDOF))},
+            "balanced_accuracy": {"mean": float(np.mean(balanced)),
+                                  "sd": float(np.std(balanced, ddof=metric_table.SD_DDOF))},
+        }
+    return out
 
 
 def curve_data(y: np.ndarray, scores: np.ndarray) -> dict:
@@ -505,6 +541,26 @@ def draw_pr(y: np.ndarray, scores: np.ndarray, curves: dict, cuts: list[dict],
 # ---------------------------------------------------------------------------
 # The gap against cross-validation
 # ---------------------------------------------------------------------------
+def accuracy_optimal_on_these_rows(y: np.ndarray, scores: np.ndarray) -> tuple[float, float]:
+    """
+    The accuracy-maximising cut on the held-out rows, and its accuracy.
+
+    Recorded for the same reason as the F1 peak: §11 claims that 0.5 is not the best cut, and an unmeasured
+    maximum is exactly the kind of sentence this project does not allow. Not adopted - 0.5 is reported
+    because the task names it.
+    """
+    order = np.argsort(-scores, kind="mergesort")
+    truth = y[order]
+    positives = int(y.sum())
+    true_positive = np.cumsum(truth)
+    false_positive = np.cumsum(1 - truth)
+    false_negative = positives - true_positive
+    true_negative = len(y) - true_positive - false_positive - false_negative
+    accuracy = (true_positive + true_negative) / len(y)
+    best = int(np.argmax(accuracy))
+    return float(scores[order][best]), float(accuracy[best])
+
+
 def build_gap(curves: dict, cv_summary: dict, boot: dict) -> dict:
     """
     Put the held-out figure beside the CV figure and say how far apart they are in CV standard deviations.
@@ -643,6 +699,8 @@ def validate(
     drawn: dict,
     started: float,
     peak: dict,
+    cv_acc: dict,
+    accuracy_peak: dict,
 ) -> list[dict]:
     """Same contract as every other phase: a check that cannot run is FAILED, never raised (D25)."""
     checks: list[dict] = []
@@ -799,6 +857,70 @@ def validate(
     compare("0.5 is still the 95th-percentile bar out of sample, and costs recall twice over",
             half_flags_almost_nothing)
 
+    # --- accuracy, and why the best one is not the best model -------------------------------
+    def accuracy_is_arithmetic() -> tuple[bool, str]:
+        """(TP + TN) / rows for both tables, re-derived from the counts each one stores."""
+        worst = 0.0
+        for cut in cuts:
+            expected = (cut["true_positive"] + cut["true_negative"]) / cut["rows"]
+            worst = max(worst, abs(expected - cut["accuracy"]))
+            worst = max(worst, abs((cut["recall"] + cut["specificity"]) / 2.0 - cut["balanced_accuracy"]))
+        for label, block in cv_acc.items():
+            prefixes = {"0.5": "half", "operating": "nested", "break_even": "be"}
+            prefix = prefixes[label]
+            accuracies, balanced = [], []
+            for fold in cv_record["models"]["xgboost_tuned"]["folds"]:
+                negatives = fold["rows"] - fold["positives"]
+                true_negative = fold["rows"] - fold[f"{prefix}_flagged"] - fold[f"{prefix}_false_negative"]
+                accuracies.append((fold[f"{prefix}_true_positive"] + true_negative) / fold["rows"])
+                balanced.append((fold[f"{prefix}_recall"] + true_negative / negatives) / 2.0)
+            worst = max(worst, abs(float(np.mean(accuracies)) - block["accuracy"]["mean"]))
+            worst = max(worst, abs(float(np.mean(balanced)) - block["balanced_accuracy"]["mean"]))
+        return worst <= 1e-12, (
+            f"accuracy and balanced accuracy re-derived from the counts of 3 held-out cuts and 3 CV cuts; "
+            f"max drift {worst:.1e}"
+        )
+
+    compare("accuracy is (TP + TN)/rows and balanced accuracy is the mean of the two class rates",
+            accuracy_is_arithmetic)
+
+    def the_most_accurate_cut_is_the_worst_one() -> tuple[bool, str]:
+        """
+        The claim the doc makes, stated so it fails if the numbers move: 0.5 wins on accuracy and loses on
+        balanced accuracy, and the operating cut sits *below* the do-nothing baseline on accuracy while
+        finding hundreds of subscribers.
+        """
+        baseline = 1.0 - float(y.mean())
+        break_even, operating, conventional = cuts
+        held_out_agrees = (
+            conventional["accuracy"] > operating["accuracy"] > break_even["accuracy"]
+            and operating["balanced_accuracy"] > conventional["balanced_accuracy"]
+            and conventional["accuracy"] > baseline > operating["accuracy"]
+        )
+        cv_agrees = (
+            cv_acc["0.5"]["accuracy"]["mean"] > cv_acc["operating"]["accuracy"]["mean"]
+            and cv_acc["operating"]["balanced_accuracy"]["mean"]
+            > cv_acc["0.5"]["balanced_accuracy"]["mean"]
+        )
+        recomputed_threshold, recomputed_peak = accuracy_optimal_on_these_rows(y, scores)
+        peak_ok = (
+            abs(accuracy_peak["threshold"] - recomputed_threshold) <= 1e-12
+            and abs(accuracy_peak["accuracy"] - recomputed_peak) <= 1e-12
+            and accuracy_peak["accuracy"] >= max(cut["accuracy"] for cut in cuts)
+            and abs(accuracy_peak["threshold"] - CONVENTIONAL) > 1e-9
+        )
+        return held_out_agrees and cv_agrees and peak_ok, (
+            f"held-out accuracy: 0.5 {conventional['accuracy']:.4%} > operating "
+            f"{operating['accuracy']:.4%} > break-even {break_even['accuracy']:.4%}; baseline "
+            f"{baseline:.4%} sits between them; balanced accuracy reverses the order "
+            f"({operating['balanced_accuracy']:.4f} against {conventional['balanced_accuracy']:.4f}); "
+            f"CV agrees on both orderings; the accuracy maximum is {accuracy_peak['accuracy']:.4%} at "
+            f"{accuracy_peak['threshold']:.6f}, so 0.5 is not it"
+        )
+
+    compare("the cut with the best accuracy has the weakest balanced accuracy, on both tables",
+            the_most_accurate_cut_is_the_worst_one)
+
     # --- the metrics recompute from the ranks ----------------------------------------------
     def metrics_recompute_by_hand() -> tuple[bool, str]:
         auc = rank_auc(y, scores)
@@ -936,6 +1058,7 @@ def report(variant: str = "full") -> dict:
 
     cv_record = json.loads(CV_RECORD_PATH.read_text())
     cv_summary = cv_record["models"]["xgboost_tuned"]["summary"]
+    cv_accuracy_block = cv_accuracy(cv_record)
     boot = bootstrap(y, scores, float(cv_summary["pr_auc"]["mean"]))
     gap = build_gap(curves, cv_summary, boot)
 
@@ -947,6 +1070,16 @@ def report(variant: str = "full") -> dict:
         "f1": peak_f1,
         "note": "the F1-maximising cut if it were fitted on the held-out rows; computed to show the "
                 "adopted cut landed near it, never adopted and never used to re-select anything",
+    }
+
+    # Same discipline for accuracy: the sentence "0.5 is not the most accurate cut" is only defensible if
+    # the scan that finds the most accurate one is in the record.
+    accuracy_threshold, accuracy_peak = accuracy_optimal_on_these_rows(y, scores)
+    accuracy_peak_block = {
+        "threshold": accuracy_threshold,
+        "accuracy": accuracy_peak,
+        "note": "the accuracy-maximising cut on the held-out rows, computed so the claim that 0.5 is not "
+                "it is measured; not adopted - 0.5 is reported because the task names it",
     }
 
     drawn = {
@@ -991,6 +1124,14 @@ def report(variant: str = "full") -> dict:
         },
         "cuts": cuts,
         "f1_peak_on_held_out": peak,
+        "accuracy": {
+            "baseline_always_no": float(1.0 - y.mean()),
+            "peak_on_held_out": accuracy_peak_block,
+            "note": "accuracy is reported because it is the metric everyone asks for and it is the one "
+                    "that ranks the cuts the wrong way round; `metrics.at_threshold` does not report it "
+                    "(D45) and `cut_table` derives it here so the doc can quote a record",
+            "cv": cv_accuracy_block,
+        },
         "gap_against_cv": gap,
         "bootstrap": {key: value for key, value in boot.items()},
         "figures": figure_block,
@@ -1000,7 +1141,7 @@ def report(variant: str = "full") -> dict:
     }
 
     checks = validate(pipeline, card, frame, y, scores, cuts, curves, boot, gap, cv_record,
-                      drawn, started_wall, peak)
+                      drawn, started_wall, peak, cv_accuracy_block, accuracy_peak_block)
     payload["checks"] = checks
     payload["checks_passed"] = sum(1 for check in checks if check["passed"])
     payload["checks_total"] = len(checks)
@@ -1042,6 +1183,11 @@ def print_report(result: dict) -> None:
               f"{cut['flagged']:>9,} ({cut['flagged_share']:>5.2%})"
               f"{cut['true_positive']:>7,}{cut['false_positive']:>7,}{cut['false_negative']:>7,}"
               f"{cut['precision']:>11.4f}{cut['recall']:>9.4f}{cut['f1']:>9.4f}{mark}")
+    print()
+    baseline = result["accuracy"]["baseline_always_no"]
+    print(f"accuracy : no model, all 'no' {baseline:.4%} | " + " | ".join(
+        f"{cut['label']} {cut['accuracy']:.4%} (balanced {cut['balanced_accuracy']:.4f})"
+        for cut in result["cuts"]))
     print()
     print("wrote    : " + ", ".join(f"{name} {block['bytes']:,} B"
                                     for name, block in result["figures"].items())

@@ -2,7 +2,7 @@
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
 **Last updated:** 2026-10-30 00:20
-**Overall completion:** 70% (32 / 46 tasks)
+**Overall completion:** 74% (34 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -15,10 +15,10 @@
 | 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
-| 7 | Model Evaluation & Validation | 15 | 2 / 5 | T32–T36 |
+| 7 | Model Evaluation & Validation | 15 | 3 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **33 / 46** | |
+| | **Total** | **100** | **34 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,10 +28,9 @@
 
 ## NEXT TASK
 
-**T34 | Phase 7 – Model Evaluation | Threshold tuning against the cost model.**
-Open: `docs/07_threshold.md`, a threshold figure under `reports/figures/`.
-Choose the operating threshold from **expected business cost** — D17's cost model in `src/cost.py` — rather
-than from accuracy, and write the argument down.
+**T35 | Phase 7 – Model Evaluation | Top-decile lift and campaign prioritisation.**
+Use the saved T34 calibration/threshold record and measure lift, capture and net value for ranked
+campaign slices. Keep the claim scoped to fixed call capacity, as D18 requires.
 **Done when:** the chosen threshold is justified by expected business cost rather than by accuracy.
 **Carry in:** five constraints, each from a measurement. **(1) The score is a probability on unseen rows.**
 T33 measured mean p **0.1151** against a **0.1170** base rate on the 9,043 held-out rows, with Brier
@@ -1691,6 +1690,32 @@ three figure sizes were read directly out of `models/holdout_eval.json` instead 
 `07_pr_curve.png`, `models/holdout_eval.json`, `docs/06_modeling.md`, `PROGRESS.md`.
 **Next:** T34 — choose the operating threshold from the cost model, with a reliability check and a
 sensitivity band, on the training half and checked on the held-out rows.
+
+---
+
+### 2026-10-30 — Session 27 (T34)
+
+**Completed:** **T34** — calibrated the shipped XGBoost probabilities with a monotone isotonic map
+trained only from five-fold out-of-fold predictions, selected the operating rule from D17's expected
+business value, and recorded the result in `models/threshold_eval.json`.
+
+The chosen threshold is **7.50%** because D17's measured assumptions are **C = €1.50** per call and
+**V = €20.00** per subscription, so `p* = C/V = 0.0750`. On cross-fitted training predictions it
+calls **13,882 / 36,168** clients, reaches **3,251** subscribers and produces **€3.18 net value per
+call**. The held-out confirmation, which did not choose either the calibration or the threshold, calls
+**3,407 / 9,043**, reaches **802** subscribers and produces **€3.21 net value per call**.
+
+Calibration moved the training mean probability from **0.1167** to **0.1170** and the held-out Brier
+score from **0.0804** to **0.0803**. The record also carries the reliability bins, D17's sensitivity
+table, the older raw-score 0.2103 comparison, and `reports/figures/08_threshold_cost_calibration.png`.
+The 0.2103 comparison calls **1,159** held-out clients and reaches **561** subscribers at **€8.18 net
+value per call**, but it remains a capacity comparison on the raw score, not a probability threshold.
+
+**Verified:** `/tmp/depositiq-venv/bin/python -m src.threshold` exits **0** with **6/6 checks**; the
+figure is a **2080 × 832** PNG, and the held-out labels are used only for the confirmation record.
+
+**Blocked:** none.
+**Next:** T35 — measure top-decile lift and fixed-capacity campaign prioritisation.
 
 ---
 

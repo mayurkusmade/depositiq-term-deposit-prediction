@@ -1,0 +1,529 @@
+{
+  "task": "T34",
+  "variant": "full",
+  "training_rows": 36168,
+  "held_out_rows": 9043,
+  "base_rate": 0.11698186241981863,
+  "calibration": {
+    "method": "isotonic regression",
+    "training_fit": "five-fold out-of-fold raw probabilities only",
+    "raw_training": {
+      "mean_prediction": 0.1166836581182688,
+      "brier": 0.0819631046544145
+    },
+    "calibrated_training": {
+      "mean_prediction": 0.11700466159991232,
+      "brier": 0.08174763779170056
+    },
+    "raw_held_out": {
+      "mean_prediction": 0.11513876283181275,
+      "brier": 0.08037876033538645
+    },
+    "calibrated_held_out": {
+      "mean_prediction": 0.11549598805257376,
+      "brier": 0.0802791207590392
+    },
+    "reliability_training_raw": [
+      {
+        "bin": 1,
+        "lower": 0.0,
+        "upper": 0.1,
+        "count": 25936,
+        "mean_prediction": 0.05035414844077356,
+        "observed_rate": 0.049699259716224554
+      },
+      {
+        "bin": 2,
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 5229,
+        "mean_prediction": 0.13300219095273053,
+        "observed_rate": 0.13233887932683114
+      },
+      {
+        "bin": 3,
+        "lower": 0.2,
+        "upper": 0.30000000000000004,
+        "count": 1378,
+        "mean_prediction": 0.2454677464113353,
+        "observed_rate": 0.29245283018867924
+      },
+      {
+        "bin": 4,
+        "lower": 0.30000000000000004,
+        "upper": 0.4,
+        "count": 1070,
+        "mean_prediction": 0.3475878827204214,
+        "observed_rate": 0.4009345794392523
+      },
+      {
+        "bin": 5,
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 871,
+        "mean_prediction": 0.4457939782112529,
+        "observed_rate": 0.4489092996555683
+      },
+      {
+        "bin": 6,
+        "lower": 0.5,
+        "upper": 0.6000000000000001,
+        "count": 626,
+        "mean_prediction": 0.5480498771507519,
+        "observed_rate": 0.5015974440894568
+      },
+      {
+        "bin": 7,
+        "lower": 0.6000000000000001,
+        "upper": 0.7000000000000001,
+        "count": 421,
+        "mean_prediction": 0.6477106842179197,
+        "observed_rate": 0.5985748218527316
+      },
+      {
+        "bin": 8,
+        "lower": 0.7000000000000001,
+        "upper": 0.8,
+        "count": 374,
+        "mean_prediction": 0.7490964952637168,
+        "observed_rate": 0.7058823529411765
+      },
+      {
+        "bin": 9,
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 232,
+        "mean_prediction": 0.8436642510109934,
+        "observed_rate": 0.7370689655172413
+      },
+      {
+        "bin": 10,
+        "lower": 0.9,
+        "upper": 1.0,
+        "count": 31,
+        "mean_prediction": 0.9239721182853945,
+        "observed_rate": 0.8387096774193549
+      }
+    ],
+    "reliability_training_calibrated": [
+      {
+        "bin": 1,
+        "lower": 0.0,
+        "upper": 0.1,
+        "count": 26489,
+        "mean_prediction": 0.05044457355077935,
+        "observed_rate": 0.05088904828419344
+      },
+      {
+        "bin": 2,
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 4077,
+        "mean_prediction": 0.12599242690016568,
+        "observed_rate": 0.12558253617856266
+      },
+      {
+        "bin": 3,
+        "lower": 0.2,
+        "upper": 0.30000000000000004,
+        "count": 1505,
+        "mean_prediction": 0.24818830704370123,
+        "observed_rate": 0.24850498338870433
+      },
+      {
+        "bin": 4,
+        "lower": 0.30000000000000004,
+        "upper": 0.4,
+        "count": 966,
+        "mean_prediction": 0.355566961166213,
+        "observed_rate": 0.35403726708074534
+      },
+      {
+        "bin": 5,
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 1804,
+        "mean_prediction": 0.44439570166378595,
+        "observed_rate": 0.4495565410199557
+      },
+      {
+        "bin": 6,
+        "lower": 0.5,
+        "upper": 0.6000000000000001,
+        "count": 394,
+        "mean_prediction": 0.5412867709241265,
+        "observed_rate": 0.5
+      },
+      {
+        "bin": 7,
+        "lower": 0.6000000000000001,
+        "upper": 0.7000000000000001,
+        "count": 528,
+        "mean_prediction": 0.6568669508487812,
+        "observed_rate": 0.6799242424242424
+      },
+      {
+        "bin": 8,
+        "lower": 0.7000000000000001,
+        "upper": 0.8,
+        "count": 329,
+        "mean_prediction": 0.7190298324958273,
+        "observed_rate": 0.6808510638297872
+      },
+      {
+        "bin": 9,
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 57,
+        "mean_prediction": 0.8481722533726503,
+        "observed_rate": 0.8947368421052632
+      },
+      {
+        "bin": 10,
+        "lower": 0.9,
+        "upper": 1.0,
+        "count": 19,
+        "mean_prediction": 0.959834945927714,
+        "observed_rate": 0.6842105263157895
+      }
+    ],
+    "reliability_held_out_raw": [
+      {
+        "bin": 1,
+        "lower": 0.0,
+        "upper": 0.1,
+        "count": 6508,
+        "mean_prediction": 0.05003606161661046,
+        "observed_rate": 0.048094652735095264
+      },
+      {
+        "bin": 2,
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 1327,
+        "mean_prediction": 0.1327861933418028,
+        "observed_rate": 0.1333835719668425
+      },
+      {
+        "bin": 3,
+        "lower": 0.2,
+        "upper": 0.30000000000000004,
+        "count": 328,
+        "mean_prediction": 0.2472918397497113,
+        "observed_rate": 0.3018292682926829
+      },
+      {
+        "bin": 4,
+        "lower": 0.30000000000000004,
+        "upper": 0.4,
+        "count": 279,
+        "mean_prediction": 0.3492851811711506,
+        "observed_rate": 0.4121863799283154
+      },
+      {
+        "bin": 5,
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 205,
+        "mean_prediction": 0.4488455458385188,
+        "observed_rate": 0.47317073170731705
+      },
+      {
+        "bin": 6,
+        "lower": 0.5,
+        "upper": 0.6000000000000001,
+        "count": 124,
+        "mean_prediction": 0.548325571321672,
+        "observed_rate": 0.5887096774193549
+      },
+      {
+        "bin": 7,
+        "lower": 0.6000000000000001,
+        "upper": 0.7000000000000001,
+        "count": 106,
+        "mean_prediction": 0.6472222984961744,
+        "observed_rate": 0.5849056603773585
+      },
+      {
+        "bin": 8,
+        "lower": 0.7000000000000001,
+        "upper": 0.8,
+        "count": 89,
+        "mean_prediction": 0.7513048119759291,
+        "observed_rate": 0.7078651685393258
+      },
+      {
+        "bin": 9,
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 70,
+        "mean_prediction": 0.8412668704986572,
+        "observed_rate": 0.7714285714285715
+      },
+      {
+        "bin": 10,
+        "lower": 0.9,
+        "upper": 1.0,
+        "count": 7,
+        "mean_prediction": 0.9184993079730442,
+        "observed_rate": 0.7142857142857143
+      }
+    ],
+    "reliability_held_out_calibrated": [
+      {
+        "bin": 1,
+        "lower": 0.0,
+        "upper": 0.1,
+        "count": 6739,
+        "mean_prediction": 0.05102837719934869,
+        "observed_rate": 0.04971063956076569
+      },
+      {
+        "bin": 2,
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 940,
+        "mean_prediction": 0.1268863154880476,
+        "observed_rate": 0.1372340425531915
+      },
+      {
+        "bin": 3,
+        "lower": 0.2,
+        "upper": 0.30000000000000004,
+        "count": 389,
+        "mean_prediction": 0.24889680119319513,
+        "observed_rate": 0.2544987146529563
+      },
+      {
+        "bin": 4,
+        "lower": 0.30000000000000004,
+        "upper": 0.4,
+        "count": 198,
+        "mean_prediction": 0.36139682928264927,
+        "observed_rate": 0.32323232323232326
+      },
+      {
+        "bin": 5,
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 459,
+        "mean_prediction": 0.4425896301266796,
+        "observed_rate": 0.477124183006536
+      },
+      {
+        "bin": 6,
+        "lower": 0.5,
+        "upper": 0.6000000000000001,
+        "count": 74,
+        "mean_prediction": 0.5448667026618423,
+        "observed_rate": 0.5945945945945946
+      },
+      {
+        "bin": 7,
+        "lower": 0.6000000000000001,
+        "upper": 0.7000000000000001,
+        "count": 172,
+        "mean_prediction": 0.6671864456653743,
+        "observed_rate": 0.6453488372093024
+      },
+      {
+        "bin": 8,
+        "lower": 0.7000000000000001,
+        "upper": 0.8,
+        "count": 57,
+        "mean_prediction": 0.7317453047884565,
+        "observed_rate": 0.7719298245614035
+      },
+      {
+        "bin": 9,
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 15,
+        "mean_prediction": 0.8643396226415092,
+        "observed_rate": 0.8666666666666667
+      }
+    ]
+  },
+  "cost_model": {
+    "call_cost_eur": 1.5,
+    "value_per_subscription_eur": 20.0,
+    "break_even_threshold": 0.075,
+    "sensitivity": [
+      {
+        "call_cost_eur": 0.75,
+        "value_10": 0.075,
+        "value_20": 0.0375,
+        "value_40": 0.0187,
+        "value_60": 0.0125
+      },
+      {
+        "call_cost_eur": 1.0,
+        "value_10": 0.1,
+        "value_20": 0.05,
+        "value_40": 0.025,
+        "value_60": 0.0167
+      },
+      {
+        "call_cost_eur": 1.5,
+        "value_10": 0.15,
+        "value_20": 0.075,
+        "value_40": 0.0375,
+        "value_60": 0.025
+      },
+      {
+        "call_cost_eur": 2.0,
+        "value_10": 0.2,
+        "value_20": 0.1,
+        "value_40": 0.05,
+        "value_60": 0.0333
+      },
+      {
+        "call_cost_eur": 3.0,
+        "value_10": 0.3,
+        "value_20": 0.15,
+        "value_40": 0.075,
+        "value_60": 0.05
+      }
+    ]
+  },
+  "chosen_threshold": {
+    "threshold": 0.075,
+    "rule": "D17 expected net value: call when calibrated p >= C/V",
+    "training_cross_fitted": {
+      "threshold": 0.075,
+      "clients_called": 13882,
+      "subscribers_reached": 3251,
+      "subscribers_missed": 980,
+      "wasted_calls": 10631,
+      "revenue_eur": 65020.0,
+      "call_cost_eur": 20823.0,
+      "net_value_eur": 44197.0,
+      "roi": 2.122508764347116,
+      "cost_per_subscription_eur": 6.405106121193479,
+      "expected_net_value_per_call_eur": 3.183763146520674,
+      "expected_cost_per_call_eur": 1.5,
+      "called_share": 0.3838199513381995,
+      "subscriber_rate_in_calls": 0.2341881573260337
+    },
+    "held_out_confirmation": {
+      "threshold": 0.075,
+      "clients_called": 3407,
+      "subscribers_reached": 802,
+      "subscribers_missed": 256,
+      "wasted_calls": 2605,
+      "revenue_eur": 16040.0,
+      "call_cost_eur": 5110.5,
+      "net_value_eur": 10929.5,
+      "roi": 2.1386361412777615,
+      "cost_per_subscription_eur": 6.37219451371571,
+      "expected_net_value_per_call_eur": 3.2079542119166424,
+      "expected_cost_per_call_eur": 1.5,
+      "called_share": 0.3767555014928674,
+      "subscriber_rate_in_calls": 0.23539771059583212
+    }
+  },
+  "empirical_training_best": {
+    "threshold": 0.07667031763417305,
+    "clients_called": 13882,
+    "subscribers_reached": 3251,
+    "subscribers_missed": 980,
+    "wasted_calls": 10631,
+    "revenue_eur": 65020.0,
+    "call_cost_eur": 20823.0,
+    "net_value_eur": 44197.0,
+    "roi": 2.122508764347116,
+    "cost_per_subscription_eur": 6.405106121193479,
+    "expected_net_value_per_call_eur": 3.183763146520674,
+    "expected_cost_per_call_eur": 1.5,
+    "called_share": 0.3838199513381995,
+    "subscriber_rate_in_calls": 0.2341881573260337,
+    "rank": 13823,
+    "threshold_rule": "maximum observed net campaign value on cross-fitted training scores"
+  },
+  "legacy_raw_held_out": {
+    "threshold": 0.21032541692256929,
+    "note": "T33's raw-score cut, reported for comparison rather than selected here",
+    "campaign": {
+      "threshold": 0.21032541692256929,
+      "clients_called": 1159,
+      "subscribers_reached": 561,
+      "subscribers_missed": 497,
+      "wasted_calls": 598,
+      "revenue_eur": 11220.0,
+      "call_cost_eur": 1738.5,
+      "net_value_eur": 9481.5,
+      "roi": 5.453839516824849,
+      "cost_per_subscription_eur": 3.0989304812834226,
+      "expected_net_value_per_call_eur": 8.180759275237273,
+      "expected_cost_per_call_eur": 1.5,
+      "called_share": 0.12816543182572154,
+      "subscriber_rate_in_calls": 0.4840379637618637
+    }
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "rows": 7234,
+      "positives": 846,
+      "raw_mean": 0.1162796306726645
+    },
+    {
+      "fold": 2,
+      "rows": 7234,
+      "positives": 846,
+      "raw_mean": 0.11533270730639074
+    },
+    {
+      "fold": 3,
+      "rows": 7234,
+      "positives": 847,
+      "raw_mean": 0.11588665848964286
+    },
+    {
+      "fold": 4,
+      "rows": 7233,
+      "positives": 846,
+      "raw_mean": 0.11662968389069814
+    },
+    {
+      "fold": 5,
+      "rows": 7233,
+      "positives": 846,
+      "raw_mean": 0.11928996305620962
+    }
+  ],
+  "figure": {
+    "bytes": 183780,
+    "path": "reports/figures/08_threshold_cost_calibration.png"
+  },
+  "checks": [
+    {
+      "check": "training and held-out rows remain separate",
+      "passed": true
+    },
+    {
+      "check": "out-of-fold scores cover each training row once",
+      "passed": true
+    },
+    {
+      "check": "calibrated scores are probabilities",
+      "passed": true
+    },
+    {
+      "check": "calibrator is monotone",
+      "passed": true
+    },
+    {
+      "check": "chosen threshold is D17 break-even",
+      "passed": true
+    },
+    {
+      "check": "figure is a real output",
+      "passed": true
+    }
+  ],
+  "checks_passed": 6,
+  "checks_total": 6,
+  "checks_ok": true,
+  "elapsed_seconds": 3.5
+}

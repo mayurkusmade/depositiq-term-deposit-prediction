@@ -15,10 +15,10 @@
 | 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
-| 7 | Model Evaluation & Validation | 15 | 3 / 5 | T32–T36 |
+| 7 | Model Evaluation & Validation | 15 | 4 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **34 / 46** | |
+| | **Total** | **100** | **35 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,29 +28,28 @@
 
 ## NEXT TASK
 
-**T35 | Phase 7 – Model Evaluation | Lift, gain and decile analysis.**
-Open: `reports/figures/08_lift_gain.png`, `reports/lift_table.csv`.
-Turn the ranking into the two artefacts a campaign manager can act on: a decile table (subscribers reached,
-cumulative share of subscribers, lift against that half's own base rate, per decile and cumulative) and a
-cumulative gain curve. Then translate the adopted cut into **calls saved at equal recall**, which is the
-only form of the benefit a bank can book.
-**Done when:** top-decile lift is quantified and translated into calls saved.
-**Carry in:** five constraints, each from a measurement. **(1) Each half gets its own base rate.** The
-training half's is **11.6982%** (4,231 / 36,168) and the held-out half's is **11.6997%** (1,058 / 9,043) -
-close enough to look interchangeable and not the same number: a lift computed on pooled rows would use a
-denominator from neither half, so each table states which rows it is over. **(2) Deciles are of the ranking,
-so this task is threshold-free** - which is what makes it the one Phase 7 step that can report on the
-held-out rows without spending them (D53, D54). **(3) The cut is D55's 0.0750 and is not re-chosen here.**
-At it the training half calls **14,866** of 36,168 and reaches **3,296** of 4,231 - **21,302 fewer calls for
-935 subscribers forgone**. That trade is the quantity T35 has to price, because "calls saved" is a benefit
-only if the forgone subscribers cost less than the calls they were not worth; the answer is in D55's 43,621
-EUR against call-everyone's 30,368 EUR, and the lift table must reproduce it rather than restate it.
-**(4) Reconcile, do not add a third number.** D15's target was top-decile lift **> 2x**; T32 has already
-measured **3.92x** at the nested cut's **13.26%** coverage and **1.90x** at the business cut's **41.10%**,
-so the decile table has to land on both of those or explain the difference. **(5) Report-only on the held-out
-rows**, as D53 and D54 require.
-Figure and table namespacing: `08_lift_gain.png`, `reports/lift_table.csv`, continuing the `reports/figures/`
-convention T16-T33 established.
+**T36 | Phase 7 – Model Evaluation | With-vs-without `duration` comparison.**
+Open: `reports/duration_comparison.csv`, notes appended to `docs/05_leakage_audit.md`.
+Fit the model twice under **identical settings** — arm A without `duration` (**65** columns, the deployable
+model) and arm B with it (**66**) — and report the gap as the price of a deployable model.
+**Done when:** both runs use identical settings and the performance gap is explained as leakage.
+**Carry in:** five constraints, each from a measurement or a rule already written down. **(1) The decision
+rule is pre-registered and T36 executes it** - `docs/05_leakage_audit.md` §4.5 fixes it before the numbers
+exist (D40): **arm A ships regardless of the gap**, a gap is expected and is not a reason to reconsider D05,
+**arm B's metrics are labelled an upper bound** and no targeting, lift or savings claim may be built on them,
+and **a near-zero gap is reported as the finding**. T36 measures; it does not choose. **(2) One process, one
+fold split, one scorer.** Both arms run in a single invocation, the same materialised fold list replayed into
+each, toggling the column only through `src.leakage.feature_columns` - the usual way a controlled comparison
+goes wrong is a second, unnoticed difference (a re-seeded fold, a refitted scaler, a different metric call).
+The toggle is already proven: T24 recorded **arm A 65 columns, arm B 66**, differing by exactly `duration`
+through `extra_numeric=("duration",)`. **(3) The gap is quoted in PR-AUC *and* in money.** T34 put a price on a
+call (**1.50 EUR**, break-even **0.0750**) and T35 turned the ranking into **13,309 calls saved / 19,964 EUR**
+on the training half, so the gap must be converted the same way and labelled an upper bound - not left as a
+metric difference. **(4) `duration` does not exist at decision time.** It is the last call's length, measured
+after the fact; I6 records its **+0.3967** correlation with the target as a leakage red flag and the EDA
+already refuses to quote it as a good predictor. **(5) Held-out rows are report-only** (D53, D54): both arms
+are scored on the training folds, and if the held-out half is touched at all it is reported, never used to
+choose.
 
 
 ---
@@ -117,6 +116,7 @@ configuration was correct — the 40-candidate ranking is not re-tested by one p
 the same rule: T35 and T36 may **report** on these rows and may not **choose** on them, or the number above
 stops being evidence |
 | D55 | 2026-10-30 | **The operating threshold is `C/V = 0.0750`, set by the cost model's assumptions and chosen on the training folds from out-of-fold scores - never from an empirical argmax** (training peak **0.0821**, held-out peak **0.0909**, neither adopted) | Three reasons, in the order they would survive a challenge. **It is a price, not a hyperparameter:** `p* = C/V` follows from `EV = pV - C`, so it is set by `src/cost.py`'s two assumptions (**1.50 EUR** per call, **20.00 EUR** per subscription) rather than by this dataset - which is why the answer to "what if those are wrong" is a 20-cell table (**0.013-0.300** across C in 0.75-3.00 and V in 10-60), not a caveat. **The argmax is not stable and the price is:** adopting the empirical peak would have meant **0.0821** on the training folds and **0.0909** on the held-out rows, for **388.50 EUR (0.883%)** on 36,168 rows - a sampled maximum swapped for a stated rule, and it would have been chosen on the half that T33 had already been scored against. **Which edge matters:** the 1% plateau runs **0.0746-0.1016** and **0.0750 is 0.0004 above its floor**, so the rule is the most aggressive cut still within 1% of the peak - exactly what a break-even threshold should be, and said out loud rather than letting a reader assume the price sits mid-plateau. What it does **not** claim: the euros are the model's assumptions (no cross-sell, no fixed costs, no contact fatigue), no confidence interval is attached to a 0.9% difference on a flat curve, and the held-out half has now been scored twice (**T33**, **T34**) so T35 and T36 may report on those rows and may not choose on them. The capacity table is the live qualification: at **5%** of the list the campaign reaches **26%** of subscribers, so a call-capped bank should read the top of that table, not `p*` |
+| D56 | 2026-10-30 | **Lift and gain are reported per half against that half's own base rate, the adopted cut is translated into 13,309 calls saved / 19,964 EUR, and calls saved is explicitly *not* treated as the objective** | Four reasons. **The tables are threshold-free**, which is the only property that lets a Phase 7 step report on the held-out rows without spending them (D53, D54) - and it is why the held-out deciles (**4.51x** top decile) can be quoted beside the training ones (**4.37x**) rather than held back. **Each half keeps its own denominator:** the two rates are **1.5 basis points** apart, which is close enough to look interchangeable and is not, and lift is a ratio to a base rate. **D15 is met by a factor of two** (**4.3652x** / **4.5100x** against >2x), so the target is a measured result rather than an aspiration. **And the savings peak is reported against the cut rather than being adopted as it:** it sits at **18.89%** coverage (**15,188 calls**) while the cut sits at **41.10%** (**13,309**), because `saved(k) = gain x N - k` has a marginal step of `(N/positives) x y - 1` and so peaks where the *local* rate crosses the *list average* (11.7%), not the price (7.5%). Adopting it would be the same error as adopting an F1 argmax, one level up: a rate dressed as a decision. The two are reconciled by pricing the block between them, which converts at **8.96%** (**+2,350 EUR**) and **7.76%** (**+79.50 EUR**) against the **7.50%** price - inefficient calls that are still profitable ones. The self-test (**shuffled scores give a mean lift of 1.000001**) is what licenses these numbers to mean what their labels say |
 | D53 | 2026-10-30 | **Thresholded metrics are reported at three cuts — leave-one-fold-out F1-optimal (the operating point), D17's 7.50% break-even (the business cut), and 0.5 (the rejected number) — and 0.5 is never the headline** | T32 measured what T29 predicted, this time across **two different models**: at 0.5 the forest beats the shipped model by **10.6 F1 points** (**0.4565** vs **0.3509**) and at the nested cut the shipped model wins by **2.4** (**0.4877** vs **0.4641**). Neither model changed. The mechanism is visible in the flag rates: the forest's mean prediction is **0.3404** so 0.5 sits inside its distribution (**17.89%** flagged), while the shipped model's mean is **0.1166** so 0.5 is near its **95th percentile** (**4.67%** flagged) — the calibrated model is being scored at a bar almost nothing clears. Each fold's cut is chosen on the **other four folds**, so no row is judged at a threshold fitted to itself, and the module re-derives all five cuts as a check. The **7.50%** cut is the only one *not* fitted to data, and it is also the one that makes the business case: **41.10%** of the list yields **77.90%** of subscribers at **22.18%** precision, against the "call everyone" baseline's F1 of **0.2095**. Which of the two live cuts to run is a capacity question for T34, not a metric's |
 | D52 | 2026-10-29 | **The shipped model is XGBoost, untreated, at T30's tuned point** — **PR-AUC 0.4460 ± 0.0110**, ROC-AUC **0.7990**, Brier **0.0818**, mean p **0.1166** against a **0.1170** base rate — persisted as `models/final_model.joblib` (**180,520 bytes**, sha256 **7a40752f...**), with **no threshold baked in**, and justified by ranking, calibration and T29's measurement rather than by the tuned margin | The three reasons are ordered by how much they survive scrutiny. **Ranking**: it is the best PR-AUC of the seven builds and ties the best ROC-AUC. **Calibration**: mean p **0.1166** against a base rate of **0.1170** means D17's **7.50%** break-even can be applied to its output *as a probability*, which no weighted build could offer (they score the average client at **0.34–0.42**) — that is why recalibration is a refinement for T34 rather than a prerequisite. **T29**: the weight bought **+0.0023** at **1.11 SE against it** and cost half the Brier score; at the tuned point the loss widened to **−0.00291 in 0/5 folds**. What the decision explicitly does **not** rest on is the tuning: **+0.00165 at 0.58 SE**, with T28's configuration **4th of 40**, so the justification for the tuned build is that it is no worse, is equally calibrated and is reproducible from a file. **No threshold is persisted** because the operating point is T34's decision (D45), and freezing a cut into the artifact would ship an unmade decision. **No held-out score exists in this step** — T32/T33 own it, and computing it inside the step that chooses the model would make the choice look better than it is |
 | D51 | 2026-10-29 | **Tuning is a 40-draw `RandomizedSearchCV` over six axes (4,800 points, 0.8% drawn), scored on `average_precision` over the project's materialised folds, with the feature set and the imbalance treatment held out of the space**; the winner is **300 rounds / lr 0.08 / depth 5 / `min_child_weight=10` / `subsample=1.0` / `colsample_bytree=0.6`**, and its **+0.00165 ± 0.00286 PR-AUC over the untuned configuration is reported as small (0.58 SE) rather than as an improvement** | The budget is declared because a search is a sample of a space, not an optimum: 40 of 4,800 is stated in the doc, so a better configuration found later is a larger `n_iter` rather than a defect here. Two exclusions are the substance of the decision. The **feature set** is T25's and stays there (D44, and T28's trigger did not fire). The **treatment** is excluded because a search may legitimately trade calibration for ranking, and letting it re-choose `scale_pos_weight` would silently reopen T29: the weight is instead evaluated at the tuned point and reproduces T29's verdict (**-0.00291 ± 0.00300 PR-AUC, 0/5 folds**, Brier **0.1535** vs **0.0818**). The search's own score is never quoted as a result - the arms are **refits** whose per-fold numbers equal the search's split scores to **0.0e+00**, and the record carries all 40 candidate scores and both bands so the optimism is visible: **14 of 40** within one standard error of the winner, median candidate **0.4389**, and the **shipped configuration 4th of 40** at **0.4449**. That last number is the finding: T28's hand-picked settings were already inside the noise of the best of forty, which is why tuning bought a hundredth of a point rather than a model |
@@ -190,7 +190,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T32 | Rubric 7 | Cross-validated metric table | Output: `reports/metrics_cv.csv` | **done 2026-10-30** (28-row CSV + `models/metrics_cv.json`: **4 models × 5 folds + mean + sd**, on the project's materialised folds; **three cuts reported** — **nested** (F1-maximising on the other four folds), **D17's 7.50%** break-even, and **0.5 as the rejected number**; shipped model leads **every** column — PR-AUC **0.4460 ± 0.0110**, ROC-AUC **0.7990 ± 0.0086**, precision **0.4591 ± 0.0130**, recall **0.5202 ± 0.0133**, F1 **0.4877 ± 0.0110** at a mean cut of **0.2103**; **the 0.5 reversal now measured across two models** — at 0.5 the forest wins by **10.6 points** (**0.4565** vs **0.3509**) and at the nested cut the shipped model wins by **2.4 points** (**0.4877** vs **0.4641**), because 0.5 is the shipped model's **95th percentile** (flags **4.67%**) but sits inside the forest's inflated distribution (flags **17.89%**); **at the business cut the baseline is “call everyone”** — shipped flags **41.10%** of the list for **77.90%** of subscribers at **22.18%** precision (**1.90×** the base rate, vs **3.92×** at the nested cut's **13.26%** coverage); the dummy's **±0.4472** recall is a constant score alternating all/nothing, left unsmoothed; **11/11 checks** pass and `python -m src.metrics` exits **0** in **30.8 s** (forest 24.9 s); **151 independent checks** refit all four models from `train.csv` without importing `src.metrics`, `src.train` or `choose_threshold` — catching that the verifier itself was reading the **six-decimal CSV** at **1e-12** tolerance)
 - [x] T33 | Rubric 7 | Confusion matrix, ROC curve and PR curve on held-out test data | Output: `reports/figures/07_*.png` | **done 2026-10-30** (`src/evaluate.py` + three figures + `models/holdout_eval.json`; the artifact was **loaded, not refitted** — **0** fitting calls and **0** training-half loads, asserted by a source scan — and scored **once** on the **9,043** held-out rows (**1,058** subscribed, **11.6997%**): **PR-AUC 0.4616**, **ROC-AUC 0.8052**, Brier **0.0804**, mean p **0.1151**; **three cuts on every figure** — **7.50%** flags **3,621 (40.04%)** for precision **0.2267** / recall **0.7760** / F1 **0.3509**, T32's **0.2103** flags **1,159 (12.82%)** for **0.4840** / **0.5302** / **0.5061**, and **0.5** flags **396 (4.38%)** for **0.6490** / **0.2429** / **0.3535** at the **95.6th percentile** of the score distribution; **the expected fall did not happen** — held-out PR-AUC is **+0.0155** (**+1.41 CV sd**) above T30's **0.4460**, but the bootstrap over these rows puts it in **[0.4304, 0.4969]** (sd **0.0169**, **1.53×** the CV sd) with **15.4%** of draws below the CV mean, so the gap is **0.92 bootstrap sd** and the verdict is **no measurable gap**; T32's CV-derived cut lands **0.001725** from the held-out F1 optimum and costs **0.000481** F1, which is the rule's real vindication; **15/15 checks** and `python -m src.evaluate` exits **0** in **9.2 s**; **144 independent checks** recompute everything with different implementations (midranks, step-block AP, `searchsorted` counts); **two defects found and fixed** — a `rank_auc` that masked the wrong order (**0.7783** vs **0.8052**) and a **float32** Brier score (**4.4e-9**, the same family as T30's §9.5); **§11** of `docs/06_modeling.md` records it and **214** numeric tokens trace to the records, and the **accuracy** block in §11.3 - **89.6052%** at 0.5 against the **88.3003%** always-no baseline, with balanced accuracy reversing the order - is derived from the same record)
 - [x] T34 | Rubric 7 | Threshold tuning against the cost model | Output: `docs/07_threshold.md`, `reports/figures/07_threshold_curve.png` | **done 2026-10-30** (`src/threshold.py` + `docs/07_threshold.md` + `07_threshold_curve.png` (**221,145 B**) + `models/threshold_choice.json` (**77,751 B** with a **403**-point curve); the threshold **is** the price - **C 1.50 EUR / V 20.00 EUR -> p\* = 0.0750**, imported from `cost.break_even_threshold()` so a check can require the recorded cut to equal `C/V` exactly; chosen on the **training half only** from **out-of-fold** scores (**36,168** rows, **4,231** subscribers, 5 folds) whose per-fold PR-AUCs reproduce T30's tuned arm to **0.0e+00**, then checked once on the **9,043** held-out rows; **0.0750 calls 14,866 (41.10%) and reaches 3,296 (77.87%) for net 43,621 EUR**, ROI **195.6%**, **6.77 EUR** per captured subscription - against the empirical peak **0.0821 / 44,010 EUR** (the adopted cut gives up **388.50 EUR, 0.883%**), T32's F1 cut **0.2103 / 36,891 EUR**, **0.5 / 18,248 EUR** and **call-everyone 30,368 EUR**; the **1%-of-peak plateau spans 0.0746-0.1016 = 14,973-9,970 calls** and **0.0750 sits 0.0004 above its bottom edge**, making the price the most aggressive cut still within 1% - the curve ascends steeply and descends shallowly, which is why both empirical argmaxes land right of it (training **0.0821**, held-out **0.0909**) and why neither is adopted; **held out** the cut nets **10,988.50 EUR** (3,621 calls, 821 reached, ROI **202.3%**) against **9,481.50** at the F1 cut, **4,546.00** at 0.5 and **7,595.50** calling everyone, reaching **77.6%** of subscribers from **40.0%** of the list against training's **77.9%** from **41.1%**; **capacity is a different question** and is tabulated (top 5% reaches **26%** of subscribers for **44%** of the money; the unconstrained optimum sits near **30%** of the list, not 5%); **ROI and net value disagree by construction** (0.5 posts **765%** ROI and loses) so net value is the objective while the campaign is capacity- not capital-limited; **15/15 checks** and `python -m src.threshold` exits **0** in **4.6 s**; **two defects fixed** - a dead self-assignment in `held_out_check`, and a record that stored the peak but **not the curve**, leaving three euro figures quoteable only from a check's detail string)
-- [ ] T35 | Rubric 7 | Lift, gain and decile analysis | Output: `reports/figures/08_lift_gain.png`, `reports/lift_table.csv` | Done when: top-decile lift is quantified and translated into calls saved
+- [x] T35 | Rubric 7 | Lift, gain and decile analysis | Output: `reports/figures/08_lift_gain.png`, `reports/lift_table.csv` | **done 2026-10-30** (`src/lift.py` + `reports/lift_table.csv` (**20 rows x 13 columns**) + `08_lift_gain.png` (**231,645 B**) + `docs/07_lift.md` + `models/lift_results.json` (**20,661 B**); the training ranking is **T34's ranking**, produced by `threshold.oof_scores` so the lifts sit on the same five fold fits, and the held-out ranking is the persisted artifact; **each half against its own base rate** (**11.6982%** vs **11.6997%**, never pooled); **top decile lift 4.3652x training and 4.5100x held out**, clearing D15's >2x by more than a factor of two, holding **43.65%** / **45.09%** of all subscribers with the top **two** deciles holding **61.76%** / **62.29%**; **decile 3 is already below random** (**0.92x** / **0.88x**) and decile 10 sits at **0.18x** (**78 of 3,617** clients), so past the best fifth of the list the model's message is mainly negative; **the adopted cut translated into calls** - **77.90%** of subscribers from **41.10%** of the list, i.e. **13,309 calls saved (36.8% of the list, 19,964 EUR)** against a fixed order needing **28,175**, and **3,396 calls / 5,094 EUR** held out, with the calls and subscribers **identical** to T34's record; **calls saved is not the objective** - it peaks at **18.89%** coverage (**15,188 calls / 22,781 EUR**), *before* the cut and **outside** T34's money plateau (**27.6%–41.4%**), because its marginal step is `(N/positives) x y - 1` and therefore crosses the **list average**, not the price; the **8,033 calls** between the peak and the cut still convert at **8.96%** against the **7.50%** price (**+2,350 EUR**, and **7.76% / +79.50 EUR** held out, which is the aggressive edge again); **reconciliation with T32** lands on both published multipliers (**3.9488x** vs **3.9247x**, **1.8991x** vs **1.8961x**) and the second is near-exact because **0.0750 *is* 41.10% coverage**; **a shuffled-score self-test** reruns the whole table on noise and finds lifts of **0.950–1.108** (mean **1.000001**), gain within **0.0060** of the diagonal and savings within **218 calls** of zero; **17/17 checks** and `python -m src.lift` exits **0** in **4.3 s**; **401 numeric tokens** in `docs/07_lift.md` trace to the two records, and the trace caught one hand-rounded figure (**28,176** for a true **28,175**)
 - [ ] T36 | Rubric 7 | With-vs-without `duration` comparison | Output: `reports/duration_comparison.csv`, notes in `docs/05_leakage_audit.md` | Done when: both runs use identical settings and the performance gap is explained as leakage
 
 ### Phase 8 — Explainability & Business Insights
@@ -217,6 +217,8 @@ Tick only after the deliverable is verified to exist and run.
 |---|---|---|
 | `src/threshold.py`, `models/threshold_choice.json`, `reports/figures/07_threshold_curve.png` | Phase 7 (**T34**): `choose()` takes the training arrays and nothing else - the signature is the guarantee that the held-out half cannot influence the choice; `sweep()`, `capacity_table()` and `sensitivity()` all price their cuts through `cost.expected_campaign_value` rather than re-deriving euros, and `held_out_check()` runs after the cut is fixed and records the held-out optimum so a check can prove it was **not** adopted. `validate()`'s **15 checks** cover the price identity, one out-of-fold score per row, the T30 fold reproduction, the money arithmetic at all 403 points, the plateau, the three rejected cuts, cost per captured subscription, capacity fill, sensitivity monotonicity, training-only provenance, held-out profitability, the figure, and a read-back of the file against the run. The JSON records the decision with its provenance, the five compared cuts, the 403-point curve, the capacity and sensitivity tables, the held-out block and the figure's path and size | 2026-10-30 |
 | `docs/07_threshold.md` | Phase 7 (**T34**): the price and where it comes from, why the choice was made on the training folds, money at five cuts, the flat optimum and which edge the price sits on, capacity when calls are capped, the held-out check, why ROI and net value disagree, the 20-cell sensitivity grid, what the step does not prove, and the verification table with the two defects it caught | 2026-10-30 |
+| `src/lift.py`, `reports/lift_table.csv`, `reports/figures/08_lift_gain.png`, `models/lift_results.json` | Phase 7 (**T35**): `decile_table()` cuts the descending ranking into ten positional blocks and derives every precision, lift, cumulative column and saving from the counts; `at_coverage()` interpolates the cumulative curve so T32's published coverage points can be compared rather than approximated; `savings_peak()` finds the exact coverage where calls saved peaks (via `saved(k) - saved(k-1) = (N/positives) x y[k] - 1`) and `marginal_block()` prices the clients between that peak and the adopted cut; `random_self_test()` reruns the whole table on shuffled scores as a code test. `validate()`'s **17 checks** cover the two base rates, the partition, the ratio arithmetic, the running sums, D15, the decline down the list, the shuffled self-test, the T32 reconciliation, the agreement with T34's cut, the saving identity, the recall table, the savings peak, the marginal block, the artifact, the CSV and the figure - plus a read-back of the record | 2026-10-30 |
+| `docs/07_lift.md` | Phase 7 (**T35**): what lift answers and what it does not, the two halves and why they are never pooled, both decile tables, the concentration and where the list stops being useful, the adopted cut in calls, the three optima on one curve and why the campaign runs past the savings peak, the reconciliation with T32, the shuffled-score self-test, what the step does not prove, and the verification table | 2026-10-30 |
 | `PROGRESS.md` | This tracker: status, decisions, 46-task checklist, session log | 2026-10-27 |
 | `.gitignore` | Excludes `.venv/`, `__pycache__/`, `.ipynb_checkpoints/`, `*.log`, `.DS_Store`, `._*`, `__MACOSX/`, editor folders | 2026-10-27 |
 | `requirements.txt` | 13 pinned dependencies grouped by purpose, with a header noting the Python 3.11 ceiling on xgboost/shap | 2026-10-27 |
@@ -1752,7 +1754,58 @@ string: quoteable and unverifiable. The record now carries the 403 points and a 
 **Next:** T35 — lift, gain and decile analysis, with the adopted cut translated into calls saved at equal
 recall.
 
----
+### 2026-10-30 — Session 37  (T35 complete)
+
+**Completed:** **T35** — `src/lift.py`, `reports/lift_table.csv` (20 rows x 13 columns),
+`reports/figures/08_lift_gain.png` (231,645 B), `docs/07_lift.md` and `models/lift_results.json` (20,661 B).
+
+**The tables.** Ten positional deciles per half, each against its own base rate (**11.6982%** training,
+**11.6997%** held out — 1.5 basis points apart and never pooled). Top decile lift **4.3652x** training and
+**4.5100x** held out, clearing D15's >2x target by more than a factor of two; the top two deciles hold
+**61.76%** / **62.29%** of all subscribers.
+
+**The finding I did not expect.** **Decile 3 is already below random** (**0.92x** training, **0.88x** held
+out), and decile 10 sits at **0.18x** (**78 of 3,617** clients). Past roughly the best fifth of the list the
+model's message is mostly *negative* — it is telling the bank who **not** to call, about 80% of the file, and
+that is a decision the lift table makes visible in a way the ROC and PR curves do not.
+
+**The cut, in calls.** **77.90%** of subscribers from **41.10%** of the list: a fixed order would need
+**28,175** calls to reach the same people, so the ranking saves **13,309 calls (36.8% of the list,
+19,964 EUR)**. Held out: **3,396 calls / 5,094 EUR**. The calls and subscribers are **identical** to T34's
+record, so the two steps are reading one cut rather than two.
+
+**Three optima on one curve, and why the cut is at the last.** Calls saved peaks at **18.89%** coverage
+(**15,188 calls**), T34's money peak sits at **36.63%**, and the priced cut is at **41.10%** (**13,309**).
+The mechanism is one line: `saved(k) - saved(k-1) = (N/positives) x y[k] - 1`, so the saving peaks where the
+*local* rate crosses the *list average* (11.7%), while money peaks where it crosses the *price* (7.5%). The
+savings peak is **outside** T34's 1%-of-peak money plateau (**27.6%–41.4%** coverage), which is the cleanest
+way to say that maximising calls saved is not a money decision. The block between the two — **8,033 calls**
+— converts at **8.96%**, above the **7.50%** price, for **+2,350 EUR**; held out **1,547 calls** at **7.76%**
+for **+79.50 EUR**, thin in exactly the way T34's "aggressive edge" predicted.
+
+**Reconciliation.** T32's two published multipliers are re-derived from this one ranking: **3.9488x** against
+**3.9247x** at 13.26% coverage and **1.8991x** against **1.8961x** at 41.10%. The second is near-exact because
+**0.0750 *is* 41.10% coverage** — the business cut and the price are the same point.
+
+**Verified:** `python -m src.lift` exits **0** with **17/17** checks in **4.3 s**. The self-test reruns the
+whole table on **shuffled scores**: lifts **0.950–1.108** (mean **1.000001**), gain within **0.0060** of the
+diagonal, savings within **218 calls** of zero — the code tested, not the model. **401 numeric tokens** in
+`docs/07_lift.md` trace to the two records.
+
+**One defect, caught by the trace:** the first draft said a fixed order would need **28,176** calls;
+`recall x rows` is **28,175.3**, so the honest figure is **28,175**. A hand-rounding error of one call in a
+document whose whole point is the call count.
+
+**Also corrected before commit:** two claims that did not survive their own arithmetic — decile 10 was
+described as "1.8% of its clients subscribe" (it is **2.16%**, **78 of 3,617**) and the held-out decile noise
+as "±0.06" (one standard error on a precision near 0.53 over 904 rows is **0.017**, so the two top-decile
+lifts are the same number within noise rather than different ones).
+
+**Blocked:** none.
+**Uncommitted:** `src/lift.py`, `reports/lift_table.csv`, `reports/figures/08_lift_gain.png`,
+`docs/07_lift.md`, `models/lift_results.json`, `PROGRESS.md`.
+**Next:** T36 — the with-vs-without `duration` comparison, executing the pre-registered rule in §4.5 of the
+leakage audit.
 
 ## Open Questions / Blockers
 

@@ -1,0 +1,585 @@
+{
+  "task": "T35",
+  "variant": "full",
+  "deciles": 10,
+  "decile_rule": "ten equal-count positional blocks of the descending score, stable for ties",
+  "halves": {
+    "train_oof": {
+      "label": "training (out-of-fold)",
+      "rows": 36168,
+      "subscribers": 4231,
+      "base_rate": 0.11698186241981863
+    },
+    "held_out": {
+      "label": "held out (artifact)",
+      "rows": 9043,
+      "subscribers": 1058,
+      "base_rate": 0.11699657193409267
+    }
+  },
+  "tables": {
+    "train_oof": [
+      {
+        "half": "train_oof",
+        "decile": 1,
+        "rows": 3617,
+        "subscribers": 1847,
+        "precision": 0.5106441802598839,
+        "lift": 4.365156868740128,
+        "cumulative_rows": 3617,
+        "cumulative_subscribers": 1847,
+        "coverage": 0.10000552975005529,
+        "cumulative_share": 0.4365398251004491,
+        "cumulative_precision": 0.5106441802598839,
+        "cumulative_lift": 4.365156868740128,
+        "calls_saved_at_equal_recall": 12171.772394233043
+      },
+      {
+        "half": "train_oof",
+        "decile": 2,
+        "rows": 3617,
+        "subscribers": 766,
+        "precision": 0.21177771633950787,
+        "lift": 1.8103465952652613,
+        "cumulative_rows": 7234,
+        "cumulative_subscribers": 2613,
+        "coverage": 0.20001105950011058,
+        "cumulative_share": 0.6175844953911604,
+        "cumulative_precision": 0.36121094829969586,
+        "cumulative_lift": 3.0877517320026944,
+        "calls_saved_at_equal_recall": 15102.79602930749
+      },
+      {
+        "half": "train_oof",
+        "decile": 3,
+        "rows": 3616,
+        "subscribers": 390,
+        "precision": 0.10785398230088496,
+        "lift": 0.9219718345210132,
+        "cumulative_rows": 10850,
+        "cumulative_subscribers": 3003,
+        "coverage": 0.2999889404998894,
+        "cumulative_share": 0.7097612857480501,
+        "cumulative_precision": 0.2767741935483871,
+        "cumulative_lift": 2.3659581735424404,
+        "calls_saved_at_equal_recall": 14820.646182935474
+      },
+      {
+        "half": "train_oof",
+        "decile": 4,
+        "rows": 3617,
+        "subscribers": 262,
+        "precision": 0.07243572021011889,
+        "lift": 0.6192047101298936,
+        "cumulative_rows": 14467,
+        "cumulative_subscribers": 3265,
+        "coverage": 0.3999944702499447,
+        "cumulative_share": 0.7716851808083195,
+        "cumulative_precision": 0.22568604410036636,
+        "cumulative_lift": 1.9292396225530726,
+        "calls_saved_at_equal_recall": 13443.309619475298
+      },
+      {
+        "half": "train_oof",
+        "decile": 5,
+        "rows": 3617,
+        "subscribers": 238,
+        "precision": 0.06580038706110036,
+        "lift": 0.5624836679805904,
+        "cumulative_rows": 18084,
+        "cumulative_subscribers": 3503,
+        "coverage": 0.5,
+        "cumulative_share": 0.8279366580004727,
+        "cumulative_precision": 0.19370714443707143,
+        "cumulative_lift": 1.6558733160009451,
+        "calls_saved_at_equal_recall": 11860.813046561096
+      },
+      {
+        "half": "train_oof",
+        "decile": 6,
+        "rows": 3617,
+        "subscribers": 209,
+        "precision": 0.05778269283936965,
+        "lift": 0.49394574205018227,
+        "cumulative_rows": 21701,
+        "cumulative_subscribers": 3712,
+        "coverage": 0.6000055297500553,
+        "cumulative_share": 0.8773339636019853,
+        "cumulative_precision": 0.17105202525229252,
+        "cumulative_lift": 1.462209796578803,
+        "calls_saved_at_equal_recall": 10030.414795556608
+      },
+      {
+        "half": "train_oof",
+        "decile": 7,
+        "rows": 3617,
+        "subscribers": 163,
+        "precision": 0.04506497097041747,
+        "lift": 0.38523041126401775,
+        "cumulative_rows": 25318,
+        "cumulative_subscribers": 3875,
+        "coverage": 0.7000110595001106,
+        "cumulative_share": 0.9158591349562751,
+        "cumulative_precision": 0.15305316375701083,
+        "cumulative_lift": 1.3083495218065628,
+        "calls_saved_at_equal_recall": 7806.793193098558
+      },
+      {
+        "half": "train_oof",
+        "decile": 8,
+        "rows": 3616,
+        "subscribers": 149,
+        "precision": 0.04120575221238938,
+        "lift": 0.3522405213939256,
+        "cumulative_rows": 28934,
+        "cumulative_subscribers": 4024,
+        "coverage": 0.7999889404998894,
+        "cumulative_share": 0.951075395887497,
+        "cumulative_precision": 0.13907513651759176,
+        "cumulative_lift": 1.1888606801154002,
+        "calls_saved_at_equal_recall": 5464.494918458993
+      },
+      {
+        "half": "train_oof",
+        "decile": 9,
+        "rows": 3617,
+        "subscribers": 129,
+        "precision": 0.035664915675974566,
+        "lift": 0.30487560155250487,
+        "cumulative_rows": 32551,
+        "cumulative_subscribers": 4153,
+        "coverage": 0.8999944702499447,
+        "cumulative_share": 0.981564641928622,
+        "cumulative_precision": 0.12758440600903198,
+        "cumulative_lift": 1.090634080958324,
+        "calls_saved_at_equal_recall": 2950.229969274398
+      },
+      {
+        "half": "train_oof",
+        "decile": 10,
+        "rows": 3617,
+        "subscribers": 78,
+        "precision": 0.021564832734310202,
+        "lift": 0.18434338698523547,
+        "cumulative_rows": 36168,
+        "cumulative_subscribers": 4231,
+        "coverage": 1.0,
+        "cumulative_share": 1.0,
+        "cumulative_precision": 0.11698186241981863,
+        "cumulative_lift": 1.0,
+        "calls_saved_at_equal_recall": 0.0
+      }
+    ],
+    "held_out": [
+      {
+        "half": "held_out",
+        "decile": 1,
+        "rows": 904,
+        "subscribers": 477,
+        "precision": 0.5276548672566371,
+        "lift": 4.510002802081067,
+        "cumulative_rows": 904,
+        "cumulative_subscribers": 477,
+        "coverage": 0.09996682516863872,
+        "cumulative_share": 0.45085066162570886,
+        "cumulative_precision": 0.5276548672566371,
+        "cumulative_lift": 4.510002802081067,
+        "calls_saved_at_equal_recall": 3173.042533081285
+      },
+      {
+        "half": "held_out",
+        "decile": 2,
+        "rows": 905,
+        "subscribers": 182,
+        "precision": 0.2011049723756906,
+        "lift": 1.718896280901106,
+        "cumulative_rows": 1809,
+        "cumulative_subscribers": 659,
+        "coverage": 0.2000442331084817,
+        "cumulative_share": 0.6228733459357277,
+        "cumulative_precision": 0.3642896627971255,
+        "cumulative_lift": 3.1136780913746747,
+        "calls_saved_at_equal_recall": 3823.6436672967857
+      },
+      {
+        "half": "held_out",
+        "decile": 3,
+        "rows": 904,
+        "subscribers": 93,
+        "precision": 0.10287610619469026,
+        "lift": 0.8793087224183214,
+        "cumulative_rows": 2713,
+        "cumulative_subscribers": 752,
+        "coverage": 0.30001105827712043,
+        "cumulative_share": 0.7107750472589792,
+        "cumulative_precision": 0.2771839292296351,
+        "cumulative_lift": 2.3691628279996126,
+        "calls_saved_at_equal_recall": 3714.538752362949
+      },
+      {
+        "half": "held_out",
+        "decile": 4,
+        "rows": 904,
+        "subscribers": 69,
+        "precision": 0.07632743362831858,
+        "lift": 0.6523903424393998,
+        "cumulative_rows": 3617,
+        "cumulative_subscribers": 821,
+        "coverage": 0.39997788344575913,
+        "cumulative_share": 0.775992438563327,
+        "cumulative_precision": 0.226983688139342,
+        "cumulative_lift": 1.9400883665822966,
+        "calls_saved_at_equal_recall": 3400.299621928166
+      },
+      {
+        "half": "held_out",
+        "decile": 5,
+        "rows": 905,
+        "subscribers": 66,
+        "precision": 0.07292817679558011,
+        "lift": 0.6233360139531483,
+        "cumulative_rows": 4522,
+        "cumulative_subscribers": 887,
+        "coverage": 0.5000552913856021,
+        "cumulative_share": 0.8383742911153119,
+        "cumulative_precision": 0.19615214506855375,
+        "cumulative_lift": 1.6765631832277235,
+        "calls_saved_at_equal_recall": 3059.4187145557653
+      },
+      {
+        "half": "held_out",
+        "decile": 6,
+        "rows": 904,
+        "subscribers": 42,
+        "precision": 0.046460176991150445,
+        "lift": 0.39710716496311294,
+        "cumulative_rows": 5426,
+        "cumulative_subscribers": 929,
+        "coverage": 0.6000221165542409,
+        "cumulative_share": 0.8780718336483931,
+        "cumulative_precision": 0.17121267969037965,
+        "cumulative_lift": 1.4633991138375266,
+        "calls_saved_at_equal_recall": 2514.4035916824196
+      },
+      {
+        "half": "held_out",
+        "decile": 7,
+        "rows": 904,
+        "subscribers": 40,
+        "precision": 0.04424778761061947,
+        "lift": 0.3781972999648694,
+        "cumulative_rows": 6330,
+        "cumulative_subscribers": 969,
+        "coverage": 0.6999889417228796,
+        "cumulative_share": 0.9158790170132325,
+        "cumulative_precision": 0.15308056872037915,
+        "cumulative_lift": 1.3084192655372293,
+        "calls_saved_at_equal_recall": 1952.2939508506606
+      },
+      {
+        "half": "held_out",
+        "decile": 8,
+        "rows": 904,
+        "subscribers": 37,
+        "precision": 0.04092920353982301,
+        "lift": 0.34983250246750425,
+        "cumulative_rows": 7234,
+        "cumulative_subscribers": 1006,
+        "coverage": 0.7999557668915183,
+        "cumulative_share": 0.9508506616257089,
+        "cumulative_precision": 0.13906552391484656,
+        "cumulative_lift": 1.1886290479791657,
+        "calls_saved_at_equal_recall": 1364.542533081285
+      },
+      {
+        "half": "held_out",
+        "decile": 9,
+        "rows": 905,
+        "subscribers": 29,
+        "precision": 0.032044198895027624,
+        "lift": 0.2738900667369894,
+        "cumulative_rows": 8139,
+        "cumulative_subscribers": 1035,
+        "coverage": 0.9000331748313612,
+        "cumulative_share": 0.9782608695652174,
+        "cumulative_precision": 0.12716549944710653,
+        "cumulative_lift": 1.0869164569945031,
+        "calls_saved_at_equal_recall": 707.4130434782619
+      },
+      {
+        "half": "held_out",
+        "decile": 10,
+        "rows": 904,
+        "subscribers": 23,
+        "precision": 0.025442477876106196,
+        "lift": 0.21746344747979993,
+        "cumulative_rows": 9043,
+        "cumulative_subscribers": 1058,
+        "coverage": 1.0,
+        "cumulative_share": 1.0,
+        "cumulative_precision": 0.11699657193409267,
+        "cumulative_lift": 1.0,
+        "calls_saved_at_equal_recall": 0.0
+      }
+    ]
+  },
+  "translation": {
+    "train_oof": {
+      "threshold": 0.075,
+      "rows": 36168,
+      "positives": 4231,
+      "calls": 14866,
+      "coverage": 0.4110263216102632,
+      "subscribers_reached": 3296,
+      "recall": 0.7790120538879698,
+      "precision": 0.2217139782053007,
+      "lift": 1.8952850776954184,
+      "calls_a_fixed_recall_would_need": 28175.307965020093,
+      "calls_saved": 13309.307965020093,
+      "calls_saved_share": 0.3679857322777066,
+      "euros_not_spent": 19963.961947530137,
+      "subscribers_foregone": 935
+    },
+    "held_out": {
+      "threshold": 0.075,
+      "rows": 9043,
+      "positives": 1058,
+      "calls": 3621,
+      "coverage": 0.40042021453057614,
+      "subscribers_reached": 821,
+      "recall": 0.775992438563327,
+      "precision": 0.22673294669980668,
+      "lift": 1.937945214561769,
+      "calls_a_fixed_recall_would_need": 7017.299621928166,
+      "calls_saved": 3396.299621928166,
+      "calls_saved_share": 0.3755722240327508,
+      "euros_not_spent": 5094.449432892248,
+      "subscribers_foregone": 237
+    }
+  },
+  "savings_peak": {
+    "train_oof": {
+      "calls": 6833,
+      "coverage": 0.1889239106392391,
+      "subscribers_reached": 2576,
+      "gain": 0.6088395178444812,
+      "precision_at_peak": 0.3769939997073028,
+      "lift_at_peak": 3.2226705226692807,
+      "calls_saved": 15187.507681399195,
+      "euros_not_spent": 22781.261522098794,
+      "base_rate": 0.11698186241981863,
+      "is_local_max": true,
+      "per_call_at_peak": 2.2226705226692807
+    },
+    "held_out": {
+      "calls": 2074,
+      "coverage": 0.229348667477607,
+      "subscribers_reached": 701,
+      "gain": 0.6625708884688091,
+      "precision_at_peak": 0.33799421407907426,
+      "lift_at_peak": 2.888924081207059,
+      "calls_saved": 3917.628544423441,
+      "euros_not_spent": 5876.442816635161,
+      "base_rate": 0.11699657193409267,
+      "is_local_max": true,
+      "per_call_at_peak": 1.8889240812070593
+    }
+  },
+  "block_after_peak": {
+    "train_oof": {
+      "calls": 8033,
+      "subscribers": 720,
+      "marginal_rate": 0.08963027511515001,
+      "price": 0.075,
+      "above_price": true,
+      "net_per_call_eur": 0.2926055023030001,
+      "net_for_the_block_eur": 2350.5
+    },
+    "held_out": {
+      "calls": 1547,
+      "subscribers": 120,
+      "marginal_rate": 0.07756948933419522,
+      "price": 0.075,
+      "above_price": true,
+      "net_per_call_eur": 0.05138978668390437,
+      "net_for_the_block_eur": 79.5
+    }
+  },
+  "recall_table": [
+    {
+      "target_recall": 0.25,
+      "calls": 1738,
+      "coverage": 0.04805352798053528,
+      "calls_random_would_need": 9042.0,
+      "calls_saved": 7304.0,
+      "euros_not_spent": 10956.0
+    },
+    {
+      "target_recall": 0.5,
+      "calls": 4472,
+      "coverage": 0.12364521123645211,
+      "calls_random_would_need": 18084.0,
+      "calls_saved": 13612.0,
+      "euros_not_spent": 20418.0
+    },
+    {
+      "target_recall": 0.75,
+      "calls": 13061,
+      "coverage": 0.36112032736120325,
+      "calls_random_would_need": 27126.0,
+      "calls_saved": 14065.0,
+      "euros_not_spent": 21097.5
+    },
+    {
+      "target_recall": 0.9,
+      "calls": 24125,
+      "coverage": 0.667026100420261,
+      "calls_random_would_need": 32551.2,
+      "calls_saved": 8426.2,
+      "euros_not_spent": 12639.300000000001
+    }
+  ],
+  "reconciliation": [
+    {
+      "label": "nested cut (13.26% coverage)",
+      "coverage": 0.132604,
+      "published_lift": 3.9247,
+      "measured_lift": 3.948765360679157,
+      "measured_share": 0.4955543547282924,
+      "difference": 0.02406536067915699,
+      "tolerance": 0.15,
+      "agrees": true
+    },
+    {
+      "label": "business cut (41.10% coverage)",
+      "coverage": 0.411027,
+      "published_lift": 1.8961,
+      "measured_lift": 1.8990820710933003,
+      "measured_share": 0.7778907986092356,
+      "difference": 0.002982071093300398,
+      "tolerance": 0.05,
+      "agrees": true
+    }
+  ],
+  "d15": {
+    "target": 2.0,
+    "train_top_decile_lift": 4.365156868740128,
+    "held_top_decile_lift": 4.510002802081067,
+    "met": true
+  },
+  "random_self_test": {
+    "lifts": [
+      0.9902548608565854,
+      0.9902548608565854,
+      0.966888411074601,
+      1.0044351213939113,
+      1.108423698667634,
+      0.950077456000829,
+      0.9689844700505968,
+      1.0590855945267024,
+      0.9760746003192597,
+      0.9855281073441436
+    ],
+    "min_lift": 0.950077456000829,
+    "max_lift": 1.108423698667634,
+    "mean_lift": 1.0000007181090846,
+    "worst_gain_deviation": 0.006026943984873578,
+    "worst_calls_saved": 217.98251004490885
+  },
+  "csv": "reports\\lift_table.csv",
+  "figure": {
+    "path": "reports\\figures\\08_lift_gain.png",
+    "bytes": 231645
+  },
+  "checks": [
+    {
+      "check": "each half is measured against its own base rate, not a pooled one",
+      "passed": true,
+      "detail": "training 0.116982 (4,231/36,168) vs held out 0.116997 (1,058/9,043) - two rates, 0.0015 points apart, never pooled"
+    },
+    {
+      "check": "the ten blocks cover every row once, are equal to a row, and descend",
+      "passed": true,
+      "detail": "train_oof: 36,168 rows over 10 blocks of 3,616-3,617, descending; held_out: 9,043 rows over 10 blocks of 904-905, descending"
+    },
+    {
+      "check": "every published precision and lift is the ratio it claims to be",
+      "passed": true,
+      "detail": "precision = subscribers/rows and lift = precision/base at all 20 rows; max drift 0.0e+00"
+    },
+    {
+      "check": "the cumulative columns are running sums that end at 100% of subscribers",
+      "passed": true,
+      "detail": "train_oof ends at 1.000000 of subscribers; held_out ends at 1.000000 of subscribers; max drift 0.0e+00"
+    },
+    {
+      "check": "the top decile clears D15's 2x target on both halves",
+      "passed": true,
+      "detail": "top decile lift 4.3652x on training (0.5106 precision) and 4.5100x held out (0.5277) against D15's >2x"
+    },
+    {
+      "check": "the highest decile holds the most lift and the list ends worse than it starts",
+      "passed": true,
+      "detail": "train_oof: decile 1 4.37x, decile 10 0.18x, 0 of 9 steps not descending; held_out: decile 1 4.51x, decile 10 0.22x, 0 of 9 steps not descending; largest non-descending step 2.791x"
+    },
+    {
+      "check": "the table reports no lift when the ranking is random",
+      "passed": true,
+      "detail": "with the scores shuffled, the ten lifts run 0.950-1.108 (mean 1.0000); the gain curve departs from the diagonal by at most 0.0060 and the calls-saved column by at most 218"
+    },
+    {
+      "check": "the cumulative curve lands on T32's two published multipliers",
+      "passed": true,
+      "detail": "nested cut (13.26% coverage): measured 3.9488 vs published 3.9247 (+0.0241); business cut (41.10% coverage): measured 1.8991 vs published 1.8961 (+0.0030)"
+    },
+    {
+      "check": "this module's reading of the adopted cut is T34's reading of it",
+      "passed": true,
+      "detail": "the adopted cut calls 14,866 and reaches 3,296 on the training half - identical to T34's record (14,866 / 3,296)"
+    },
+    {
+      "check": "calls saved equals the recall a fixed list would have needed minus the calls made",
+      "passed": true,
+      "detail": "train_oof: 13,309 calls (36.8% of the list, 19,964 EUR); held_out: 3,396 calls (37.6% of the list, 5,094 EUR); max drift 0.0e+00"
+    },
+    {
+      "check": "reaching a higher recall always costs more calls",
+      "passed": true,
+      "detail": "25% recall -> 1,738 calls (random 9,042, saved 7,304); 50% recall -> 4,472 calls (random 18,084, saved 13,612); 75% recall -> 13,061 calls (random 27,126, saved 14,065); 90% recall -> 24,125 calls (random 32,551, saved 8,426); the random baseline is recall x 36,168 rows to 0.0e+00"
+    },
+    {
+      "check": "the calls-saved peak lies before the adopted cut, where efficiency crosses the base rate",
+      "passed": true,
+      "detail": "train_oof: peak at 18.89% (6,833 calls, lift 3.22x) saves 15,188 vs the cut's 13,309 at 41.10%; held_out: peak at 22.93% (2,074 calls, lift 2.89x) saves 3,918 vs the cut's 3,396 at 40.04%"
+    },
+    {
+      "check": "the calls between the savings peak and the cut still convert above the price",
+      "passed": true,
+      "detail": "train_oof: the 8,033 calls between the peak and the cut convert at 8.96% against a 7.50% price (+2,350 EUR); held_out: the 1,547 calls between the peak and the cut convert at 7.76% against a 7.50% price (+80 EUR)"
+    },
+    {
+      "check": "the held-out ranking comes from the persisted artifact",
+      "passed": true,
+      "detail": "9,043 held-out scores from final_model.joblib in [0.004575, 0.940095], no refit"
+    },
+    {
+      "check": "the lift table was written with both halves and its columns",
+      "passed": true,
+      "detail": "lift_table.csv: 20 rows x 13 columns, halves ['held_out', 'train_oof']"
+    },
+    {
+      "check": "the lift/gain figure was written",
+      "passed": true,
+      "detail": "08_lift_gain.png is 231,645 bytes"
+    },
+    {
+      "check": "the record on disk is this run's answers, not a transcript of another",
+      "passed": true,
+      "detail": "lift_results.json: 10+10 deciles, held-out calls saved 3,396, 16 checks before this one, figure 231,645 B"
+    }
+  ],
+  "checks_passed": 17,
+  "checks_total": 17,
+  "checks_ok": true,
+  "elapsed_seconds": 4.3
+}

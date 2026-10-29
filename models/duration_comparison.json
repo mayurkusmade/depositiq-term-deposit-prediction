@@ -1,0 +1,761 @@
+{
+  "task": "T36",
+  "variant": "full",
+  "rule": "Arm A ships regardless of the gap; D05 was decided on availability, not performance. Arm B's metrics are an upper bound and no targeting, lift or savings claim may be built on them. A near-zero gap would be reported as the finding.",
+  "decision": {
+    "clauses": {
+      "arm_b_wins_most_folds": true,
+      "bands_are_monotone": true,
+      "duration_alone_ranks_well": true
+    },
+    "thresholds": {
+      "min_fold_wins": 4,
+      "min_solo_roc_auc": 0.7
+    },
+    "gap_is_leakage": true,
+    "fold_wins": 5,
+    "rule": "Arm A ships regardless of the gap; D05 was decided on availability, not performance. Arm B's metrics are an upper bound and no targeting, lift or savings claim may be built on them. A near-zero gap would be reported as the finding.",
+    "arm_a_ships": true,
+    "why_a_ships": "pre-registered \u00a74.5 clause 1 and D05: the column is unavailable at decision time, so the gap cannot change which model ships"
+  },
+  "price": {
+    "threshold": 0.075,
+    "call_cost_eur": 1.5,
+    "value_per_subscription_eur": 20.0,
+    "note": "the bank's price does not move because the model did; both arms are scored at it"
+  },
+  "training": {
+    "rows": 36168,
+    "positives": 4231,
+    "base_rate": 0.11698186241981863,
+    "folds": 5,
+    "fold_seed": 42
+  },
+  "arms": {
+    "arm_a_without_duration": {
+      "arm": "arm_a_without_duration",
+      "role": "deployable model (D05)",
+      "note": "duration excluded",
+      "features": [
+        "age",
+        "day",
+        "previous_capped",
+        "balance_arsinh",
+        "marital",
+        "housing",
+        "contact",
+        "month",
+        "poutcome",
+        "campaign_bucket",
+        "recency_band",
+        "previously_contacted"
+      ],
+      "matrix_columns": 40,
+      "matrix_names": [
+        "age",
+        "day",
+        "balance_arsinh",
+        "previous_capped",
+        "marital=divorced",
+        "marital=married",
+        "marital=single",
+        "housing=no",
+        "housing=yes",
+        "contact=cellular",
+        "contact=telephone",
+        "contact=unknown",
+        "month=apr",
+        "month=aug",
+        "month=dec",
+        "month=feb",
+        "month=jan",
+        "month=jul",
+        "month=jun",
+        "month=mar",
+        "month=may",
+        "month=nov",
+        "month=oct",
+        "month=sep",
+        "poutcome=failure",
+        "poutcome=other",
+        "poutcome=success",
+        "poutcome=unknown",
+        "campaign_bucket=1",
+        "campaign_bucket=10+",
+        "campaign_bucket=2",
+        "campaign_bucket=3",
+        "campaign_bucket=4-5",
+        "campaign_bucket=6-9",
+        "recency_band=0-29 d",
+        "recency_band=180+ d",
+        "recency_band=30-89 d",
+        "recency_band=90-179 d",
+        "recency_band=never",
+        "previously_contacted"
+      ],
+      "params": {
+        "objective": "binary:logistic",
+        "base_score": null,
+        "booster": null,
+        "callbacks": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": 0.6,
+        "device": null,
+        "early_stopping_rounds": null,
+        "enable_categorical": false,
+        "eval_metric": "aucpr",
+        "feature_types": null,
+        "feature_weights": null,
+        "gamma": null,
+        "grow_policy": null,
+        "importance_type": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.08,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 5,
+        "max_leaves": null,
+        "min_child_weight": 10,
+        "missing": NaN,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_estimators": 300,
+        "n_jobs": 1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": 1.0,
+        "subsample": 1.0,
+        "tree_method": "hist",
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "scale_pos_weight": 1.0,
+      "n_jobs": 1,
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7969572269814413,
+          "pr_auc": 0.44354752846058426,
+          "brier": 0.082306001875243,
+          "mean_pred": 0.11565180122852325,
+          "accuracy_at_half": 0.8928670168648051,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533,
+          "calls_at_price": 2980,
+          "reached_at_price": 657,
+          "net_eur_at_price": 8670.0,
+          "roi_at_price": 1.9395973154362416
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.8097105277181951,
+          "pr_auc": 0.4377568751215429,
+          "brier": 0.08200162072470182,
+          "mean_pred": 0.11517524719238281,
+          "accuracy_at_half": 0.8931434890793475,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533,
+          "calls_at_price": 2875,
+          "reached_at_price": 662,
+          "net_eur_at_price": 8927.5,
+          "roi_at_price": 2.070144927536232
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7870622125927647,
+          "pr_auc": 0.4338568755367747,
+          "brier": 0.08335074235796075,
+          "mean_pred": 0.115627720952034,
+          "accuracy_at_half": 0.8924523085429914,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772,
+          "calls_at_price": 3015,
+          "reached_at_price": 656,
+          "net_eur_at_price": 8597.5,
+          "roi_at_price": 1.9010503040353786
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7970605370468457,
+          "pr_auc": 0.4588444143135174,
+          "brier": 0.08061520421467418,
+          "mean_pred": 0.11685789376497269,
+          "accuracy_at_half": 0.8964468408682428,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176,
+          "calls_at_price": 3026,
+          "reached_at_price": 651,
+          "net_eur_at_price": 8481.0,
+          "roi_at_price": 1.868473231989425
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.8043046769424153,
+          "pr_auc": 0.4560708866606429,
+          "brier": 0.08084399654400452,
+          "mean_pred": 0.11966327577829361,
+          "accuracy_at_half": 0.8940965021429559,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176,
+          "calls_at_price": 2970,
+          "reached_at_price": 670,
+          "net_eur_at_price": 8945.0,
+          "roi_at_price": 2.0078563411896746
+        }
+      ],
+      "summary": {
+        "roc_auc": {
+          "mean": 0.7990190362563324,
+          "sd": 0.008562978393974515
+        },
+        "pr_auc": {
+          "mean": 0.4460153160186124,
+          "sd": 0.011043321063311734
+        },
+        "brier": {
+          "mean": 0.08182351314331686,
+          "sd": 0.0011198671792237605
+        },
+        "mean_pred": {
+          "mean": 0.11659518778324127,
+          "sd": 0.001825128757163326
+        },
+        "accuracy_at_half": {
+          "mean": 0.8938012314996685,
+          "sd": 0.0015977647591564107
+        }
+      },
+      "pooled": {
+        "rows": 36168,
+        "positives": 4231,
+        "roc_auc": 0.7990128831914244,
+        "pr_auc": 0.4447811336211645,
+        "brier": 0.0818235736315043,
+        "mean_pred": 0.11659509833509228,
+        "accuracy_at_half": 0.8938011501880115,
+        "at_price": {
+          "threshold": 0.075,
+          "clients_called": 14866,
+          "subscribers_reached": 3296,
+          "subscribers_missed": 935,
+          "wasted_calls": 11570,
+          "revenue_eur": 65920.0,
+          "call_cost_eur": 22299.0,
+          "net_value_eur": 43621.0,
+          "roi": 1.956186376070676,
+          "cost_per_subscription_eur": 6.765473300970874
+        }
+      }
+    },
+    "arm_b_with_duration": {
+      "arm": "arm_b_with_duration",
+      "role": "leaky diagnostic - upper bound (D40)",
+      "note": "duration included",
+      "features": [
+        "age",
+        "day",
+        "previous_capped",
+        "balance_arsinh",
+        "marital",
+        "housing",
+        "contact",
+        "month",
+        "poutcome",
+        "campaign_bucket",
+        "recency_band",
+        "previously_contacted",
+        "duration"
+      ],
+      "matrix_columns": 41,
+      "matrix_names": [
+        "age",
+        "day",
+        "balance_arsinh",
+        "duration",
+        "previous_capped",
+        "marital=divorced",
+        "marital=married",
+        "marital=single",
+        "housing=no",
+        "housing=yes",
+        "contact=cellular",
+        "contact=telephone",
+        "contact=unknown",
+        "month=apr",
+        "month=aug",
+        "month=dec",
+        "month=feb",
+        "month=jan",
+        "month=jul",
+        "month=jun",
+        "month=mar",
+        "month=may",
+        "month=nov",
+        "month=oct",
+        "month=sep",
+        "poutcome=failure",
+        "poutcome=other",
+        "poutcome=success",
+        "poutcome=unknown",
+        "campaign_bucket=1",
+        "campaign_bucket=10+",
+        "campaign_bucket=2",
+        "campaign_bucket=3",
+        "campaign_bucket=4-5",
+        "campaign_bucket=6-9",
+        "recency_band=0-29 d",
+        "recency_band=180+ d",
+        "recency_band=30-89 d",
+        "recency_band=90-179 d",
+        "recency_band=never",
+        "previously_contacted"
+      ],
+      "params": {
+        "objective": "binary:logistic",
+        "base_score": null,
+        "booster": null,
+        "callbacks": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": 0.6,
+        "device": null,
+        "early_stopping_rounds": null,
+        "enable_categorical": false,
+        "eval_metric": "aucpr",
+        "feature_types": null,
+        "feature_weights": null,
+        "gamma": null,
+        "grow_policy": null,
+        "importance_type": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.08,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 5,
+        "max_leaves": null,
+        "min_child_weight": 10,
+        "missing": NaN,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_estimators": 300,
+        "n_jobs": 1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": 1.0,
+        "subsample": 1.0,
+        "tree_method": "hist",
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "scale_pos_weight": 1.0,
+      "n_jobs": 1,
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.9334536460947018,
+          "pr_auc": 0.6140427510558754,
+          "brier": 0.06328645659323544,
+          "mean_pred": 0.11575055867433548,
+          "accuracy_at_half": 0.9055847387337572,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533,
+          "calls_at_price": 2130,
+          "reached_at_price": 796,
+          "net_eur_at_price": 12725.0,
+          "roi_at_price": 3.9827856025039123
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.9318835849132017,
+          "pr_auc": 0.6076479242177205,
+          "brier": 0.06363278398294758,
+          "mean_pred": 0.11818953603506088,
+          "accuracy_at_half": 0.9046170859828587,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533,
+          "calls_at_price": 2143,
+          "reached_at_price": 796,
+          "net_eur_at_price": 12705.5,
+          "roi_at_price": 3.9525587183076683
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.9391183279052102,
+          "pr_auc": 0.6427375339509988,
+          "brier": 0.060927439690545,
+          "mean_pred": 0.1150963306427002,
+          "accuracy_at_half": 0.9091788775228089,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772,
+          "calls_at_price": 2142,
+          "reached_at_price": 803,
+          "net_eur_at_price": 12847.0,
+          "roi_at_price": 3.998443821973234
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.9404727799264243,
+          "pr_auc": 0.6398999082316823,
+          "brier": 0.060458747246830306,
+          "mean_pred": 0.11361528187990189,
+          "accuracy_at_half": 0.9104106180008296,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176,
+          "calls_at_price": 2023,
+          "reached_at_price": 802,
+          "net_eur_at_price": 13005.5,
+          "roi_at_price": 4.285879057505355
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.9349304382683353,
+          "pr_auc": 0.6227273624074033,
+          "brier": 0.062087232235762076,
+          "mean_pred": 0.11828047782182693,
+          "accuracy_at_half": 0.9101341075625605,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176,
+          "calls_at_price": 2108,
+          "reached_at_price": 792,
+          "net_eur_at_price": 12678.0,
+          "roi_at_price": 4.009487666034156
+        }
+      ],
+      "summary": {
+        "roc_auc": {
+          "mean": 0.9359717554215747,
+          "sd": 0.003684375594631828
+        },
+        "pr_auc": {
+          "mean": 0.625411095972736,
+          "sd": 0.015508893388038384
+        },
+        "brier": {
+          "mean": 0.06207853194986409,
+          "sd": 0.001398532525098115
+        },
+        "mean_pred": {
+          "mean": 0.11618643701076507,
+          "sd": 0.0020240166219892912
+        },
+        "accuracy_at_half": {
+          "mean": 0.9079850855605631,
+          "sd": 0.0026940549584850053
+        }
+      },
+      "pooled": {
+        "rows": 36168,
+        "positives": 4231,
+        "roc_auc": 0.9359122934113216,
+        "pr_auc": 0.6235762576131756,
+        "brier": 0.062078576463734984,
+        "mean_pred": 0.11618644980011102,
+        "accuracy_at_half": 0.9079849590798496,
+        "at_price": {
+          "threshold": 0.075,
+          "clients_called": 10546,
+          "subscribers_reached": 3989,
+          "subscribers_missed": 242,
+          "wasted_calls": 6557,
+          "revenue_eur": 79780.0,
+          "call_cost_eur": 15819.0,
+          "net_value_eur": 63961.0,
+          "roi": 4.0433023579240155,
+          "cost_per_subscription_eur": 3.9656555527701176
+        }
+      }
+    }
+  },
+  "paired": {
+    "pr_auc": {
+      "metric": "pr_auc",
+      "per_fold": [
+        0.1704952225952911,
+        0.16989104909617764,
+        0.20888065841422404,
+        0.1810554939181649,
+        0.16665647574676046
+      ],
+      "mean": 0.17939577995412362,
+      "sd": 0.017349080738737477,
+      "wins": 5,
+      "folds": 5,
+      "se_ratio": 23.121752955955536
+    },
+    "roc_auc": {
+      "metric": "roc_auc",
+      "per_fold": [
+        0.1364964191132605,
+        0.1221730571950066,
+        0.15205611531244556,
+        0.14341224287957866,
+        0.13062576132592008
+      ],
+      "mean": 0.13695271916524226,
+      "sd": 0.011494727432478109,
+      "wins": 5,
+      "folds": 5,
+      "se_ratio": 26.64139637549454
+    },
+    "brier": {
+      "metric": "brier",
+      "per_fold": [
+        -0.01901954528200757,
+        -0.01836883674175424,
+        -0.022423302667415747,
+        -0.02015645696784387,
+        -0.018756764308242448
+      ],
+      "mean": -0.019744981193452776,
+      "sd": 0.00163854521272467,
+      "wins": 0,
+      "folds": 5,
+      "se_ratio": -26.945316992259393
+    },
+    "net_eur_at_price": {
+      "metric": "net_eur_at_price",
+      "per_fold": [
+        4055.0,
+        3778.0,
+        4249.5,
+        4524.5,
+        3733.0
+      ],
+      "mean": 4068.0,
+      "sd": 330.84305191434805,
+      "wins": 5,
+      "folds": 5,
+      "se_ratio": 27.494379827036813
+    }
+  },
+  "gap": {
+    "price": 0.075,
+    "pr_auc_gap": 0.17879512399201108,
+    "roc_auc_gap": 0.13689941021989727,
+    "brier_gap": -0.01974499716776932,
+    "euro_gap": 20340.0,
+    "euro_gap_per_1000_rows": 562.3755806237558,
+    "calls_gap": -4320,
+    "reach_gap": 693,
+    "arm_a": {
+      "threshold": 0.075,
+      "clients_called": 14866,
+      "subscribers_reached": 3296,
+      "subscribers_missed": 935,
+      "wasted_calls": 11570,
+      "revenue_eur": 65920.0,
+      "call_cost_eur": 22299.0,
+      "net_value_eur": 43621.0,
+      "roi": 1.956186376070676,
+      "cost_per_subscription_eur": 6.765473300970874
+    },
+    "arm_b": {
+      "threshold": 0.075,
+      "clients_called": 10546,
+      "subscribers_reached": 3989,
+      "subscribers_missed": 242,
+      "wasted_calls": 6557,
+      "revenue_eur": 79780.0,
+      "call_cost_eur": 15819.0,
+      "net_value_eur": 63961.0,
+      "roi": 4.0433023579240155,
+      "cost_per_subscription_eur": 3.9656555527701176
+    }
+  },
+  "mechanism": {
+    "bands": [
+      {
+        "band": "0-59s",
+        "calls": 3727,
+        "share_of_calls": 0.10304689228046893,
+        "subscribers": 6,
+        "rate": 0.0016098738932116983,
+        "wilson_low": 0.0007380119064968056,
+        "wilson_high": 0.00350810778939165
+      },
+      {
+        "band": "60-119s",
+        "calls": 7379,
+        "share_of_calls": 0.20402012829020127,
+        "subscribers": 158,
+        "rate": 0.02141211546279984,
+        "wilson_low": 0.01834979063974076,
+        "wilson_high": 0.024972498707493785
+      },
+      {
+        "band": "120-179s",
+        "calls": 6900,
+        "share_of_calls": 0.19077637690776378,
+        "subscribers": 400,
+        "rate": 0.057971014492753624,
+        "wilson_low": 0.052698998660786686,
+        "wilson_high": 0.06373495892016362
+      },
+      {
+        "band": "180-299s",
+        "calls": 8347,
+        "share_of_calls": 0.23078411855784117,
+        "subscribers": 901,
+        "rate": 0.1079429735234216,
+        "wilson_low": 0.10146532889902296,
+        "wilson_high": 0.11478133059934423
+      },
+      {
+        "band": "300-599s",
+        "calls": 6763,
+        "share_of_calls": 0.186988498119885,
+        "subscribers": 1284,
+        "rate": 0.18985657252698507,
+        "wilson_low": 0.18068646862632262,
+        "wilson_high": 0.19937881914397185
+      },
+      {
+        "band": "600s+",
+        "calls": 3052,
+        "share_of_calls": 0.08438398584383985,
+        "subscribers": 1482,
+        "rate": 0.4855832241153342,
+        "wilson_low": 0.46788067222003643,
+        "wilson_high": 0.5033220236265022
+      }
+    ],
+    "monotone": true,
+    "solo": {
+      "roc_auc": 0.80779155905401,
+      "pr_auc": 0.3897034537131233,
+      "pr_auc_lift": 3.3313151770021845,
+      "base_rate": 0.11698186241981863,
+      "top_decile_precision": 0.4557522123893805,
+      "top_decile_lift": 3.895922008437512,
+      "top_decile_recall": 0.3895060269439849,
+      "positives": 4231,
+      "rows": 36168
+    },
+    "shortest_band_rate": 0.0016098738932116983,
+    "longest_band_rate": 0.4855832241153342,
+    "longest_band_share_of_subscribers": 0.3502718033561806
+  },
+  "csv": "reports\\duration_comparison.csv",
+  "checks": [
+    {
+      "check": "both arms were scored on the project's folds, replayed not re-derived",
+      "passed": true,
+      "detail": "both arms scored the same five folds: [7234, 7234, 7234, 7233, 7233] validation rows / [846, 846, 847, 846, 846] positives, from one materialised list"
+    },
+    {
+      "check": "the feature lists differ by exactly `duration`",
+      "passed": true,
+      "detail": "B has 13 features and A has 12; the only difference is ['duration']; A is exactly the shipped set"
+    },
+    {
+      "check": "the two matrices are the same width plus one named column",
+      "passed": true,
+      "detail": "arm A 40 columns, arm B 41; the extra column is ['duration'] and every other name is shared"
+    },
+    {
+      "check": "both arms used identical estimator settings",
+      "passed": true,
+      "detail": "40 estimator settings compared, 0 differ; both unweighted (1.0) and single-threaded; ['missing'] are NaN in both and matched as such"
+    },
+    {
+      "check": "arm A is the shipped model, not a neighbour of it",
+      "passed": true,
+      "detail": "arm A's five fold PR-AUCs reproduce T30's tuned arm to 0.0e+00 (0.4435, 0.4378, 0.4339, 0.4588, 0.4561)"
+    },
+    {
+      "check": "arm A reproduces T34's campaign value to the cent",
+      "passed": true,
+      "detail": "arm A at 0.0750 nets 43,621.00 EUR from 14,866 calls - T34 recorded 43,621.00 from 14,866"
+    },
+    {
+      "check": "the published gap is the difference between the two arms",
+      "passed": true,
+      "detail": "PR-AUC gap +0.1788, euro gap +20,340.00 (63,961.00 - 43,621.00), both computed as the difference of the two pooled campaigns at 0.0750"
+    },
+    {
+      "check": "the verdict is the pre-registered rule applied, and arm A ships either way",
+      "passed": true,
+      "detail": "clauses arm_b_wins_most_folds=True, bands_are_monotone=True, duration_alone_ranks_well=True; fold wins 5/5 -> gap_is_leakage=True; arm B is labelled 'leaky diagnostic - upper bound (D40)'"
+    },
+    {
+      "check": "the leak's mechanism reproduces T22's audit",
+      "passed": true,
+      "detail": "`duration` alone: ROC-AUC 0.8078 (T22 0.8078), PR-AUC 0.3897 (T22 0.3897), top-decile lift 3.90x (T22 3.9)"
+    },
+    {
+      "check": "the subscription rate rises monotonically with call length",
+      "passed": true,
+      "detail": "subscription rate runs 0.16% in the shortest band to 48.56% in the longest - a 302x swing across call length, with the longest band supplying 35.03% of subscribers"
+    },
+    {
+      "check": "no held-out row was read by this comparison",
+      "passed": true,
+      "detail": "this module never loads the held-out half (0 references to it); both arms are scored on the 36,168 training rows only"
+    },
+    {
+      "check": "the comparison table was written with both arms and their summaries",
+      "passed": true,
+      "detail": "duration_comparison.csv: 14 rows, arms ['arm_a_without_duration', 'arm_b_with_duration'], statistics ['fold', 'mean', 'sd']"
+    },
+    {
+      "check": "the record on disk is this run's answers, not a transcript of another",
+      "passed": true,
+      "detail": "duration_comparison.json: gap +20,340.00 EUR, verdict True, widths 40/41, 12 checks before this one"
+    }
+  ],
+  "checks_passed": 13,
+  "checks_total": 13,
+  "checks_ok": true,
+  "elapsed_seconds": 7.1
+}

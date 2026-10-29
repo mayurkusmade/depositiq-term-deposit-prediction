@@ -1,11 +1,12 @@
 # DepositIQ — `duration` Leakage Audit
 
 **Rubric:** Criterion 5 — Feature Engineering / Selection (10 marks) **Tasks:** T22 (design the
-with-vs-without experiment) · **Status:** complete · **Date:** 2026-10-28 **Depends on:** D05 (the
+with-vs-without experiment) · **T36** runs it and §9 reports the result · **Status:** complete · **Date:** 2026-10-28 (T36 added 2026-10-30) **Depends on:** D05 (the
 column is excluded from the main model), T16–T21 (the EDA that measured its correlation), and T15's
-frozen split (D26). **Numbers:** every figure below is printed by `python -m src.leakage`, which
-recomputes the whole audit from `data/processed/train.csv` on demand. No model is fitted by this
-task, and the **held-out 9,043 rows are not read** by it.
+frozen split (D26). **Numbers:** every figure in §§1–8 is printed by `python -m src.leakage`, which
+recomputes the audit from `data/processed/train.csv` on demand, and **no model is fitted** by it; §9 is the
+one section that fits models, exactly two of them, and its figures are printed by
+`python -m src.duration_compare`. The **held-out 9,043 rows are not read** by either module.
 
 ---
 
@@ -467,3 +468,124 @@ Held-out ROC-AUC moved by minus 0.0001 with a spread of 0.002, so the five went 
 from 65 columns to 40. What I will not claim is that this transfers to the XGBoost model T32 will
 evaluate - a forest failing to use `job` is not proof that `job` is useless, which is exactly why the
 ablation numbers are in the record."
+
+---
+
+## 9. The comparison, run: what the leak was worth (T36)
+
+**Task:** T36 · **Run:** `python -m src.duration_compare` → `reports/duration_comparison.csv` (14 rows) and
+`models/duration_comparison.json` · **Date:** 2026-10-30
+
+§4.5 fixed the rule before any number existed, so the rule is discharged first and the number second.
+
+### 9.1 The rule, discharged
+
+| §4.5 clause | what happened |
+|---|---|
+| **Arm A ships regardless of the gap** | **Arm A ships.** The gap does not change the decision, because `duration` does not exist when the decision is made - it is recorded when the call ends. |
+| **Arm B's metrics are an upper bound** | Labelled `leaky diagnostic - upper bound (D40)` in the record's `role` field, and no targeting, lift or savings claim in this project is built on them. §5 of `07_lift.md` is arm A's. |
+| **The gap is quoted in PR-AUC and in money** | **+0.1788** PR-AUC and **+20,340.00 EUR** at T34's price, per §9.3. |
+| **A near-zero gap would be the finding** | It is not near zero: **23.1 standard errors** across folds. Reported as the price of a deployable model, which is what it is. |
+
+### 9.2 The two arms
+
+One estimator, one fold list, one scorer; the only argument that differs is the feature toggle in
+`leakage.feature_columns`, so the feature sets differ by exactly `duration` and the matrices by exactly one
+column.
+
+| arm | features | matrix columns | pooled PR-AUC | pooled ROC-AUC | Brier | mean p | calls at 0.0750 | subscribers | net EUR |
+|---|---|---|---|---|---|---|---|---|---|
+| **A** without `duration` (ships) | 12 | **40** | **0.4448** | 0.7990 | 0.0818 | 0.1166 | 14,866 | 3,296 | **43,621.00** |
+| **B** with `duration` (upper bound) | 13 | **41** | **0.6236** | 0.9359 | 0.0621 | 0.1162 | 10,546 | 3,989 | 63,961.00 |
+
+The widths are measured, not quoted: T24 demonstrated this toggle at the 17-feature width (65 vs 66
+columns), and this is the same toggle at the width the shipped model uses. Arm A's per-fold PR-AUCs
+reproduce T30's tuned arm to **0.0e+00** and its campaign value reproduces T34's **43,621.00 EUR** to the
+cent, so the arm that ships is the arm that has been documented all along, not a re-fit of it. (The pooled
+0.4448 differs from T32's **0.4460** because pooling out-of-fold scores and averaging per-fold scores are
+different aggregations; both arms are pooled here, so the gap is computed one way for both.)
+
+### 9.3 The gap
+
+| metric | arm B - arm A | per-fold mean | fold sd | SE ratio | B wins |
+|---|---|---|---|---|---|
+| PR-AUC | **+0.1788** | +0.179396 | 0.017349 | **23.12** | **5/5** |
+| ROC-AUC | +0.1369 | +0.136953 | 0.011495 | 26.64 | 5/5 |
+| Brier | **-0.0197** | -0.019745 | 0.001639 | -26.95 | 0/5 (lower is better) |
+| net at 0.0750 | **+20,340.00 EUR** | +4,068.00 | 330.84 | 27.49 | 5/5 |
+
+**The price of a deployable model, in the units this project spent a phase establishing: +0.1788 PR-AUC and
++20,340 EUR** on 36,168 training rows - **+562.38 EUR per 1,000 clients**, from **4,320 fewer calls** that
+reach **693 more subscribers**.
+
+Two details worth reading rather than skimming. **The mean predicted probability barely moves**
+(0.1166 vs 0.1162), so this is not a model that became miscalibrated by adding a feature - it is a model that
+got sharper at *ranking* while landing on the same average. And **arm B's Brier score is better**
+(0.0621 vs 0.0818): a model that has seen the outcome is well calibrated, which is the most misleading thing
+about it.
+
+### 9.4 Why this is leakage, and not skill
+
+The verdict is computed from §4.5's mechanism clauses rather than from the size of the gap:
+
+| clause (fixed before the arms were fitted) | measured |
+|---|---|
+| arm B wins at least 4 of 5 folds | **5/5** |
+| T22's band table is non-decreasing in call length | **non-decreasing** |
+| `duration` alone beats ROC-AUC 0.70 | **0.8078** |
+
+The band table is the mechanism in plain sight - the subscription rate does not creep up with call length,
+it explodes:
+
+| call length | calls | subscribe |
+|---|---|---|
+| 0-59 s | 3,727 | **0.16%** |
+| 60-119 s | 7,379 | 2.14% |
+| 120-179 s | 6,900 | 5.80% |
+| 180-299 s | 8,347 | 10.79% |
+| 300-599 s | 6,763 | 18.99% |
+| 600 s+ | 3,052 | **48.56%** |
+
+A **302x** swing, and the longest band alone supplies **35.03%** of all subscribers. The causal arrow runs
+from the outcome to the length: a client who says yes keeps talking, and a client who declines ends the
+call. Nothing about a five-minute conversation *caused* a subscription; the conversation was long because
+the answer was yes.
+
+The same fact at the level of one column: **`duration` used as a score, no model, no fitting, reaches
+ROC-AUC 0.8078 and PR-AUC 0.3897** (3.33x the base rate, top-decile lift 3.90x). That single raw column
+beats most of the project's purpose-built models on PR-AUC, which is the whole reason D05 exists.
+
+### 9.5 What this does not claim
+
+* **Arm B is not a better model.** It is a model reading the answer. Its metrics are an upper bound on
+  what any deployable model could do *with the same features*, and they are not a standard the shipped model
+  failed to meet.
+* **The euro gap is not money being left on the table.** No campaign can use `duration` before the call, so
+  the 20,340 EUR is the cost of *honesty*, not of a wrong decision. A report that presented it as a
+  shortfall would be measuring the wrong thing.
+* **The gap is cross-validated, not held out.** No held-out row was read (§9.6), so this is an in-sample-by-
+  folds number and inherits the optimism T30's §9.4 and T33's bootstrap both describe.
+* **Five folds is five numbers.** The SE ratios are large enough that the sign test is the honest summary:
+  5/5 on ranking and on euros, 0/5 on Brier in the direction that matters.
+
+### 9.6 Verification
+
+| Check | Result |
+|---|---|
+| `python -m src.duration_compare` | exits **0**, **13/13** checks, **7.1 s** |
+| Same folds | both arms scored the same five validation sets (7,234/7,234/7,234/7,233/7,233 rows; 846/846/847/846/846 positives), replayed from one materialised list |
+| One toggle | feature lists differ by exactly `["duration"]`; matrices **40** vs **41** columns, every other name shared |
+| Identical settings | 40 estimator settings compared, **0** differ (XGBoost's `missing` is `nan` in both and matched NaN-aware); both unweighted at 1.0 and single-threaded |
+| Arm A is the shipped model | per-fold PR-AUCs reproduce T30's tuned arm to **0.0e+00**; campaign value reproduces T34's **43,621.00 EUR** to the cent |
+| The published gap is a difference | +0.1788 / +20,340.00 computed from the two pooled campaigns, not typed |
+| The rule was applied | verdict = the three clauses; `arm_a_ships` recorded as `true` with its reason |
+| The mechanism reproduces T22 | 0.8078 / 0.3897 / 3.90x against T22's published 0.8078 / 0.3897 / 3.90x |
+| No held-out row read | source scan for the held-out load finds **0** references, with the needle assembled at run time so the file cannot match its own text |
+| The table | `reports/duration_comparison.csv`, 14 rows, both arms, `fold`/`mean`/`sd` statistics |
+
+*Interpretation for the viva:* "The column that measures how long the call lasted is worth 0.18 PR-AUC and
+20,340 EUR on this data, and that is exactly why it is not in the model: a client who says yes talks for
+five minutes, so the length is downstream of the answer. A model given it would look excellent in every
+table and be useless on Monday morning, because at the moment the bank decides whom to call, no call has
+happened yet. The comparison in §9.2 is the size of that temptation, measured rather than asserted."
+

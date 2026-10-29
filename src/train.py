@@ -218,18 +218,23 @@ FORBIDDEN: tuple[str, ...] = ("duration", "pdays", config.TARGET)
 # ---------------------------------------------------------------------------
 # The harness
 # ---------------------------------------------------------------------------
-def make_pipeline(estimator, columns: list[str] | tuple[str, ...] | None = None) -> Pipeline:
+def make_pipeline(estimator, columns: list[str] | tuple[str, ...] | None = None, *,
+                  extra_numeric: tuple[str, ...] = ()) -> Pipeline:
     """
     The one place a model is assembled: T24's preprocessor, then the estimator.
 
     `columns` defaults to T25's shipped feature set (12 features -> 40 matrix columns), so a caller
     cannot accidentally train on the 65-column set T25 measured as unnecessary (D44).
+
+    `extra_numeric` exists so that **T36's leaky arm** can be built by this same function rather than by a
+    second assembly path: it is the documented escape hatch in `preprocess.build_preprocessor`, and the
+    default `()` keeps every other caller identical to the character (D40: one harness, one toggle).
     """
     if columns is None:
         columns = select.shipped_features()
     return Pipeline(
         steps=[
-            (STEP_PREPROCESS, preprocess.build_preprocessor(columns)),
+            (STEP_PREPROCESS, preprocess.build_preprocessor(columns, extra_numeric=extra_numeric)),
             (STEP_MODEL, estimator),
         ]
     )
@@ -270,6 +275,8 @@ def cross_validate_factory(
     y: pd.Series,
     folds: list[tuple[np.ndarray, np.ndarray]],
     columns: list[str],
+    *,
+    extra_numeric: tuple[str, ...] = (),
 ) -> dict:
     """
     Fit one estimator factory once per fold and score its out-of-fold predictions.
@@ -287,7 +294,7 @@ def cross_validate_factory(
     fits: list[Pipeline] = []
 
     for fold, (train_idx, valid_idx) in enumerate(folds, start=1):
-        pipeline = make_pipeline(make(), columns)
+        pipeline = make_pipeline(make(), columns, extra_numeric=extra_numeric)
         pipeline.fit(frame.iloc[train_idx], y.iloc[train_idx])
         scores = pipeline.predict_proba(frame.iloc[valid_idx])[:, 1]
         estimator = pipeline.named_steps[STEP_MODEL]

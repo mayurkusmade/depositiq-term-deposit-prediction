@@ -15,10 +15,10 @@
 | 4 | EDA | 10 | 6 / 6 ✅ | T16–T21 |
 | 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
-| 7 | Model Evaluation & Validation | 15 | 1 / 5 | T32–T36 |
+| 7 | Model Evaluation & Validation | 15 | 2 / 5 | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 0 / 3 | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **32 / 46** | |
+| | **Total** | **100** | **33 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,40 +28,29 @@
 
 ## NEXT TASK
 
-**T33 | Phase 7 – Model Evaluation | Confusion matrix, ROC and PR curves on held-out data.**
-Open: `reports/figures/07_*.png`, notes appended to `docs/06_modeling.md`.
-Score **`models/final_model.joblib`** once on the held-out half and save three figures: a confusion matrix, an
-ROC curve and a precision-recall curve, each annotated with its numbers.
-**Done when:** all three are saved with the 0.5-threshold numbers annotated.
-**Carry in:** four constraints, each from a measurement. **(1) It is the artifact, not a refit.** Load the
-joblib and score `features.load_engineered("test")` — this is the only step in the project allowed to touch
-the test half, and a fresh fit here would silently make the held-out number a CV number. **(2) The task asks
-for 0.5 and the figures must carry it**, but T29/T32 measured that 0.5 is near the shipped model's **95th
-percentile** (it flags **4.67%** of rows), so a confusion matrix drawn only at 0.5 shows a near-empty positive
-column and invites the wrong reading. Annotate **all three cuts**: 0.5 as the conventional one the task
-names, **0.2103** (T32's mean nested cut) as the operating point, and **0.075** (D17's break-even) as the
-business one — with the flag counts at each. **(3) The gap is the finding.** T32's CV PR-AUC is **0.4460**
-and was chosen on those same folds; the held-out number is expected **lower**, and the doc must state the
-gap in those words rather than presenting the held-out figure as a failure or hiding it. **(4) No tuning, no
-recalibration, no re-selection** — T34 owns calibration, and if the held-out curve looks worse than CV this
-step's job is to report it, not to fix it. Figure namespacing: `07_confusion_matrix.png`,
-`07_roc_curve.png`, `07_pr_curve.png`, per the `reports/figures/` convention T16–T21 established.
-**Carry in:** two configurations are in play, because T29 changed which one should ship. Tune the
-**untreated** estimator (`scale_pos_weight=1`, **PR-AUC 0.4444 ± 0.0131**, perfectly calibrated at mean p
-**0.1168**) as the primary, and keep the weighted one (**0.4420 ± 0.0134**) as the comparison — D49 records
-why the weight is on notice: it buys **+0.0023** PR-AUC at 1.11 SE *against* it and costs **half the Brier
-score**. **SMOTE is closed** and must not appear in the search space. Three constraints, each from a
-measured result rather than a preference. **(1) Same harness, not a parallel one:** score the search's
-candidates with `train.materialise_folds`/`train.fold_metrics` semantics and the same
-`preprocess.build_preprocessor`, or the "tuned beats untuned" comparison is two experiments — the whole
-point of D45. **(2) State the selection bias instead of hiding it:** the winner is chosen on the same five
-folds T32 will report, so its CV score is **optimistic**; T32's held-out evaluation is what disciplines it,
-and the search's own `mean_test_score` must not be quoted as a result. **(3) Keep it affordable:** one
-XGBoost fit is **1.8 s** at 400 rounds, so `n_iter=40` x 5 folds is about **6 minutes** — time one candidate
-before committing to a grid, and set `n_jobs=1` inside the estimator (parallelise the search, not each fit)
-or the runtimes stop being comparable. Record the search space, `n_iter`, seed, scoring metric (`average_precision`,
-D04) and the refit parameters in the JSON, and check that the winning parameters actually reappear in the
-fitted estimator.
+**T34 | Phase 7 – Model Evaluation | Threshold tuning against the cost model.**
+Open: `docs/07_threshold.md`, a threshold figure under `reports/figures/`.
+Choose the operating threshold from **expected business cost** — D17's cost model in `src/cost.py` — rather
+than from accuracy, and write the argument down.
+**Done when:** the chosen threshold is justified by expected business cost rather than by accuracy.
+**Carry in:** five constraints, each from a measurement. **(1) The score is a probability on unseen rows.**
+T33 measured mean p **0.1151** against a **0.1170** base rate on the 9,043 held-out rows, with Brier
+**0.0804** against CV's **0.0818**, so D17's **7.50%** break-even can be applied to raw output — whether to
+recalibrate anyway is this step's measurement (a reliability curve plus a monotone map, scored out of
+sample), not a prior assumption in either direction. **(2) Two live cuts, and the choice between them is a
+capacity question.** At **7.50%** the model calls **40.04%** of the list and reaches **77.60%** of
+subscribers at **1.94×** the base rate; at T32's cut **0.2103** it calls **12.82%** and reaches **53.02%**
+at **4.14×**. Both sit above break-even in expectation, so the answer is a marginal-value question —
+expected net value per call at each threshold — rather than a metric's. **(3) 0.5 is closed.** It costs
+**0.1526** F1 against the operating cut and misses **801 of the 1,058** subscribers on the held-out half;
+it stays in the tables only as the rejected number (D53). **(4) The held-out half has been read once**
+(T33). This step may **report** on it and must not **choose** on it: pick the threshold on the training
+half, then check it on the held-out rows and report the difference. **(5) Reuse the arithmetic.**
+`src/metrics.at_threshold` is the project's one definition of a threshold metric, and `src/cost.py` holds
+the labelled assumptions (**C = €1.50**, **V = €20.00**, p* = **0.0750**) with a `sensitivity_table()` —
+quote no cost figure that is not in `ASSUMPTIONS`. The figure should carry the expected-cost curve, the
+break-even crossing and the sensitivity band, and the doc must state the expected cost per call at the
+chosen threshold rather than only the threshold itself.
 
 ---
 
@@ -106,6 +95,26 @@ fitted estimator.
 | D35 | 2026-10-28 | `day` is kept as a raw feature but **no rule is built on it**; `campaign` enters T23 as a **capped count or bucket**, not the raw 1–63 scale | `day`'s marginal band difference (12.66% for 1–10 against 10.92% for 11–20, intervals not overlapping) **reverses inside `may`** (5.94% against 7.14% for 21–31) and changes direction month to month, and the column is entangled with `month` by construction (`jan` never runs below day 6, `feb` stops at 27, `may` starts at 4) — so a day rule would encode this file's calendar rather than the behaviour. `campaign`'s own scale is unusable for the same reason the bucket table exists: median 2, max 63, and the productivity changes by a factor of 3.4 between one call and ten |
 | D36 | 2026-10-28 | T24 keeps **`days_since_contact`** and **`previously_contacted`** and **drops raw `pdays`**; there is no other multicollinearity to defuse, so no PCA and no dropping of `balance` or `campaign` on "correlation" grounds | Measured: of the 28 off-diagonal pairs only two reach an absolute r of 0.20, and one of those is `pdays` ↔ `days_since_contact` at **+1.0000** — the same values, not merely correlated ones. With both present the 8-column complete-case matrix is **rank 7**, the condition number is **5.0×10¹⁶** and both VIFs are **9.0×10¹⁵**; with `pdays` dropped every VIF is **1.01–1.03**. Keeping the raw column would let a linear model split one effect between two names while the VIF appeared tolerable, because the sentinel masks the duplication in the full-column view |
 | D37 | 2026-10-28 | Any correlation involving **`pdays`** is reported on the **previously-contacted rows only** (or not at all); the whole-column value is a sentinel artefact and is never quoted as a finding | The column reads **+0.1007** against the target over all 36,168 rows and **−0.1526** — bit-for-bit `days_since_contact`'s value — once the 29,584 sentinel rows are removed, because −1 is the smallest possible value and therefore sorts as "very recent". A modeller acting on the +0.1007 would invert the effect for every real observation. This is the concrete reason D23 replaced the column instead of re-scaling it |
+| D54 | 2026-10-30 | **The held-out half is scored once by the persisted artifact at three cuts, the
+threshold is *not* re-chosen on it, and the gap against CV is judged against the bootstrap sd of that draw
+rather than the CV fold sd** — held-out **PR-AUC 0.4616** / **ROC-AUC 0.8052** against CV's **0.4460** /
+**0.7990**, i.e. **+0.0155** (**+1.41 CV sd**, but **0.92 bootstrap sd**), with **15.4%** of resampled draws
+falling below the CV mean | Every part of this is a rule about what a single number may be used for.
+**Scored once, loaded not refitted:** the object is `models/final_model.joblib` (sha256 **7a40752f...**)
+verified against T31's card, because a refit here would silently convert the project's one out-of-sample
+number into a second in-sample one. **The cut is not chosen here:** the F1-maximising threshold on these
+rows is **0.212050**, and adopting it would spend the held-out set on a decision the training folds already
+made — so it is recorded as a diagnostic instead, and it is how we know T32's **0.2103** landed **0.001725**
+from the optimum for **0.000481** F1. **The yardstick is the bootstrap, not the CV sd:** the CV sd
+(**0.0110**) is the spread between five models fitted to **28,934** rows each, while the bootstrap sd
+(**0.0169**) is the spread a held-out estimate actually has; dividing by the first and calling 1.4 sd large
+would be a category error, and both ratios are recorded with the judgement stated. The expected fall did not
+occur and that is reported in those words: the artifact saw **36,168** rows against a fold model's
+**28,934**, so a small *gain* is what the difference in training data predicts, and one draw of **1,058**
+positives carries the error the bootstrap quantifies. What this does **not** claim is that the tuned
+configuration was correct — the 40-candidate ranking is not re-tested by one point. Governance follows from
+the same rule: T35 and T36 may **report** on these rows and may not **choose** on them, or the number above
+stops being evidence |
 | D53 | 2026-10-30 | **Thresholded metrics are reported at three cuts — leave-one-fold-out F1-optimal (the operating point), D17's 7.50% break-even (the business cut), and 0.5 (the rejected number) — and 0.5 is never the headline** | T32 measured what T29 predicted, this time across **two different models**: at 0.5 the forest beats the shipped model by **10.6 F1 points** (**0.4565** vs **0.3509**) and at the nested cut the shipped model wins by **2.4** (**0.4877** vs **0.4641**). Neither model changed. The mechanism is visible in the flag rates: the forest's mean prediction is **0.3404** so 0.5 sits inside its distribution (**17.89%** flagged), while the shipped model's mean is **0.1166** so 0.5 is near its **95th percentile** (**4.67%** flagged) — the calibrated model is being scored at a bar almost nothing clears. Each fold's cut is chosen on the **other four folds**, so no row is judged at a threshold fitted to itself, and the module re-derives all five cuts as a check. The **7.50%** cut is the only one *not* fitted to data, and it is also the one that makes the business case: **41.10%** of the list yields **77.90%** of subscribers at **22.18%** precision, against the "call everyone" baseline's F1 of **0.2095**. Which of the two live cuts to run is a capacity question for T34, not a metric's |
 | D52 | 2026-10-29 | **The shipped model is XGBoost, untreated, at T30's tuned point** — **PR-AUC 0.4460 ± 0.0110**, ROC-AUC **0.7990**, Brier **0.0818**, mean p **0.1166** against a **0.1170** base rate — persisted as `models/final_model.joblib` (**180,520 bytes**, sha256 **7a40752f...**), with **no threshold baked in**, and justified by ranking, calibration and T29's measurement rather than by the tuned margin | The three reasons are ordered by how much they survive scrutiny. **Ranking**: it is the best PR-AUC of the seven builds and ties the best ROC-AUC. **Calibration**: mean p **0.1166** against a base rate of **0.1170** means D17's **7.50%** break-even can be applied to its output *as a probability*, which no weighted build could offer (they score the average client at **0.34–0.42**) — that is why recalibration is a refinement for T34 rather than a prerequisite. **T29**: the weight bought **+0.0023** at **1.11 SE against it** and cost half the Brier score; at the tuned point the loss widened to **−0.00291 in 0/5 folds**. What the decision explicitly does **not** rest on is the tuning: **+0.00165 at 0.58 SE**, with T28's configuration **4th of 40**, so the justification for the tuned build is that it is no worse, is equally calibrated and is reproducible from a file. **No threshold is persisted** because the operating point is T34's decision (D45), and freezing a cut into the artifact would ship an unmade decision. **No held-out score exists in this step** — T32/T33 own it, and computing it inside the step that chooses the model would make the choice look better than it is |
 | D51 | 2026-10-29 | **Tuning is a 40-draw `RandomizedSearchCV` over six axes (4,800 points, 0.8% drawn), scored on `average_precision` over the project's materialised folds, with the feature set and the imbalance treatment held out of the space**; the winner is **300 rounds / lr 0.08 / depth 5 / `min_child_weight=10` / `subsample=1.0` / `colsample_bytree=0.6`**, and its **+0.00165 ± 0.00286 PR-AUC over the untuned configuration is reported as small (0.58 SE) rather than as an improvement** | The budget is declared because a search is a sample of a space, not an optimum: 40 of 4,800 is stated in the doc, so a better configuration found later is a larger `n_iter` rather than a defect here. Two exclusions are the substance of the decision. The **feature set** is T25's and stays there (D44, and T28's trigger did not fire). The **treatment** is excluded because a search may legitimately trade calibration for ranking, and letting it re-choose `scale_pos_weight` would silently reopen T29: the weight is instead evaluated at the tuned point and reproduces T29's verdict (**-0.00291 ± 0.00300 PR-AUC, 0/5 folds**, Brier **0.1535** vs **0.0818**). The search's own score is never quoted as a result - the arms are **refits** whose per-fold numbers equal the search's split scores to **0.0e+00**, and the record carries all 40 candidate scores and both bands so the optimism is visible: **14 of 40** within one standard error of the winner, median candidate **0.4389**, and the **shipped configuration 4th of 40** at **0.4449**. That last number is the finding: T28's hand-picked settings were already inside the noise of the best of forty, which is why tuning bought a hundredth of a point rather than a model |
@@ -177,7 +186,7 @@ Tick only after the deliverable is verified to exist and run.
 
 ### Phase 7 — Model Evaluation & Validation
 - [x] T32 | Rubric 7 | Cross-validated metric table | Output: `reports/metrics_cv.csv` | **done 2026-10-30** (28-row CSV + `models/metrics_cv.json`: **4 models × 5 folds + mean + sd**, on the project's materialised folds; **three cuts reported** — **nested** (F1-maximising on the other four folds), **D17's 7.50%** break-even, and **0.5 as the rejected number**; shipped model leads **every** column — PR-AUC **0.4460 ± 0.0110**, ROC-AUC **0.7990 ± 0.0086**, precision **0.4591 ± 0.0130**, recall **0.5202 ± 0.0133**, F1 **0.4877 ± 0.0110** at a mean cut of **0.2103**; **the 0.5 reversal now measured across two models** — at 0.5 the forest wins by **10.6 points** (**0.4565** vs **0.3509**) and at the nested cut the shipped model wins by **2.4 points** (**0.4877** vs **0.4641**), because 0.5 is the shipped model's **95th percentile** (flags **4.67%**) but sits inside the forest's inflated distribution (flags **17.89%**); **at the business cut the baseline is “call everyone”** — shipped flags **41.10%** of the list for **77.90%** of subscribers at **22.18%** precision (**1.90×** the base rate, vs **3.92×** at the nested cut's **13.26%** coverage); the dummy's **±0.4472** recall is a constant score alternating all/nothing, left unsmoothed; **11/11 checks** pass and `python -m src.metrics` exits **0** in **30.8 s** (forest 24.9 s); **151 independent checks** refit all four models from `train.csv` without importing `src.metrics`, `src.train` or `choose_threshold` — catching that the verifier itself was reading the **six-decimal CSV** at **1e-12** tolerance)
-- [ ] T33 | Rubric 7 | Confusion matrix, ROC curve and PR curve on held-out test data | Output: `reports/figures/07_*.png` | Done when: all three are saved with the 0.5-threshold numbers annotated
+- [x] T33 | Rubric 7 | Confusion matrix, ROC curve and PR curve on held-out test data | Output: `reports/figures/07_*.png` | **done 2026-10-30** (`src/evaluate.py` + three figures + `models/holdout_eval.json`; the artifact was **loaded, not refitted** — **0** fitting calls and **0** training-half loads, asserted by a source scan — and scored **once** on the **9,043** held-out rows (**1,058** subscribed, **11.6997%**): **PR-AUC 0.4616**, **ROC-AUC 0.8052**, Brier **0.0804**, mean p **0.1151**; **three cuts on every figure** — **7.50%** flags **3,621 (40.04%)** for precision **0.2267** / recall **0.7760** / F1 **0.3509**, T32's **0.2103** flags **1,159 (12.82%)** for **0.4840** / **0.5302** / **0.5061**, and **0.5** flags **396 (4.38%)** for **0.6490** / **0.2429** / **0.3535** at the **95.6th percentile** of the score distribution; **the expected fall did not happen** — held-out PR-AUC is **+0.0155** (**+1.41 CV sd**) above T30's **0.4460**, but the bootstrap over these rows puts it in **[0.4304, 0.4969]** (sd **0.0169**, **1.53×** the CV sd) with **15.4%** of draws below the CV mean, so the gap is **0.92 bootstrap sd** and the verdict is **no measurable gap**; T32's CV-derived cut lands **0.001725** from the held-out F1 optimum and costs **0.000481** F1, which is the rule's real vindication; **13/13 checks** and `python -m src.evaluate` exits **0** in **9.0 s**; **119 independent checks** recompute everything with different implementations (midranks, step-block AP, `searchsorted` counts); **two defects found and fixed** — a `rank_auc` that masked the wrong order (**0.7783** vs **0.8052**) and a **float32** Brier score (**4.4e-9**, the same family as T30's §9.5); **§11** of `docs/06_modeling.md` records it and **163** numeric tokens trace to the records)
 - [ ] T34 | Rubric 7 | Threshold tuning against the cost model | Output: `docs/07_threshold.md`, threshold figure | Done when: the chosen threshold is justified by expected business cost rather than by accuracy
 - [ ] T35 | Rubric 7 | Lift, gain and decile analysis | Output: `reports/figures/08_lift_gain.png`, `reports/lift_table.csv` | Done when: top-decile lift is quantified and translated into calls saved
 - [ ] T36 | Rubric 7 | With-vs-without `duration` comparison | Output: `reports/duration_comparison.csv`, notes in `docs/05_leakage_audit.md` | Done when: both runs use identical settings and the performance gap is explained as leakage
@@ -229,6 +238,22 @@ Tick only after the deliverable is verified to exist and run.
 | `models/baseline_dummy.joblib`, `models/baseline_logreg.joblib`, `models/model_random_forest.joblib`, `models/model_xgboost.joblib`, `models/cv_results.json` | Phase 6 (**T26–T28**) artifacts: the fitted pipelines (40-column preprocessor included, so a reload is self-contained) and the machine-readable record — per-fold and summary metrics for every estimator, the per-estimator reduction ablation, the feature list, fold seed, `sd_ddof`, estimator parameters and the 14 check results. Renamed from `baselines_cv.json` in T27, when it stopped holding only baselines. **Every number in `docs/06_modeling.md` comes from this file** | 2026-10-29 |
 | `src/tune.py`, `models/best_params.json` | Phase 6 (**T30**): the hyperparameter search — `SEARCH_SPACE` (six axes, 4,800 points), `make_estimator()` pinning everything that is *not* searched (`tree_method`, `eval_metric`, seed, `n_jobs=1`), `run_search()` handing `RandomizedSearchCV` the **materialised folds** as `cv`, `fold_sd()` recomputing the sd with `ddof=1`, `registered_params()` reading T28's configuration from the registry rather than retyping it, and `evaluate()` scoring each arm through `train.cross_validate_factory`. `validate()`'s **12 checks** cover the folds, the applied parameters, the fixed treatment, the one-core fits, the budget, the feature set, the absence of SMOTE, bit-identity with T29's control, refit-not-copy scores, the done-condition, a rebuild from the file, and the file matching the run. The JSON records the space, budget, metric, seed, **all 40 candidate scores**, both bands, the top five, the winner, three arms and the checks | 2026-10-29 |
 | `src/metrics.py`, `reports/metrics_cv.csv`, `models/metrics_cv.json` | Phase 7 (**T32**): the metric table — `builds()` reads the shipped parameters from `best_params.json`, `run_model()` fits each model through `train.cross_validate_factory` and then scores every fold at **three cuts** (`at_threshold()` computes precision/recall/F1 from TP/FP/FN counts, not from a label array), `summarise()` reports mean and **sample** sd, `build_table()` writes one row per model per fold plus `mean` and `sd` rows, and `validate()`'s **11 checks** re-derive the folds, the class record, the leave-one-out cuts, the harmonic-mean identity, the scikit-learn agreement, the break-even boundary, the floor, the summary, the CV-only property and the CSV. **28 rows**, 6-decimal storage, full precision in the JSON | 2026-10-30 |
+| `src/evaluate.py`, `reports/figures/07_confusion_matrix.png`, `07_roc_curve.png`,
+`07_pr_curve.png`, `models/holdout_eval.json` | Phase 7 (**T33**): the held-out evaluation — `load_artifact()`
+loads T31's file and refuses to continue if the checksum is not the recorded one, `score()` returns
+**float64** probabilities (XGBoost hands back float32, which moved the Brier score by **4.4e-9**), `cut_table()`
+scores every cut through **T32's own** `at_threshold` so the two tables share one definition,
+`operating_cut()` reads the operating point from `models/metrics_cv.json` instead of restating it,
+`bootstrap()` resamples the held-out rows 2,000 times and stores every draw, `build_gap()` judges the gap
+against the bootstrap sd and generates its verdict sentence from the arithmetic, `f1_optimal_on_these_rows()`
+finds the cut that was deliberately **not** adopted, and `validate()`'s **13 checks** cover the artifact's
+identity, the absence of any fitting call, the row partition, single-pass determinism, the cuts'
+provenance, the confusion counts against scikit-learn, the shared threshold arithmetic, the 0.5 behaviour,
+hand-written rank AUC and step AP, the curve endpoints and areas, the gap arithmetic, the bootstrap's
+replay from its seed, and the figures' existence and annotations. The JSON records the scored artifact and
+its checksum, the metrics, all three cuts with full confusion counts and FPR/specificity, the F1 peak, the
+gap block, the bootstrap summaries, and figure paths, sizes and checksums (6-decimal CSV-free: this phase
+writes figures, not a table) | 2026-10-30 |
 | `src/final.py`, `models/final_model.joblib`, `models/final_model.json` | Phase 6 (**T31**): the shipped model and its proof — `chosen_params()` reads the six settings from `models/best_params.json`, `build()` assembles the pipeline through `tune.make_estimator` so the pinned settings are the ones that produced the CV, `cross_process_predictions()` reloads and scores **1,000 rows in a fresh interpreter** (`-c` from the project root, because a temp script cannot `import src`), and `validate()`'s **11 checks** cover the parameters, the pinned settings, structure, matrix width, bit-identical reload, cross-process reload, probability range and simplex, determinism, training-half-only fitting (with a source scan that cannot match its own text), the checksum, and the card's CV numbers agreeing with T30's arm to **1e-12**. The JSON card records parameters, pinned settings, feature list, training rows, the CV summary **with its optimistic-by-construction note**, usage contract and library versions | 2026-10-29 |
 | `docs/06_model_comparison.md` | Phase 6 (**T31**): seven builds on one fold split with ×base-rate multipliers, the three-way reading (ranking vs calibration vs reproducibility), the decision with what it does **not** rest on, the artifact contract with a load snippet, the explicit list of what the step does not claim (no held-out number, optimistic CV, calibration tested in T34, `duration` excluded, what would reopen the choice), and the verification record | 2026-10-29 |
 | `src/imbalance.py`, `models/imbalance_results.json` | Phase 6 (**T29**): the three-arm imbalance experiment — `build_pipeline()` reads the estimator from `src.train` and changes **only** `scale_pos_weight`, `SMOTE` sits between the preprocessor and the model in an `imblearn.pipeline.Pipeline`, `choose_threshold()` is the F1-maximising cut, `apply_nested_thresholds()` gives each fold the cut chosen from the other four, and `validate()`'s **10 checks** re-derive SMOTE's row arithmetic, the fold-local scaler, the threshold provenance and fold-1 reproducibility. The JSON records per-fold PR-AUC/ROC-AUC/F1/Brier/mean-p/threshold for all three arms, the threshold rule, per-arm runtimes and the check results | 2026-10-29 |
@@ -1609,6 +1634,63 @@ scan that reproduces every nested cut, and confirm the §10.2 reversal independe
 `docs/06_modeling.md`, `PROGRESS.md`.
 **Next:** T33 — score the persisted artifact once on the held-out half and save the confusion matrix, ROC
 and PR curves, annotated at 0.5 **and** at the two live operating cuts.
+
+### 2026-10-30 — Session 35  (T33 complete)
+
+**Completed:** **T33** — `src/evaluate.py` (1,011 lines) plus
+`reports/figures/07_confusion_matrix.png` (164,168 B), `07_roc_curve.png` (135,860 B) and
+`07_pr_curve.png` (178,378 B), `models/holdout_eval.json`, and **§11** of `docs/06_modeling.md`.
+
+**The result.** The artifact — loaded, not refitted — scored the 9,043 held-out rows once: **PR-AUC
+0.4616**, **ROC-AUC 0.8052**, Brier **0.0804**, mean p **0.1151** against a **0.1170** base rate.
+
+**The finding, and it cut against the carry-in.** The carried expectation was that the held-out number
+would come out **lower** than CV, because T30 chose the configuration on those folds. It came out
+**higher**: **+0.0155** PR-AUC, **+0.0061** ROC-AUC. The step's job was then to find out whether that means
+anything, and it does not: the bootstrap over these rows puts the estimate in **[0.4304, 0.4969]**, sd
+**0.0169** — **1.53×** the CV fold sd — and **15.4%** of draws fall **below** the CV mean. The verdict is
+**no measurable gap**. Two candidate explanations are recorded and neither is "the model is better than
+measured": the artifact saw **36,168** rows against a fold model's **28,934**, and one draw of 1,058
+positives is one draw.
+
+**The number worth more than the headline.** The F1-maximising cut *on the held-out rows* is **0.212050**,
+and it was **not** adopted — choosing it would spend the held-out set on a decision the training folds
+already made. But measuring it shows how good that earlier decision was: T32's CV-derived **0.2103** sits
+**0.001725** from the optimum and costs **0.000481** F1. A threshold picked on five folds and carried to
+unseen rows landed where those rows would have put it.
+
+**At the three cuts.** **7.50%** flags 3,621 (40.04%) at precision 0.2267 / recall 0.7760; **0.2103** flags
+1,159 (12.82%) at 0.4840 / 0.5302; **0.5** flags 396 (4.38%) at 0.6490 / 0.2429. 0.5 has the best precision
+of the three and the worst F1 (**0.3535** against **0.5061**), because it misses **801 of the 1,058**
+subscribers — the same mechanism T32 measured, now out of sample.
+
+**Verified:** `python -m src.evaluate` exits **0** with **13/13** checks in **10.2 s**; **119 independent
+checks** in `_t33_verify.py` (deleted before the commit) recompute every figure without importing
+`src.evaluate`, using midranks from `unique`/`bincount` for ROC-AUC, tie-block steps for AP, `searchsorted`
+for the confusion counts, and numpy percentiles over the **stored draws** for the interval. **163** numeric
+tokens in §11 trace to the three records or to arithmetic on them; the trace runs in two tiers, and every
+token in its *computed* tier was read and named.
+
+**Two defects, both mine and both caught by running it.** `rank_auc` summed the ranks of the *positions*
+the subscribers occupy in the score-sorted array rather than the subscribers' own ranks — it read
+**0.7783** against scikit-learn's **0.8052** until `ranks_sorted` was mapped back through `order`. And the
+record's Brier score was averaged in **float32**, because `predict_proba` returns float32 and numpy keeps
+float32 arithmetic with an int8 target in float32: **4.4e-9** between an int8 and an int64 target vector.
+That is the same family as the defect T30's verifier found in the CV record (§9.5), and `score()` now casts
+to float64 with the reason written down. **Ties were handled rather than dodged:** 9,007 distinct scores
+over 9,043 rows, so 36 rows share a score with another row, and a naive per-positive average precision
+comes out **1.8e-8** low.
+
+**Also checked by hand, because the trace could not:** the record's runtime moved when the F1-peak
+computation was added, and the superseded value still matched a pairwise arithmetic combination in the
+trace's *computed* tier — a stale number can be vouched for by coincidence there, so the runtime and the
+three figure sizes were read directly out of `models/holdout_eval.json` instead of through the trace.
+
+**Blocked:** none.
+**Uncommitted:** `src/evaluate.py`, `reports/figures/07_confusion_matrix.png`, `07_roc_curve.png`,
+`07_pr_curve.png`, `models/holdout_eval.json`, `docs/06_modeling.md`, `PROGRESS.md`.
+**Next:** T34 — choose the operating threshold from the cost model, with a reliability check and a
+sensitivity band, on the training half and checked on the held-out rows.
 
 ---
 

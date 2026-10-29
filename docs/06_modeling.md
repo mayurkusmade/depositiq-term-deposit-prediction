@@ -558,3 +558,165 @@ lenient bar for one and a near-impossible one for the other. And the row I would
 nearly twice the precision of calling everyone, while the tighter cut reaches half the subscribers from 13%
 of the calls at almost four times the base rate. Both thresholds are available from the same score, which is
 the practical reason the calibrated model was worth insisting on."
+## 11. The held-out evaluation (T33): the score on rows no model has seen
+
+Nine thousand and forty-three rows sat out every fit in this project. This section is what they say.
+
+### 11.1 What was scored, and what was deliberately not done
+
+`models/final_model.joblib` — the artifact T31 persisted, **180,520 bytes**, sha256 **7a40752f...** — was
+loaded and asked for `predict_proba` once over `features.load_engineered("test")`: **9,043 rows, 1,058 of
+them subscribed (11.6997%)**, 7,985 not. Nothing was refitted, retuned, recalibrated or re-selected. The
+module contains **0** fitting calls and **0** training-half loads, and both are asserted by a source scan
+whose patterns cannot match their own text.
+
+The rows are *proven* to be the held-out half rather than assumed: **36,168 + 9,043 = 45,211**, the raw
+file's row count, and the engineered frame's positive count equals the stored `test.csv`'s. One pass, one
+score per row, and no second look once the numbers were in — which is the only thing that makes the figures
+evidence rather than a rehearsal.
+
+Scores are cast to **float64** on the way out. XGBoost's `predict_proba` returns float32, and numpy keeps
+float32 arithmetic with an int8 target in float32, so the first version of this record averaged the Brier
+score in single precision and moved it by **4.4e-9** depending on the target vector's dtype. That is the
+same family of defect T30's verifier found in the CV record (§9.5); it is fixed here rather than inherited.
+
+### 11.2 The three figures
+
+| file | what it shows | bytes |
+|---|---|---|
+| `reports/figures/07_confusion_matrix.png` | three 2×2 panels, one per cut, shaded by **row** share so the diagonal reads as recall and specificity, each cell carrying its count and its share of the actual class | 164,168 |
+| `reports/figures/07_roc_curve.png` | the full curve, plus a zoom on FPR ≤ 0.14 where two of the three cuts actually sit | 135,860 |
+| `reports/figures/07_pr_curve.png` | the curve against the no-skill line at **0.1170**, plus precision, recall and F1 swept across the threshold with the three cuts marked | 178,378 |
+
+Every panel's numbers are the record's numbers: the drawing functions return the annotation text they
+wrote, and a check requires each panel's precision and recall to appear in it. All three annotate **all
+three cuts**, because the task asked for 0.5 and 0.5 alone would mislead — see §11.6.
+
+### 11.3 The numbers at each cut
+
+| cut | flagged | TP | FP | FN | precision | recall | F1 | precision ÷ base rate |
+|---|---|---|---|---|---|---|---|---|
+| **7.50%** (D17 break-even) | 3,621 (**40.04%**) | 821 | 2,800 | 237 | 0.2267 | **0.7760** | 0.3509 | **1.94×** |
+| **0.2103** (T32 CV cut) | 1,159 (**12.82%**) | 561 | 598 | 497 | 0.4840 | 0.5302 | **0.5061** | **4.14×** |
+| **0.5** (rejected) | 396 (**4.38%**) | 257 | 139 | 801 | **0.6490** | 0.2429 | 0.3535 | **5.55×** |
+
+The table reads the way T32's did, out of sample and more sharply. The conventional cut has the **best precision of the three and the worst recall**: it calls 396 clients, **257** of whom do subscribe, and
+  therefore **misses 801 of the 1,058 subscribers (75.7%)**. Its F1 is **0.3535** against **0.5061** at the
+operating cut, a loss of **0.1526** — and the operating cut finds **561** subscribers, **2.18×** what 0.5
+finds, for **763** more calls.
+
+That is the same mechanism T32 measured on the training folds, now on rows that had no part in any model
+choice: 0.5 sits at the **95.6th percentile** of this model's scores.
+
+### 11.4 The gap: it was expected to fall, and it did not
+
+The carry-in said the held-out figure should come out **lower** than CV, because T30 chose the configuration
+on those same folds and a CV number chosen that way is optimistic in principle. Stated plainly, in those
+words: **it did not fall.** The held-out PR-AUC is **0.4616** against T30's CV figure of **0.4460**, a gap
+of **+0.0155**; ROC-AUC is **0.8052** against **0.7990**, **+0.0061**.
+
+Two numbers have to be put beside that before it means anything.
+
+* As a share of the CV fold-to-fold spread, the gap is **+1.41 CV sd** (**1.408**), which sounds large and is
+  the wrong denominator: that sd is the spread between five models fitted to 28,934 rows each, not the
+  spread a single held-out estimate has.
+* The bootstrap over these 9,043 rows puts the held-out PR-AUC in **[0.4304, 0.4969]**, sd **0.0169** —
+  **1.53×** wider than the CV sd — and **15.4%** of resampled draws land **below** the CV mean. Against its
+  own yardstick the gap is **0.92 bootstrap sd**.
+
+So the verdict the record generates is: *no measurable gap* — a difference of this size is an ordinary draw.
+The CV mean sits **inside** the bootstrap interval, which is the formal version of the same statement. There
+is **nothing here to celebrate and nothing to repair**: the selection bias T30 warned about is **not
+detectable at this sample size**, and the honest reading of a +0.92 sd move is "these two estimates agree".
+
+Two candidate explanations exist for the sign, and neither is "the model is better than measured". The
+artifact was fitted on **36,168** rows; every CV fold model saw **28,934**, so the number being compared
+against describes a model with **25%** less data — a small gain is what that difference predicts rather than
+a loss. And one draw of 1,058 positives carries the sampling error the bootstrap just quantified.
+
+What this step **cannot** conclude: that the tuned configuration was the right pick. The ranking of T30's 40
+candidates is not re-tested here — one held-out point per model does not re-run a search — so the choice
+still rests on §9's argument, which is that the gain was small and the calibration and reproducibility were
+the real reasons.
+
+### 11.5 The probability scale survives the split
+
+| | CV | held-out | difference |
+|---|---|---|---|
+| mean predicted probability | 0.1166 | **0.1151** | **−0.0015** |
+| base rate | 0.1170 | **0.1170** | — |
+| Brier score | 0.0818 | **0.0804** | **−0.0014** |
+
+The model's average prediction on unseen rows lands **0.0019** below the observed rate — the same place it
+landed on the training folds. That matters for one concrete reason: D17's **7.50%** break-even is only
+applicable if the score *is* a probability, and the weighted builds from Phase 6 could not offer that (they
+scored the average client at **0.34–0.42**). On the held-out half the scale holds, so T34 can apply the cost
+model to raw output. Whether it should be recalibrated anyway is T34's measurement, not this section's
+claim.
+
+### 11.6 What 0.5 costs, and why the cut was not re-chosen here
+
+The held-out rows *could* have picked a cut: the F1-maximising threshold on these 9,043 rows is
+**0.212050**, at an F1 of **0.506570**. It was **not** adopted, because choosing it here would spend the
+held-out set on a decision the training folds already made.
+
+What it measures instead is how good that earlier decision was. T32's CV-derived cut of **0.2103** sits
+**0.001725** from the held-out optimum and costs **0.000481** F1. A threshold chosen on five folds,
+transferred to rows the model never saw, lands **0.001725** from where those rows would have put it. That
+is the strongest evidence in the phase that the leave-one-fold-out rule was the right way to pick an
+operating point — and it is evidence *about the rule*, obtained without using it to re-select anything.
+
+### 11.7 Verification
+
+* `python -m src.evaluate` exits **0** with **13/13** checks in **10.2 s**: the loaded object is the artifact
+  T31 recorded (sha256 and all six parameters); the module fits nothing and loads no training rows; the rows
+  partition the raw file; every row is scored once and twice identically; the three cuts are 0.075 from the
+  cost model, T32's CV mean to **1e-12**, and 0.5 by convention, and none equals the held-out F1 optimum;
+  every confusion cell equals scikit-learn's and partitions the rows; `metrics.at_threshold` — T32's own
+  function — reproduces every number with **0.0e+00** drift; 0.5 flags the least and retains the least; the
+  ROC-AUC recomputes by midranks and the AP by the step definition to **1e-12**; the stored curves run corner
+  to corner and integrate back to the reported metrics; the gap is arithmetic on both records; the bootstrap
+  replays bit-identically from its seed and its interval contains its own estimate; and all three figures
+  exist, are PNGs, post-date the run and carry the record's numbers.
+* **119 independent checks** in a separate script that never imports `src.evaluate`, using different
+  implementations throughout: ROC-AUC from midranks built with `unique`/`bincount` instead of a loop over
+  runs, AP from step blocks, confusion counts from `searchsorted` over sorted scores instead of masking, and
+  the bootstrap summary recomputed with numpy's percentiles from the **stored draws**.
+* **Two defects found, both by those checks and both mine.**
+  * The hand-written `rank_auc` came out at **0.7783** against scikit-learn's **0.8052** because it summed
+    the rankings of the *positions* the subscribers occupy in the score-sorted array rather than the
+    subscribers' own ranks — `ranks_sorted` was never mapped back through `order`. Fixed, and the comment
+    records why.
+  * The float32 Brier score in §11.1.
+* **Ties are real and were handled, not dodged.** **9,007** distinct scores over 9,043 rows, so **36** rows
+  share a score with another row — identical feature vectors produce identical predictions, and no threshold
+  can separate them. Average precision is defined over distinct thresholds, so a naive per-positive mean
+  comes out **1.8e-8** low; the independent verifier steps by tie block and agrees with the record to
+  **1e-12**. The difference is immaterial to every decision here and would have been invisible if the two
+  implementations had been the same one called twice.
+
+### 11.8 What T34–T37 inherit
+
+* **The score is a probability on unseen rows** (mean **0.1151** against a **0.1170** base rate), so the
+  **7.50%** break-even can be applied to it directly. T34 owns whether to recalibrate anyway.
+* **Two live operating points, unchanged in kind.** At **7.50%** the model calls **40.04%** of the list and
+  reaches **77.60%** of subscribers at **1.94×** the base rate — against CV's **1.90×**, so the precision at
+  the business cut held across the split. At **0.2103** it calls **12.82%** and reaches **53.02%** at **4.14×**.
+* **The held-out half has now been read once, and only once.** T35's lift table and T36's `duration`
+  comparison will both want it. They may *report* on it; none of them may *choose* on it. If a later step
+  picks a threshold, a feature set or an imbalance treatment by looking at these 9,043 rows, this section
+  stops being a held-out evaluation and the number above stops being evidence.
+* **The 0.5 column stays, labelled rejected.** Any later table quoting F1 at 0.5 without saying so has this
+  section to answer to: **0.1526** F1 points, and **801 of 1,058** subscribers never called.
+
+*Interpretation for the viva:* "Before this step, every number I had quoted came from the training half. So I
+took the saved model, applied it once to the 9,043 rows it had never seen, and wrote the result down before
+doing anything else with it. It came out slightly *better* than cross-validation — 0.4616 against 0.4460 —
+and the honest thing to say about that is that it is not a result. I bootstrapped the held-out rows and
+15.4% of resamples scored below the CV figure, so a gap of that size is what one draw looks like. What the
+step does establish is that the model did not fall apart out of sample, and that the cut I chose on the
+training folds was within 0.0017 of the cut those rows would have chosen themselves — which is the real test
+of whether that rule worked. And it gives the three pictures: at 0.5 the model is 65% precise on 396 calls
+and misses three quarters of the subscribers; at the 7.5% break-even it calls 40% of the list and finds 78%
+of them. Same model, same rows, a completely different campaign — which is why the threshold was the
+decision, not the accuracy."

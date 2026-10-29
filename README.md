@@ -12,7 +12,7 @@ model, and reports what the ranking is worth in euro — with every figure trace
 | **Target** | `y` — did this client subscribe to a term deposit? (5,289 of 45,211 did — 11.70%) |
 | **Model** | XGBoost, 12 features / 40 matrix columns, tuned, no imbalance treatment |
 | **Operating cut** | **0.0750** — the price of a call (`C/V`), not a fitted number |
-| **Status** | **43 of 46 tasks complete**; see [What is not here yet](#what-is-not-here-yet) |
+| **Status** | **44 of 46 tasks complete**; see [What is not here yet](#what-is-not-here-yet) |
 | **Python** | **3.11** — required, not preferred (see [Quick start](#quick-start)) |
 
 ---
@@ -100,8 +100,9 @@ twelve contributions and the three exemplars' recorded scores.
 ## Reproduce every number
 
 Each module is runnable as `python -m src.<name>`, validates its own output, prints its checks and
-exits non-zero on disagreement. Run from the repository root. The measured steps total **about eight
-minutes**; `src.train` (**182.3 s**) and `src.local_explain` (**76.7 s**) dominate.
+exits non-zero on disagreement. Run from the repository root. The twelve steps that record their runtime
+total **about eight to ten minutes** depending on the machine; `src.select`'s permutation null, `src.train`
+and `src.local_explain` dominate, and the exact seconds are in each record's `elapsed_seconds` field.
 
 ```bash
 # 1. data: raw -> processed, then the one split every later step replays
@@ -113,20 +114,20 @@ python -m src.features          # 17 engineered features, 8 leakage checks
 python -m src.preprocess        # 17 features -> 65 matrix columns
 python -m src.select            # -> 12 features / 40 columns, 06_feature_importance.png
 python -m src.leakage           # the duration audit
-python -m src.duration_compare  # with-vs-without duration, 7.1 s
 # 3. models
-python -m src.train             # 4 candidate builds, 5-fold CV, 182.3 s
-python -m src.imbalance         # weights / none / SMOTE, 61.1 s
-python -m src.tune              # 40 of 4,800 points, 68.2 s
+python -m src.train             # 4 candidate builds, 5-fold CV (~3 min)
+python -m src.imbalance         # weights / none / SMOTE (~1 min)
+python -m src.tune              # 40 of 4,800 points (~1 min)
 python -m src.final             # models/final_model.joblib
 # 4. evaluation - the held-out half is scored here, once
-python -m src.metrics           # metrics_cv.csv, 30.8 s
-python -m src.evaluate          # held-out metrics + 3 figures, 9.2 s
-python -m src.threshold         # the cut at 0.0750, 4.6 s
-python -m src.lift              # deciles, lift and gain, 4.3 s
+python -m src.metrics           # metrics_cv.csv (~1 min)
+python -m src.evaluate          # held-out metrics + 3 figures (~10 s)
+python -m src.threshold         # the cut at 0.0750 (~10 s)
+python -m src.lift              # deciles, lift and gain (~10 s)
+python -m src.duration_compare  # with-vs-without duration at the tuned point (~15 s)
 # 5. explanation and recommendations
-python -m src.explain           # global SHAP, 38.8 s
-python -m src.local_explain     # three exemplar clients, 76.7 s
+python -m src.explain           # global SHAP (~1 min)
+python -m src.local_explain     # three exemplar clients (~1 min)
 python -m src.playbook          # eight recommendations as records
 # 6. deliverables
 python -m src.report            # report.md -> report.pdf (needs Chrome, Edge or Chromium)
@@ -161,7 +162,7 @@ depositiq-term-deposit-prediction/
 ├── reports/               6 CSV tables + 19 figures
 ├── docs/                  the report, the deck, and 11 supporting documents
 ├── app/                   app.py - the Streamlit demo (T43)
-└── PROGRESS.md            46-task checklist, 64-entry decisions log, session log
+└── PROGRESS.md            46-task checklist, 65-entry decisions log, session log
 ```
 
 Start with the two deliverables, then follow whichever thread you need:
@@ -223,6 +224,11 @@ eventually be wrong:
 3. **Numeric traces** — documents are parsed for every decimal, and each one must exist in a
    `models/*.json` record, a `reports/*.csv` column or a supporting document. The report's 497 tokens,
    the deck's 157 and the playbook's 63 all pass; a number with no record behind it fails the build.
+4. **A clean-clone rerun** — the pushed repository was cloned outside the working tree, given a fresh
+   virtual environment and the pinned install, and run through the command list above in order. The
+   fitted artifacts, processed data, report tables and seven of eight figures came back byte-identical;
+   the eighth was a SHAP beeswarm whose jitter was unseeded, now seeded. The two defects the rerun found
+   — a command in the wrong position and exact runtimes quoted in the report — are recorded with the fix.
 
 The verifiers found real defects rather than confirming the work: a `rank_auc` that masked the wrong
 order, a Brier score computed in `float32`, scikit-learn's `std_test_score` using `ddof=0`, a
@@ -233,17 +239,16 @@ cross-validated balanced accuracy. All are recorded in `PROGRESS.md`, with the f
 
 ## What is not here yet
 
-The repository is **43 of 46 tasks** into a 46-task plan, and the three open items are deliverables
+The repository is **44 of 46 tasks** into a 46-task plan, and the two open items are deliverables
 rather than analysis:
 
 | Task | Missing piece |
 |---|---|
-| T44 | an end-to-end rerun from a fresh clone, recorded in `PROGRESS.md` |
 | T45 | `docs/viva_qa.md` — 25+ likely questions with answers |
 | T46 | `docs/demo_script.md` — a five-minute walkthrough |
 
 The Streamlit demo is present at `app/app.py` and is checked by `python -m src.demo`; no number above
-depends on the three remaining tasks.
+depends on the two remaining tasks.
 
 ---
 

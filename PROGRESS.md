@@ -2,7 +2,7 @@
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
 **Last updated:** 2026-10-30 23:10
-**Overall completion:** 93% (43 / 46 tasks)
+**Overall completion:** 96% (44 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -17,8 +17,8 @@
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
-| 9 | Documentation & Presentation | 10 | 10 / 13 | T01–T06, T41–T46 |
-| | **Total** | **100** | **42 / 46** | |
+| 9 | Documentation & Presentation | 10 | 11 / 13 | T01–T06, T41–T46 |
+| | **Total** | **100** | **44 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,19 +28,15 @@
 
 ## NEXT TASK
 
-**T44 | Phase 9 – Deliverables | End-to-end rerun from a clean clone.** Output: a verification checklist
-recorded in `PROGRESS.md`.
-**The static half was done in T42** — a 102-file tree rebuilt from `git ls-files`, all 24 then-current
-modules imported, `src.config` proved to resolve to the clone, the smoke test run, and no `.venv` or
-bytecode leaked: **15/15**. What remains is the part a static import cannot prove: a **fresh clone of the
-pushed repository**, a fresh virtual environment, `pip install -r requirements.txt`, and the documented
-command sequence run end to end. **Done when:** the fresh clone reproduces the reported metrics and the
-checklist is in this file, including wall-clock time and any discrepancy.
-**Carry in:** clone into a directory **outside** the working tree; do not copy `.venv`, `models/*.joblib`
-or `data/processed/*.csv` — the point is to rebuild them. Use Python 3.11. The held-out half is still
-spent once: run the modules in the README's order, not in a convenient order, and compare the rebuilt
-records with the committed ones. `src.report` needs Chrome, Edge or Chromium; if none is available in the
-clean environment, record the renderer as a failed check rather than skipping it silently.
+**T45 | Phase 10 – Viva Preparation | Viva Q&A bank.** Output: `docs/viva_qa.md`.
+**Done when:** at least **25 likely questions** are answered, and between them they cover **every rubric
+criterion** — not just the modelling chapters. Each answer should name the record or document that holds
+its evidence, so a question about a decimal can be answered by opening the file rather than re-deriving
+the number from memory.
+**Carry in:** the report, deck, playbook and README are the source of the answers; do not introduce a new
+figure that no record holds. The three prohibitions (`duration`, accuracy, causal `month`) and the
+D18 scope sentence should each have a question that forces them into the open, because they are the
+points a viva is most likely to probe.
 
 ---
 
@@ -134,6 +130,8 @@ stops being evidence |
 
 | D64 | 2026-10-30 | **The demo is a thin Streamlit UI (`app/app.py`) over a checked core (`src/demo.py`), and the core is what is tested: it loads T31's artifact by digest, turns 11 business facts into the shipped 12 features, scores with `predict_proba`, and explains with D58's signed-sum SHAP aggregation against the 0.0750 price rather than 0.5** | Four reasons. **The UI must not be the only implementation.** A Streamlit script is hard to test and easy to fork: the probability shown on screen, the SHAP table and the euro decision would each be a second copy of logic the report already fixed. Putting them in `src/demo.py` means `python -m src.demo` can score the same default client, the same three T38 exemplars and the same 40-column matrix without a browser, and the app imports those functions rather than re-deriving them. **The artifact is pinned by digest, not by path:** `load_model()` refuses `models/final_model.joblib` unless its sha256 and size equal `models/final_model.json`, so a re-fitted model cannot be demoed under T31's name. **The form asks for 11 facts, not 12 features:** `previous` derives both `previous_capped` and `previously_contacted` (D21), `balance` derives `balance_arsinh`, `campaign` derives `campaign_bucket`, and `days_since_contact` derives `recency_band`; the five dropped features (D44) and `duration`/`pdays` (D05, D36) are absent by construction, and a check proves the forbidden names appear in neither the frame nor the 40-column matrix. **The three prohibitions are interface decisions, not footnotes:** the cut is `C/V = 0.0750` re-derived from `src.cost`, so a client at 0.5 is explicitly called and the app says why; `duration` has no field; and `C = 1.50 EUR` / `V = 20.00 EUR` are labelled assumptions beside the EV and the 20-cell sensitivity grid. The three T38 exemplars are rebuilt from `models/shap_local.json` plus `data/processed/train.csv` and reproduce their recorded scores to **0.0e+00**, so the demo's examples cannot drift from the report. **22 checks** pass in **1.7 s**, and Streamlit was already pinned at **1.52.2**, so T43 adds no dependency. |
 
+| D65 | 2026-10-30 | **The clean-clone rerun is the only test of the README's claim, and what it checks is the artifacts rather than the prose: a fresh clone at the pushed commit, a fresh venv, the 14 pins, and the 22 commands in the README's own order, with every rebuilt record compared to the committed one** | Three reasons. **A command list can be internally consistent and still fail in order.** `duration_compare` reads `models/best_params.json` (from `src.tune`) and `models/threshold_choice.json` (from `src.threshold`), so the README's original position before both was wrong in a way no static check could see; the clone failed at 4.5 s with `FileNotFoundError`, the order moved after `lift`, and `src.readme` now enforces **18** constraints including both dependencies. **A runtime is not a result.** `docs/report.md` and the README quoted exact seconds from one machine; when the clone's `src.train` took **188.1 s** against the quoted **182.3 s**, the report's provenance check refused the decimal — correctly, because a marker on another laptop will get a third number. Exact seconds now live only in each record's `elapsed_seconds`, the documents use qualitative bands, and the README's **eight-to-ten-minute** claim is checked against the sum of the 12 records (**562.0 s = 9.4 min** in the clone) rather than a rounded anecdote. **A figure is an output too.** The SHAP values were identical across runs but `09_shap_summary.png` was not, because `shap.summary_plot` jitters with the global NumPy RNG; passing `rng=PLOT_SEED` made two fresh runs byte-identical (**B0EF0026…**, **455,211 bytes**), which is what lets the figure be compared at all. **What the comparison showed:** all **5** joblibs, all **4** processed CSVs, all **6** report CSVs and **7 of 8** figures byte-identical; every substantive JSON metric identical after NaN handling; the remaining differences are the records that cite the edited prose (`deck.json`, `readme.json`, `report.json`), the regenerated report/deck files, and the newly seeded figure. **Two clean-room mistakes were mine, not the repository's:** deleting `docs/report.md` as if it were generated broke `src.report` (it is the source the renderer reads, so it was restored from `HEAD`), and treating a missing browser as skippable would have hidden a failed deliverable — the machine had one, so `src.report` rendered **30/30** and the PDF was produced. **Scope:** one clone on one Windows machine at one commit; the byte-identity result is evidence of determinism on that stack, not a promise across every OS and BLAS build. |
+
 ---
 
 ## Task Checklist
@@ -203,7 +201,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T41 | Rubric 9 | Build the slide deck | Output: `docs/presentation.pptx`, `src/deck.py`, `models/deck.json` | **done 2026-10-30** (15 slides, business-first: the answer and its scope, the decision, the price, then the evidence, then the eight recommendations; **24/24** in-module checks and **38 independent** ones that open the package as a zip and parse its XML without python-pptx, recomputing **3,296 × 20 − 14,866 × 1.5 = 43,621.00 EUR** from confusion counts and confirming the six embedded charts are byte-identical to `reports/figures/`; **157** decimal tokens trace to a record or document and the **33** slide-foot citations are each verified to exist; geometry, type size and text overflow are checked against the **saved** file; all **15** slides were exported to PNG through PowerPoint and inspected, which is how charts too small to read at 5.8 in were caught; **two inherited report defects found and fixed** — § 7.6 paired a held-out accuracy with a CV balanced accuracy (**61.26%** → **61.28%**) and claimed accuracy peaked at 0.5 when the record's peak is **89.76%** at **0.478284**)
 - [x] T42 | Rubric 9 | Finalise README and repo hygiene | Output: `README.md`, `src/readme.py`, `models/readme.json` | **done 2026-10-30** (249 lines: the decision and its scope, the headline figures beside the record that holds each, a two-line quick start, the **24-command** reproduction sequence in dependency order with per-step runtimes, a repository map, the data's provenance with three SHA-256 prefixes, and a plain statement that `app/` is empty; **33 checks** in `src/readme.py` hold it to the repository — every command names a real module with a `__main__` guard, every runnable module is named, **14** dependency constraints hold, the quoted versions equal the pins, the counts are counted from disk, every link resolves, no absolute path appears and every decimal traces to a record; **15/15** clean-clone checks rebuild a **102-file** tree from `git ls-files`, import all **24** modules there and prove `src.config` resolves to the clone; **four stale counts and one conflation** found — the file's **5,289** subscribers had been paired with the modelling half's **11.6982%** rate in the README, `docs/report.md` § 0 and the deck's decision slide, all three now distinguishing **11.70%** from **11.6982%**)
 - [x] T43 | Rubric 9 | Build the interactive demo | Output: `app/app.py` (Streamlit) | **done 2026-10-30** (`src/demo.py` + `app/app.py` + `models/demo.json`; the UI is thin and the core is checked headlessly — **11 business facts** become the **12 shipped features** through the project's own derivations, `duration`/`pdays`/`y` are absent from the form, the frame and the 40-column matrix, and the artifact is loaded by **sha256/size** rather than by path; the drivers are D58's **signed sum within each one-hot block**, additivity **4.605e-07** and `sigmoid(margin)` against `predict_proba` **2.027e-09**; the cut is T34's **0.0750 = C/V**, and a client at **0.5** is explicitly called, so 0.5 is not the rule; **C = 1.50 EUR** and **V = 20.00 EUR** are labelled assumptions beside the EV and the 20-cell sensitivity grid; the three T38 exemplars are rebuilt from `models/shap_local.json` + `data/processed/train.csv` and reproduce their recorded scores to **0.0e+00**; **22/22 checks** pass and `python -m src.demo` exits **0** in **1.7 s**; `app/app.py` was rendered headlessly through Streamlit's `AppTest`, the default client scores **7.22%** (just below the price), the true-positive exemplar **38.19%** and the false-negative **5.50%**; Streamlit **1.52.2** was already pinned, so no dependency was added; `src.readme` now requires the README to name the demo and no longer accepts an empty `app/`)
-- [ ] T44 | Rubric 9 | End-to-end rerun from a clean clone | Output: verification checklist recorded in `PROGRESS.md` | Done when: fresh clone + install + run reproduces the reported metrics
+- [x] T44 | Rubric 9 | End-to-end rerun from a clean clone | Output: verification checklist recorded in `PROGRESS.md` | **done 2026-10-30** (a **fresh clone of the pushed repo** at `c1e70b6`, **105 tracked files**, Python **3.11.9**, a fresh `.venv`, all **14 pins** installed, `src.config.ROOT` resolving to the clone and no `.venv`/bytecode tracked; the **22 documented commands** were run in README order and all exit **0** after the fixes below; **`src.report` 30/30**, **`src.deck`** passes, **`src.demo` 22/22**, **`src.readme` 34/34** in the clone; the rebuilt artifacts match `HEAD`: **all 5 joblibs, all 4 processed CSVs, all 6 report CSVs and 7 of 8 figures byte-identical**, every substantive JSON metric identical after NaN handling, with differences only in the records that cite the edited prose (`deck.json`, `readme.json`, `report.json`), the regenerated report/deck files, and the now-seeded SHAP figure; **four defects found and fixed** — the README ran `duration_compare` before `tune` and `threshold` even though it reads both records, `docs/report.md` quoted machine-specific seconds that its own provenance check could not re-find, `09_shap_summary.png` was unseeded inside `shap.summary_plot`, and a clean-room script had deleted `docs/report.md` as if it were generated when it is a source document; the full sequence took **about 15.4 minutes** on this machine, with the **12 recorded steps summing to 562.0 s = 9.4 min**, inside the README's corrected **eight-to-ten-minute** band)
 
 ### Phase 10 — Viva Preparation
 - [ ] T45 | Rubric 9 | Viva Q&A bank | Output: `docs/viva_qa.md` | Done when: 25+ likely questions are answered, covering every rubric criterion
@@ -2247,6 +2245,82 @@ added. `src.readme` was updated in the same task: it now requires the README to 
 **Uncommitted:** `src/demo.py`, `app/app.py`, `models/demo.json`, `README.md`, `src/readme.py`,
 `models/readme.json`, `PROGRESS.md`.
 **Next:** T44 — the end-to-end rerun from a clean clone, recorded in this file.
+
+---
+
+### 2026-10-30 — Session 46  (T44 complete)
+
+**Completed:** **T44** — the end-to-end rerun from a clean clone; criterion 9 is **11 / 13** and the project
+is **44 / 46**.
+
+**The test was a clone, not a convenience copy.** The pushed repository was cloned into a directory outside
+the working tree at **`c1e70b6`** — **105 tracked files**, a clean working tree, no `.venv` and no bytecode —
+and everything that can be rebuilt was deleted before the run: the processed CSVs, all five joblibs, every
+`models/*.json`, the six `reports/*.csv`, the eight pipeline figures, and the generated report and deck.
+`docs/report.md` was restored when that proved to be a mistake (below). A fresh **Python 3.11.9** virtual
+environment was created and all **14 pins** installed from `requirements.txt`; `src.config.ROOT` resolves to
+the clone, not to the original tree. The **22 commands** in the README were then run in the README's order,
+one process at a time, with every exit code and wall-clock time recorded.
+
+**What the clone found, in the order it found it — four real defects, all fixed:**
+
+1. **`duration_compare` was in the wrong place in the README.** It reads `models/best_params.json`, which
+   `src.tune` writes, so the original position before `train`/`tune` failed at **4.5 s** with
+   `FileNotFoundError`. Moved after `tune`, it then failed at **15.8 s** on `models/threshold_choice.json`,
+   which `src.threshold` writes — a second dependency the first failure had masked. It now runs after
+   `lift`, and `src.readme` enforces **18** constraints, including `tune → duration_compare`,
+   `threshold → duration_compare` and `duration_compare → playbook`.
+2. **The report quoted machine-specific seconds.** `docs/report.md` listed `src.train` at **182.3 s**; the
+   clone's record says **188.1 s**, so `src.report`'s provenance check refused the decimal and exited **1**.
+   That is the check working: a number from one laptop is not reproducible on another. Exact seconds now
+   live only in each record's `elapsed_seconds`, the report and README use qualitative bands, and the
+   README's claim is **eight to ten minutes**, checked by `src.readme` against the 12 records' sum
+   (**562.0 s = 9.4 min**) rather than rounded to a single anecdote.
+3. **`09_shap_summary.png` was not reproducible.** Every SHAP value was identical between runs, but
+   `shap.summary_plot` jitters the beeswarm with the **global NumPy RNG**, so the image changed. Passing
+   `rng=PLOT_SEED` in `src/explain.py` fixed it: two fresh runs now produce a byte-identical figure
+   (**`B0EF0026CD15B409…`**, **455,211 bytes**), which is what makes a figure comparison meaningful.
+4. **`docs/report.md` is a source document, not an artifact.** The clean-room deletion removed it, and
+   `src.report` correctly failed with `missing …\docs\report.md`; it was restored from `HEAD`. The generated
+   outputs are `docs/report.html`, `docs/report.pdf` and `docs/presentation.pptx`.
+
+**The checklist:**
+
+| Check | Result |
+|---|---|
+| Fresh clone of the pushed repo, outside the working tree | **PASS** — `c1e70b6`, 105 tracked files, clean tree |
+| Fresh virtual environment and pinned install | **PASS** — Python 3.11.9, 14/14 pins |
+| `src.config` resolves to the clone, no `.venv`/bytecode tracked | **PASS** — `ROOT == clone`, 0 leaked paths |
+| Every documented command exits 0, in README order | **PASS** — 22/22 after the two order fixes |
+| `src.report` renders, with a browser present | **PASS** — **30/30**, PDF produced (no skipped renderer) |
+| `src.deck` validates the saved package | **PASS** |
+| `src.demo` scores the committed artifact | **PASS** — **22/22** |
+| `src.readme` holds the README to the clone | **PASS** — **34/34** |
+| Fitted artifacts reproduce | **PASS** — 5/5 joblibs byte-identical |
+| Processed data and report tables reproduce | **PASS** — 4/4 processed CSVs and 6/6 report CSVs byte-identical |
+| Figures reproduce | **7/8 byte-identical**; the eighth was the unseeded SHAP beeswarm, now seeded and reproducible |
+| JSON metrics reproduce | **PASS** — every substantive numeric/string value identical after NaN handling; only prose-driven records differ |
+| Wall-clock time recorded | **926.8 s ≈ 15.4 min** for the full sequence; the 12 records that store `elapsed_seconds` sum to **562.0 s = 9.4 min** |
+| Discrepancies recorded | **Yes** — the two order defects, the runtime trace, the SHAP seed, and the source/artifact mistake above |
+
+**The metrics did not move; the clock did.** All **five** joblibs, all **four** processed CSVs, all **six**
+report CSVs and **seven of eight** figures came back byte-identical. The only JSON differences were the
+records that quote the edited prose (`deck.json`, `readme.json`, `report.json`), the regenerated
+report/deck files, and the newly seeded figure; after NaN handling there were **0** substantive numeric or
+string differences in the metric records. The clone was slower than the machine that produced the
+committed records — `src.select` alone took **288.6 s** and records no `elapsed_seconds`, `src.train`
+**188.1 s**, `src.explain` **79.1 s**, `src.local_explain` **77.7 s** — but the 12 recorded steps still sum
+to **9.4 min**, inside the README's stated **eight-to-ten-minute** band.
+
+**Verified:** `python -m src.readme` exits **0** with **34/34** checks in the clone; `python -m src.demo`
+**22/22**; `python -m src.report` **30/30**; `python -m src.deck` passes. The clone is disposable and lives
+at `C:\Users\Mayur\AppData\Local\Temp\opencode\depositiq-t44-clone`; the fixes were applied to the working
+tree and the affected records regenerated there.
+
+**Blocked:** none.
+**Uncommitted:** `README.md`, `src/readme.py`, `docs/report.md`, `src/explain.py`, the regenerated records
+and figures, and `PROGRESS.md`.
+**Next:** T45 — the viva Q&A bank.
 
 ---
 

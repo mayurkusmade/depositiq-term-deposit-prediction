@@ -73,6 +73,7 @@ ORDER: tuple[tuple[str, str], ...] = (
     ("split", "train"),
     ("train", "imbalance"),
     ("train", "tune"),
+    ("tune", "duration_compare"),
     ("tune", "final"),
     ("final", "demo"),
     ("final", "metrics"),
@@ -81,6 +82,8 @@ ORDER: tuple[tuple[str, str], ...] = (
     ("explain", "local_explain"),
     ("final", "threshold"),
     ("threshold", "lift"),
+    ("threshold", "duration_compare"),
+    ("duration_compare", "playbook"),
     ("lift", "playbook"),
     ("playbook", "report"),
     ("report", "deck"),
@@ -313,9 +316,10 @@ def main() -> int:
         if isinstance(elapsed, (int, float)):
             runtimes.append(float(elapsed))
     minutes = sum(runtimes) / 60.0
-    check("the stated total runtime is the records' sum",
-          round(minutes) == 8 and "about eight" in text,
-          f"{sum(runtimes):.1f} s over {len(runtimes)} recorded steps = {minutes:.1f} min")
+    check("the stated runtime range contains the records' sum",
+          7.0 <= minutes <= 11.0 and "eight to ten" in text,
+          f"{sum(runtimes):.1f} s over {len(runtimes)} recorded steps = {minutes:.1f} min "
+          f"(stated: eight to ten)")
 
     print()
     print(f"{COUNT - len(FAILURES)}/{COUNT} checks passed")

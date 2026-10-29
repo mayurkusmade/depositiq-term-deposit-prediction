@@ -712,7 +712,7 @@ def print_report(result: dict) -> None:
         print(f"  [{'PASS' if check['passed'] else 'FAIL'}] {check['check']} - {check['detail']}")
     print("=" * 112)
     print(f"result: {'PASS - the demo scores the artifact and explains the score' if result['checks_ok'] else 'FAIL'}")
-    print("Next  : T44 - the end-to-end rerun from a clean clone.")
+    print("Next  : T45 - the viva Q&A bank.")
 
 
 if __name__ == "__main__":

@@ -560,6 +560,10 @@ def draw(
         # A colour bar is meaningless for a 0/1 one-hot column - the scale would read "value 0 to 1".
         # The subtitle states the mapping instead, and the panel keeps the width the bar was taking.
         color_bar=False,
+        # `shap` jitters the beeswarm with the global NumPy RNG when `rng` is omitted, which made this
+        # figure differ between fresh runs even though every SHAP value was identical (T44). Passing the
+        # same seed as the row sample makes the picture reproducible, not just the numbers behind it.
+        rng=PLOT_SEED,
     )
     left.set_title(
         f"every column the model sees (40 one-hot levels)\n{len(chosen):,} of {len(X):,} training clients; "

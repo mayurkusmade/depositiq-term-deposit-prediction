@@ -693,29 +693,29 @@ depositiq-term-deposit-prediction/
 ├── reports/             metrics_cv.csv, lift_table.csv, playbook.csv, shap_*.csv, 19 figures
 ├── docs/                this report plus 11 supporting documents
 ├── app/                 Streamlit demo (T43)
-└── PROGRESS.md          46-task checklist, 60-entry decisions log
+└── PROGRESS.md          46-task checklist, 65-entry decisions log
 ```
 
 ### 9.2 Every claim has a module behind it
 
-| Module | Produces | Checks | Runtime |
+| Module | Produces | Checks | Runtime (reference) |
 |---|---|---|---|
 | `src.clean` | processed CSVs | 15 per variant | — |
 | `src.features` | 17 engineered features | 8 in-module | — |
 | `src.preprocess` | 65-column matrix | 15 | — |
-| `src.select` | 12 features / 40 columns | 17 | — |
-| `src.train` | `cv_results.json` | 15 | 182.3 s |
-| `src.imbalance` | `imbalance_results.json` | 10 | 61.1 s |
-| `src.tune` | `best_params.json` | 12 | 68.2 s |
-| `src.final` | `final_model.joblib` | 11 | 3.0 s |
-| `src.metrics` | `metrics_cv.csv` | 11 | 30.8 s |
-| `src.evaluate` | `holdout_eval.json` + 3 figures | 15 | 9.2 s |
-| `src.threshold` | `threshold_choice.json` + curve | 15 | 4.6 s |
-| `src.lift` | `lift_results.json` + figure | 17 | 4.3 s |
-| `src.duration_compare` | `duration_comparison.json` | 13 | 7.1 s |
-| `src.explain` | `shap_global.json` + figure | 17 | 38.8 s |
-| `src.local_explain` | `shap_local.json` + figure | 16 | 76.7 s |
-| `src.playbook` | `playbook.json` + CSV | 12 | 9.4 s |
+| `src.select` | 12 features / 40 columns | 17 | ~5 min |
+| `src.train` | `cv_results.json` | 15 | ~3 min |
+| `src.imbalance` | `imbalance_results.json` | 10 | ~1 min |
+| `src.tune` | `best_params.json` | 12 | ~1 min |
+| `src.final` | `final_model.joblib` | 11 | <10 s |
+| `src.metrics` | `metrics_cv.csv` | 11 | ~1 min |
+| `src.evaluate` | `holdout_eval.json` + 3 figures | 15 | ~10 s |
+| `src.threshold` | `threshold_choice.json` + curve | 15 | ~10 s |
+| `src.lift` | `lift_results.json` + figure | 17 | ~10 s |
+| `src.duration_compare` | `duration_comparison.json` | 13 | ~15 s |
+| `src.explain` | `shap_global.json` + figure | 17 | ~1 min |
+| `src.local_explain` | `shap_local.json` + figure | 16 | ~1 min |
+| `src.playbook` | `playbook.json` + CSV | 12 | <1 s |
 
 Each module's `validate()` re-reads its own record from disk and fails the process on disagreement, so a
 stale artifact cannot ship a sentence.
@@ -753,9 +753,10 @@ python -m src.explain && python -m src.local_explain # SHAP
 python -m src.playbook                               # recommendations
 ```
 
-Runtime is dominated by `src.train` (**182.3 s**) and `src.local_explain` (**76.7 s**); the whole chain
-is a few minutes on a laptop. Every module is deterministic under seed 42, and the figures were
-confirmed byte-identical across fresh runs.
+Runtime is dominated by `src.select`'s permutation null, then by `src.train` and `src.local_explain`; the
+whole chain takes minutes on a laptop. Exact seconds are in each record's `elapsed_seconds` field and are
+machine-specific, so they are not quoted here. Every module is deterministic under seed 42, and the figures
+were confirmed byte-identical across fresh runs.
 
 ---
 

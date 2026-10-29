@@ -1,9 +1,9 @@
 {
   "task": "T42",
   "readme": "README.md",
-  "bytes": 14207,
-  "sha256": "05ffe63efdd8b24957f051f6cb19b9851dd0bed0a847e21f130cc6ab8f94a562",
-  "lines": 268,
+  "bytes": 14808,
+  "sha256": "922215b467ec277f33a5ec975d2b7be72f2393f5e3d543769e04c757733811d3",
+  "lines": 273,
   "sections": [
     "The result, and what it does not mean",
     "Quick start",
@@ -42,9 +42,9 @@
     "tune"
   ],
   "pins": 14,
-  "tokens_traced": 57,
+  "tokens_traced": 45,
   "figures": 19,
-  "tasks_done": 43,
+  "tasks_done": 44,
   "tasks_total": 46,
   "checks": 34,
   "failures": []

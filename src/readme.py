@@ -29,9 +29,9 @@ What is asserted
 * **The counts are the counts.** Modules, figures, CSV tables, supporting documents, decisions and tasks
   are counted from disk, not remembered.
 * **Every relative link resolves**, and no absolute path or home directory appears anywhere.
-* **The README does not claim what does not exist.** It must say the demo is missing, and the moment
-  `app/app.py` appears this check fails until the README is updated - the honesty is enforced, not
-  encouraged.
+* **The README does not claim what does not exist.** The demo is `app/app.py`, the README must name the
+  command that starts it, and the check fails if the file disappears or the README calls `app/` empty -
+  the honesty is enforced, not encouraged.
 
 How to run
 ----------
@@ -59,6 +59,7 @@ MIN_CHARS: int = 6000
 SECTIONS: tuple[str, ...] = (
     "The result, and what it does not mean",
     "Quick start",
+    "The interactive demo",
     "Reproduce every number",
     "What is in the repository",
     "The data",
@@ -73,6 +74,7 @@ ORDER: tuple[tuple[str, str], ...] = (
     ("train", "imbalance"),
     ("train", "tune"),
     ("tune", "final"),
+    ("final", "demo"),
     ("final", "metrics"),
     ("final", "evaluate"),
     ("final", "explain"),
@@ -284,10 +286,15 @@ def main() -> int:
 
     print("-- honesty ---------------------------------------------------------------")
     demo = config.APP_DIR / "app.py"
-    check("the README says the demo is missing", "T43" in text and "app/" in text and "empty" in text,
-          "the empty app/ directory is declared")
-    check("it does not claim a demo that does not exist", not demo.exists(),
-          "app/app.py absent" if not demo.exists() else "app/app.py now exists - update the README")
+    check("the demo the README names exists", demo.exists(),
+          "app/app.py present" if demo.exists() else "app/app.py missing")
+    check("the README starts the demo and does not call app/ empty",
+          "streamlit run app/app.py" in text and "app/` is empty" not in text,
+          "the run command is stated and the directory is no longer described as empty")
+    app_text = demo.read_text(encoding="utf-8") if demo.exists() else ""
+    check("the demo is a UI over the checked core",
+          "streamlit" in app_text and "demo" in app_text,
+          "app/app.py imports src.demo" if app_text else "app/app.py missing")
     check("the three prohibitions appear in it", all(phrase.lower() in text.lower() for phrase in PROHIBITIONS),
           f"{len(PROHIBITIONS)} phrases")
     # Whitespace and bold markers are removed before matching, because a reflow of the paragraph is not a

@@ -1,12 +1,13 @@
 {
   "task": "T42",
   "readme": "README.md",
-  "bytes": 13134,
-  "sha256": "e15cfc19c14ef619da67f404e836e04b8236c8ed5cd95184b3be391856f30358",
-  "lines": 248,
+  "bytes": 14207,
+  "sha256": "05ffe63efdd8b24957f051f6cb19b9851dd0bed0a847e21f130cc6ab8f94a562",
+  "lines": 268,
   "sections": [
     "The result, and what it does not mean",
     "Quick start",
+    "The interactive demo",
     "Reproduce every number",
     "What is in the repository",
     "The data",
@@ -19,6 +20,7 @@
     "cost",
     "data_loader",
     "deck",
+    "demo",
     "duration_compare",
     "evaluate",
     "explain",
@@ -40,10 +42,10 @@
     "tune"
   ],
   "pins": 14,
-  "tokens_traced": 52,
+  "tokens_traced": 57,
   "figures": 19,
-  "tasks_done": 42,
+  "tasks_done": 43,
   "tasks_total": 46,
-  "checks": 33,
+  "checks": 34,
   "failures": []
 }

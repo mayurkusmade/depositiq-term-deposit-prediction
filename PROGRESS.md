@@ -2,7 +2,7 @@
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
 **Last updated:** 2026-10-30 23:10
-**Overall completion:** 91% (42 / 46 tasks)
+**Overall completion:** 93% (43 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -17,7 +17,7 @@
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
-| 9 | Documentation & Presentation | 10 | 9 / 13 | T01–T06, T41–T46 |
+| 9 | Documentation & Presentation | 10 | 10 / 13 | T01–T06, T41–T46 |
 | | **Total** | **100** | **42 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
@@ -28,22 +28,19 @@
 
 ## NEXT TASK
 
-**T43 | Phase 9 – Deliverables | The interactive demo.** Open: `app/app.py` (Streamlit).
-**The repository now has a front door**, so the one deliverable that a marker will actually click is the last
-substantial piece of code: an app that takes a client's attributes and returns a probability with the drivers
-behind it. `app/` is empty. **Done when:** it runs locally, accepts client attributes, and returns a
-probability with the top SHAP drivers.
-**Carry in:** five constraints. **(1) The app scores the shipped artifact, not a fresh fit** —
-`models/final_model.joblib` through the same `src.tune.make_estimator` path every evaluation used, so a
-displayed probability equals the one T33 recorded. **(2) The drivers are the ones D58 defines:** TreeSHAP
-contributions aggregated by **signed sum within each one-hot block**, in log-odds, because the naive per-column
-alternative inflates `month` by **58.52%**. **(3) `duration` is not an input and never appears in the form**
-(D22, prohibition one) — a demo that accepts it would be the one place the project's central prohibition is
-quietly broken. **(4) The output is a probability against the price, not a verdict:** show the score beside
-**0.0750** and refuse to imply that 0.5 is a cut. **(5) The euro columns are labelled as assumptions** —
-**1.50 EUR** a call, **20.00 EUR** a deposit, linear in V — so the app cannot be read as a bank's own numbers.
-**Note:** `src/readme.py` fails the moment `app/app.py` exists, because the README says the demo is missing.
-That failure is the mechanism, not a bug: update the README in the same task.
+**T44 | Phase 9 – Deliverables | End-to-end rerun from a clean clone.** Output: a verification checklist
+recorded in `PROGRESS.md`.
+**The static half was done in T42** — a 102-file tree rebuilt from `git ls-files`, all 24 then-current
+modules imported, `src.config` proved to resolve to the clone, the smoke test run, and no `.venv` or
+bytecode leaked: **15/15**. What remains is the part a static import cannot prove: a **fresh clone of the
+pushed repository**, a fresh virtual environment, `pip install -r requirements.txt`, and the documented
+command sequence run end to end. **Done when:** the fresh clone reproduces the reported metrics and the
+checklist is in this file, including wall-clock time and any discrepancy.
+**Carry in:** clone into a directory **outside** the working tree; do not copy `.venv`, `models/*.joblib`
+or `data/processed/*.csv` — the point is to rebuild them. Use Python 3.11. The held-out half is still
+spent once: run the modules in the README's order, not in a convenient order, and compare the rebuilt
+records with the committed ones. `src.report` needs Chrome, Edge or Chromium; if none is available in the
+clean environment, record the renderer as a failed check rather than skipping it silently.
 
 ---
 
@@ -135,6 +132,8 @@ stops being evidence |
 | D62 | 2026-10-30 | **The deck is generated from a fifteen-slide `SPEC` by `src/deck.py` with `python-pptx==1.0.2`, and validated against the saved `.pptx` rather than the objects that built it, with the figure column widened to 6.34 in and every slide's citations checked to exist** | Three reasons. **The risk here is layout, which no test of the data would catch.** The report's risk was transcription; a deck's is a text box that overflows, a caption that runs past the bottom edge, or a chart shrunk until its labels are decoration — so the checks read coordinates, font sizes and text back out of the saved package (**24/24** in module, **38** independently through the XML) instead of trusting the code that placed them. That discipline found **two inherited errors** in `docs/report.md` § 7.6: a held-out accuracy beside a cross-validated balanced accuracy (**61.26%** where the held-out pair says **61.28%**), and a claim that accuracy maximises at **0.5** when the record's own peak is **89.76%** at **0.478284**. Both are repaired in the report and the deck, and they are the trace's blind spot made concrete: a token-level trace admits a number that appears *anywhere* in the documents, so a figure lifted from the wrong column passes it — which is why the deck additionally checks each slide against the **specific** record it cites. **Fifteen slides, ordered by decision rather than by rubric:** the answer and its scope, the decision, the price, then the evidence, then the eight recommendations — a deck that walks the nine criteria in order is a report read aloud. **The figure column is 6.34 inches, not 5.8:** the first build was exported to PNG through PowerPoint and looked at, and the project's multi-panel charts were unreadable at an even split, so the split, the baseline alignment and the type sizes were changed in response — a layout assertion that was never rendered is a guess. **Scope:** the deck selects and compresses; it computes nothing, and every number on it is the report's, traced to the same records. |
 | D63 | 2026-10-30 | **The README is a document plus a validator (`src/readme.py`), and its "reproduce by following it alone" claim is tested by reconstructing a clone from `git ls-files` and running the commands there; the data is committed, and the README must declare what is missing** | Three reasons. **A README is the one document nobody re-runs:** every other deliverable is protected by the module that produced it, but prose about paths, versions and commands has no such guard, so it drifts silently until a marker follows it into a `ModuleNotFoundError`. The validator therefore checks the README against the **filesystem, the records and `requirements.txt`** rather than against its own intentions: every `python -m src.<name>` must name an existing module with a `__main__` guard, every runnable module must be named somewhere, the command order must respect 14 dependency constraints, the quoted versions must equal the pins, the counts (modules, figures, CSV tables, documents, decisions, tasks) are counted from disk, every relative link must resolve, and every decimal must appear in a record. **The clone is the real test:** `_t42_clone.py` rebuilds a 102-file tree from git's own file list, imports all 24 modules there, confirms `src.config` resolves to the clone rather than the original tree, runs the smoke test, and checks that no `.venv` or bytecode leaks in — which is the static half of T44, and it passed 15/15. **The data is committed, contradicting this task's own carry-in:** `data/raw` and `data/processed` are tracked (10 files, 5 MB), and that is deliberate rather than an oversight — a clone with no data cannot follow step 1 at all, and the README publishes the three SHA-256 prefixes so a reader can confirm the file is the UCI original. **The honesty clause is enforced:** the README must say `app/` is empty, and the check fails the moment `app/app.py` appears, so T43 cannot land without updating it. **Four stale counts and one conflation were caught by building it this way:** the first draft claimed 15 pins (14), 23 modules (24), 4 CSV tables (6), and — the one that mattered — paired the file's **5,289** subscribers with the modelling half's **11.6982%** rate. That conflation was already in `docs/report.md` § 0 and on the deck's decision slide, all three quoting the same shared sentence; the file's rate is **11.70%** and the half's is **11.6982%**, and all three now say which is which. **Scope:** the README selects and links; it computes nothing, and its numbers are the report's, traced to the same records. |
 
+| D64 | 2026-10-30 | **The demo is a thin Streamlit UI (`app/app.py`) over a checked core (`src/demo.py`), and the core is what is tested: it loads T31's artifact by digest, turns 11 business facts into the shipped 12 features, scores with `predict_proba`, and explains with D58's signed-sum SHAP aggregation against the 0.0750 price rather than 0.5** | Four reasons. **The UI must not be the only implementation.** A Streamlit script is hard to test and easy to fork: the probability shown on screen, the SHAP table and the euro decision would each be a second copy of logic the report already fixed. Putting them in `src/demo.py` means `python -m src.demo` can score the same default client, the same three T38 exemplars and the same 40-column matrix without a browser, and the app imports those functions rather than re-deriving them. **The artifact is pinned by digest, not by path:** `load_model()` refuses `models/final_model.joblib` unless its sha256 and size equal `models/final_model.json`, so a re-fitted model cannot be demoed under T31's name. **The form asks for 11 facts, not 12 features:** `previous` derives both `previous_capped` and `previously_contacted` (D21), `balance` derives `balance_arsinh`, `campaign` derives `campaign_bucket`, and `days_since_contact` derives `recency_band`; the five dropped features (D44) and `duration`/`pdays` (D05, D36) are absent by construction, and a check proves the forbidden names appear in neither the frame nor the 40-column matrix. **The three prohibitions are interface decisions, not footnotes:** the cut is `C/V = 0.0750` re-derived from `src.cost`, so a client at 0.5 is explicitly called and the app says why; `duration` has no field; and `C = 1.50 EUR` / `V = 20.00 EUR` are labelled assumptions beside the EV and the 20-cell sensitivity grid. The three T38 exemplars are rebuilt from `models/shap_local.json` plus `data/processed/train.csv` and reproduce their recorded scores to **0.0e+00**, so the demo's examples cannot drift from the report. **22 checks** pass in **1.7 s**, and Streamlit was already pinned at **1.52.2**, so T43 adds no dependency. |
+
 ---
 
 ## Task Checklist
@@ -203,7 +202,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T40 | Rubric 9 | Write the final report | Output: `docs/report.md` (+ PDF) | **done 2026-10-30** (`src/report.py` → `docs/report.md`, `docs/report.html`, `docs/report.pdf` and `models/report.json`; **7,289 words over 27 rendered pages**, covering the nine criteria **in rubric order**, each section naming the document or module that carries its evidence; **9 figures embedded**, every one a file under `reports/figures/` that a record already produced; **12 records cited and re-parsed**; and **497 decimal tokens** all matched against a value in a `models/*.json` record, a `reports/*.csv` column or one of the eleven supporting documents — **0 unmatched**; the **D18 scope sentence sits at byte 1,790, before the first `EUR` total at 2,281**, with the price assumptions declared in the same paragraph; the three prohibitions are asserted where their results are (`duration` in §5.4, accuracy in §7.6, causal `month` in §8.1); `python -m src.report` exits **0** with **30/30** checks in **3.4 s**, and **45 independent checks** recompute the headline euros from the records without importing the module — every one of the fourteen quoted totals matched to the cent, every percentage re-derived from its counts; **three defects caught by that trace and fixed** — `77.87%` twice where the record says **77.90%**, and a balance-band pair that existed in no record at all)
 - [x] T41 | Rubric 9 | Build the slide deck | Output: `docs/presentation.pptx`, `src/deck.py`, `models/deck.json` | **done 2026-10-30** (15 slides, business-first: the answer and its scope, the decision, the price, then the evidence, then the eight recommendations; **24/24** in-module checks and **38 independent** ones that open the package as a zip and parse its XML without python-pptx, recomputing **3,296 × 20 − 14,866 × 1.5 = 43,621.00 EUR** from confusion counts and confirming the six embedded charts are byte-identical to `reports/figures/`; **157** decimal tokens trace to a record or document and the **33** slide-foot citations are each verified to exist; geometry, type size and text overflow are checked against the **saved** file; all **15** slides were exported to PNG through PowerPoint and inspected, which is how charts too small to read at 5.8 in were caught; **two inherited report defects found and fixed** — § 7.6 paired a held-out accuracy with a CV balanced accuracy (**61.26%** → **61.28%**) and claimed accuracy peaked at 0.5 when the record's peak is **89.76%** at **0.478284**)
 - [x] T42 | Rubric 9 | Finalise README and repo hygiene | Output: `README.md`, `src/readme.py`, `models/readme.json` | **done 2026-10-30** (249 lines: the decision and its scope, the headline figures beside the record that holds each, a two-line quick start, the **24-command** reproduction sequence in dependency order with per-step runtimes, a repository map, the data's provenance with three SHA-256 prefixes, and a plain statement that `app/` is empty; **33 checks** in `src/readme.py` hold it to the repository — every command names a real module with a `__main__` guard, every runnable module is named, **14** dependency constraints hold, the quoted versions equal the pins, the counts are counted from disk, every link resolves, no absolute path appears and every decimal traces to a record; **15/15** clean-clone checks rebuild a **102-file** tree from `git ls-files`, import all **24** modules there and prove `src.config` resolves to the clone; **four stale counts and one conflation** found — the file's **5,289** subscribers had been paired with the modelling half's **11.6982%** rate in the README, `docs/report.md` § 0 and the deck's decision slide, all three now distinguishing **11.70%** from **11.6982%**)
-- [ ] T43 | Rubric 9 | Build the interactive demo | Output: `app/app.py` (Streamlit) | Done when: it runs locally, accepts client attributes, and returns a probability with the top SHAP drivers
+- [x] T43 | Rubric 9 | Build the interactive demo | Output: `app/app.py` (Streamlit) | **done 2026-10-30** (`src/demo.py` + `app/app.py` + `models/demo.json`; the UI is thin and the core is checked headlessly — **11 business facts** become the **12 shipped features** through the project's own derivations, `duration`/`pdays`/`y` are absent from the form, the frame and the 40-column matrix, and the artifact is loaded by **sha256/size** rather than by path; the drivers are D58's **signed sum within each one-hot block**, additivity **4.605e-07** and `sigmoid(margin)` against `predict_proba` **2.027e-09**; the cut is T34's **0.0750 = C/V**, and a client at **0.5** is explicitly called, so 0.5 is not the rule; **C = 1.50 EUR** and **V = 20.00 EUR** are labelled assumptions beside the EV and the 20-cell sensitivity grid; the three T38 exemplars are rebuilt from `models/shap_local.json` + `data/processed/train.csv` and reproduce their recorded scores to **0.0e+00**; **22/22 checks** pass and `python -m src.demo` exits **0** in **1.7 s**; `app/app.py` was rendered headlessly through Streamlit's `AppTest`, the default client scores **7.22%** (just below the price), the true-positive exemplar **38.19%** and the false-negative **5.50%**; Streamlit **1.52.2** was already pinned, so no dependency was added; `src.readme` now requires the README to name the demo and no longer accepts an empty `app/`)
 - [ ] T44 | Rubric 9 | End-to-end rerun from a clean clone | Output: verification checklist recorded in `PROGRESS.md` | Done when: fresh clone + install + run reproduces the reported metrics
 
 ### Phase 10 — Viva Preparation
@@ -216,6 +215,7 @@ Tick only after the deliverable is verified to exist and run.
 
 | File | Contents | Created |
 |---|---|---|
+| `src/demo.py`, `app/app.py`, `models/demo.json` | Phase 9 (**T43**): the interactive demo. `src/demo.py` is the tested core - `load_model()` loads `models/final_model.joblib` only after its sha256 and size match `models/final_model.json`; `training_profile()` reads the categorical vocabulary and median/mode defaults from the processed training half through `split.load_split`; `client_frame()` turns **11 business facts** into the **12 shipped features** using `features.engineer`'s own derivations (`previous > 0` flag, the cap, `balance_arsinh`, `campaign_bucket`, `recency_band` with the explicit `never` level); `shipped_frame()` selects `select.shipped_features()` in order; `explain_client()` scores with `predict_proba`, builds the 40-column matrix, aggregates TreeSHAP by **signed sum within each one-hot block** (D58) and sorts by absolute contribution; `should_call()` / `expected_value()` price the call at **C = 1.50 EUR / V = 20.00 EUR** and compare against **0.0750 = C/V**, never 0.5; `example_clients()` rebuilds the three T38 exemplars from `models/shap_local.json` + the training split. `validate()`'s **22 checks** cover the artifact digest, the 12/40 shape, the price identity, the 0.5 counter-example, the EV arithmetic, the labelled assumptions, the absent `duration`/`pdays`/`y`, the categorical defaults, the shipped column order, the 12-feature partition of 40 columns, additivity, the margin-versus-probability identity, the driver sort, the finite score, the three exemplars' scores and cells, their additivity, the app compiling, and the unread held-out half. `app/app.py` is the thin Streamlit UI: an 11-field sidebar, three exemplar presets, live score, decision and EV, the top-five and all-twelve driver tables, a bar chart, the model/assumptions expanders and the sensitivity grid | 2026-10-30 |
 | `src/local_explain.py`, `reports/shap_local.csv`, `reports/figures/10_shap_local.png`, `models/shap_local.json` | Phase 8 (**T38**): `cell_of()` labels rows `TP`/`FP`/`FN`/`TN` against the **price** from T34's record, re-derived through `cost.break_even_threshold()` rather than typed; `pick_exemplars()` executes the pre-registered rule (closest to the cell median, ties by lowest row index) and keeps the distances so `validate()` can re-derive the minimum from the scores alone; `value_of()` reads a categorical's level off its one-hot block and formats a numeric, so the figure labels what the model actually saw; `local_profile()` sums each block's **signed** contributions, keeping the aggregation rule and the reference value identical to T37 so local and global are comparable. The cells are built on the served `predict_proba`, and `validate()`'s **16 checks** cover the digest, the C/V identity, the four-cell partition, cell membership, distinctness, the selection rule, per-client additivity, the margin-versus-`predict_proba` identity, the derivation-stability count, `pred_contribs`, the 12/40 partition, the absent leak, the global ranks read back from T37, the 0.5-misrule counter-example, the unread held-out half and the figure | 2026-10-30 |
 | `src/explain.py`, `reports/shap_importance.csv`, `reports/figures/09_shap_summary.png`, `models/shap_global.json` | Phase 8 (**T37**): `load_artifact()` pins T31's digest so a re-fit cannot be explained silently; `design_matrix()` takes the matrix the estimator actually saw; `explain()` returns TreeSHAP values, the margin they must reconstruct, and xgboost's own `pred_contribs` for comparison (the sklearn wrapper rejects a `DMatrix` argument to `predict` in this version, which is why the array goes in and the DMatrix is built only for `pred_contribs`); `feature_table()` sums **signed** contributions per one-hot block and carries the naive per-column alternative as a measured `inflation`; `column_table()` keeps the un-aggregated view the figure's beeswarm needs; `compare_with_t25()` ranks T25's pinned permutation values **within the twelve** and marks gaps of 3+; `directions()` reads which level (or which end of a numeric range) moves a client, with `level_rates()` filling in the measured subscription rate behind each sentence. `validate()`'s **17 checks** cover the digest, the pipeline shape, the absent leak, the 12/40 partition, T25's kept set, additivity, the probability identity, the `pred_contribs` agreement, feature-level additivity, the aggregation bound, the shares, both rank permutations, the pin, the per-column table, the reference-vs-mean distinction, the unread held-out half and the figure. The figure is a beeswarm over 40 columns (**6,000** of **36,168** rows, seed 42, `color_bar=False` because a 0/1 scale is meaningless), the 12-feature importance bar with the naive sum overlaid, and a dumbbell of the two rankings | 2026-10-30 |
 | `src/playbook.py`, `reports/playbook.csv`, `models/playbook.json` | Phase 8 (**T39**): `Recommendation` records carry `action`, `evidence`, `expected`, `check` and `falsifier` with `scope` set on the two that spend the fixed budget, and `evidence` entries are `(record, key path, formatting)` triples resolved by `resolve()`, so a number cannot be written that no record holds; `derived()` computes the ten quantities the document needs - net EUR per 1,000 calls on each half, cost per subscription both ways, coverage, held-out recall and precision, the always-`no` accuracy, the campaign/client split - instead of typing them; `validate()` re-reads every cited figure from disk and compares it with what was written (**46/46**), checks each recommendation carries all five fields and at least two figures, and fails if `duration` is mentioned outside **R4**; `render()` emits the CSV and JSON | 2026-10-30 |
@@ -2206,6 +2206,50 @@ base-rate correction.
 
 ---
 
+### 2026-10-30 — Session 45  (T43 complete)
+
+**Completed:** **T43** — `src/demo.py`, `app/app.py` and `models/demo.json`; criterion 9 is **10 / 13** and
+the project is **43 / 46**.
+
+**The front door is now a demo, and the demo is a thin UI over checked code.** The last substantial piece
+of code was the one a marker clicks: an app that takes a client's attributes and returns a probability
+with the drivers behind it. It is deliberately two files. `src/demo.py` holds every decision - loading the
+artifact, deriving the features, scoring, explaining, pricing the call - and `app/app.py` is a Streamlit
+form that imports it. The split is what makes the demo testable without a browser: `python -m src.demo`
+scores the same default client, the same three T38 exemplars and the same 40-column matrix that the UI
+shows.
+
+**Five constraints, each enforced rather than promised.** The app scores `models/final_model.joblib`
+only after its **sha256 and size** match `models/final_model.json`, so a re-fitted model cannot be
+demoed under T31's name. The form asks for **11 business facts**, not 12 features: `previous` derives
+both `previous_capped` and `previously_contacted`, `balance` derives `balance_arsinh`, `campaign`
+derives `campaign_bucket`, and `days_since_contact` derives `recency_band`, all through
+`features.engineer`'s own definitions. **`duration`, `pdays` and `y`** are absent from the form, the
+frame and the matrix - checked mechanically. The drivers are D58's **signed sum within each one-hot
+block**, in log-odds; the naive per-column alternative is not used. The cut is T34's **0.0750 = C/V**,
+re-derived from `src.cost`, and a client at **0.5** is explicitly called, so 0.5 is not the rule.
+**C = 1.50 EUR** and **V = 20.00 EUR** are labelled assumptions beside the EV and the 20-cell sensitivity
+grid.
+
+**The default client sits just below the price, which makes the demo honest.** The median/mode client
+scores **7.22%** against the **7.50%** price and is not called; the true-positive exemplar scores
+**38.19%** and the false-negative **5.50%**. The app was rendered headlessly through Streamlit's
+`AppTest`: the default, both exemplars and the `previous > 0` branch that reveals the days field all
+render without an exception, and the form drives the score.
+
+**Verified:** `python -m src.demo` exits **0** with **22/22** checks in **1.7 s**, additivity
+**4.605e-07**, `sigmoid(margin)` against `predict_proba` **2.027e-09**, and the three exemplars reproduce
+their recorded scores to **0.0e+00**. Streamlit was already pinned at **1.52.2**, so no dependency was
+added. `src.readme` was updated in the same task: it now requires the README to name the demo and the
+`streamlit run app/app.py` command, and fails if `app/` is described as empty.
+
+**Blocked:** none.
+**Uncommitted:** `src/demo.py`, `app/app.py`, `models/demo.json`, `README.md`, `src/readme.py`,
+`models/readme.json`, `PROGRESS.md`.
+**Next:** T44 — the end-to-end rerun from a clean clone, recorded in this file.
+
+---
+
 ## Open Questions / Blockers
 
 1. ~~**BLOCKER — GitHub push pending.**~~ **Resolved 2026-10-27 (Session 18).** The push of `8278fae`
@@ -2236,12 +2280,4 @@ data was altered. Any older path references elsewhere should be updated to `data
    will re-pin — but everything in the plan works on 3.11, so this is optional.
 9. **Will the marker run our code?** If the project is graded by running it, the marker's Python
    version must be ≥ 3.11. Nothing in `requirements.txt` works on 3.9 or older.
-10. **BLOCKER — nine commits unpushed, this one included (item 1 reopened 2026-10-30, Session 41; still open at Session 44).** A push failed again,
-    and this time with a name rather than a hang: `GIT_TERMINAL_PROMPT=0 GIT_TERMINAL... git push origin
-    main` returns `fatal: could not read Username for 'https://github.com': terminal prompts disabled`, so
-    the credential helper that worked non-interactively in Session 26 no longer supplies a token to this
-    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **9 commits ahead**: `33fff7a`
-    (T34), `7bce0c1` (T35), `d149f58` (T36), `7612071` (T37), the T38 commit, the T39–T42 commits and this one, per `git log
-    --oneline origin/main..main`. Nothing is lost and the tree is clean; the fix is a
-    interactive credential sign-in, which the agent's shell cannot drive. Run `git push origin main` from
-    your own terminal, or re-authenticate Git Credential Manager, and this closes.
+10. ~~**BLOCKER — nine commits unpushed, this one included (item 1 reopened 2026-10-30, Session 41; still open at Session 44).**~~ **Resolved 2026-10-30 (Session 45).** The push succeeded non-interactively: `caefa9a..7f929c6 main -> main`, exit 0, so the credential helper is supplying a token again and `origin/main` is now `7f929c6` (T42). The nine commits that had queued since T34 are pushed. T43's commit follows in this session; if a future push fails with the same `could not read Username` error, re-authenticate Git Credential Manager and reopen this item.

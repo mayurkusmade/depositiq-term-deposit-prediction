@@ -1,0 +1,264 @@
+{
+  "task": "T43",
+  "app": "app\\app.py",
+  "core": "src\\demo.py",
+  "artifact": {
+    "path": "models\\final_model.joblib",
+    "bytes": 180520,
+    "sha256": "7a40752f75a264a0933bae2dc42feb28385b6ab75de36c32782c8a7ab8f2ed5f"
+  },
+  "price": 0.075,
+  "price_source": "cost.break_even_threshold() = C/V; equals models/threshold_choice.json",
+  "call_cost_eur": 1.5,
+  "value_per_subscription_eur": 20.0,
+  "assumptions": "C and V are ASSUMED figures from src.cost, not bank data; euro totals are linear in V",
+  "inputs": [
+    "age",
+    "day",
+    "balance",
+    "campaign",
+    "previous",
+    "days_since_contact",
+    "marital",
+    "housing",
+    "contact",
+    "month",
+    "poutcome"
+  ],
+  "forbidden_inputs": [
+    "duration",
+    "pdays",
+    "y"
+  ],
+  "derived": {
+    "previous_capped": "min(previous, 2)",
+    "previously_contacted": "previous > 0 (D21)",
+    "balance_arsinh": "arcsinh(balance)",
+    "campaign_bucket": "features.CAMPAIGN_EDGES / LABELS",
+    "recency_band": "features.RECENCY_EDGES / LABELS, 'never' when previous == 0"
+  },
+  "default_client": {
+    "age": 39,
+    "day": 16,
+    "balance": 451.0,
+    "campaign": 2,
+    "previous": 0,
+    "days_since_contact": null,
+    "marital": "married",
+    "housing": "yes",
+    "contact": "cellular",
+    "month": "may",
+    "poutcome": "unknown"
+  },
+  "default_score": 0.07224362343549728,
+  "default_contributions": [
+    {
+      "feature": "contact",
+      "value": "cellular",
+      "contribution": 0.2545258009340614,
+      "columns": 3
+    },
+    {
+      "feature": "month",
+      "value": "may",
+      "contribution": -0.2503963712370023,
+      "columns": 12
+    },
+    {
+      "feature": "housing",
+      "value": "yes",
+      "contribution": -0.20602086186408997,
+      "columns": 2
+    },
+    {
+      "feature": "day",
+      "value": "16",
+      "contribution": 0.16805081069469452,
+      "columns": 1
+    },
+    {
+      "feature": "balance_arsinh",
+      "value": "6.80 (balance 451 EUR)",
+      "contribution": -0.16028383374214172,
+      "columns": 1
+    },
+    {
+      "feature": "marital",
+      "value": "married",
+      "contribution": -0.15633434243500233,
+      "columns": 3
+    },
+    {
+      "feature": "campaign_bucket",
+      "value": "2",
+      "contribution": -0.07158033060841262,
+      "columns": 6
+    },
+    {
+      "feature": "poutcome",
+      "value": "unknown",
+      "contribution": -0.06392903043888509,
+      "columns": 4
+    },
+    {
+      "feature": "previous_capped",
+      "value": "0",
+      "contribution": -0.045395150780677795,
+      "columns": 1
+    },
+    {
+      "feature": "recency_band",
+      "value": "never",
+      "contribution": 0.025296273757703602,
+      "columns": 5
+    },
+    {
+      "feature": "previously_contacted",
+      "value": "no",
+      "contribution": 0.0017186051700264215,
+      "columns": 1
+    },
+    {
+      "feature": "age",
+      "value": "39",
+      "contribution": -0.0014274816494435072,
+      "columns": 1
+    }
+  ],
+  "examples": {
+    "true_positive": {
+      "row": 19263,
+      "label": 1,
+      "score": 0.38189131021499634,
+      "clients_in_cell": 3523
+    },
+    "false_positive": {
+      "row": 23374,
+      "label": 0,
+      "score": 0.11326217651367188,
+      "clients_in_cell": 11059
+    },
+    "false_negative": {
+      "row": 10760,
+      "label": 1,
+      "score": 0.054961346089839935,
+      "clients_in_cell": 708
+    }
+  },
+  "checks": [
+    {
+      "check": "the demo scores T31's artifact, not a fresh fit",
+      "passed": true,
+      "detail": "sha256 7a40752f75a264a0..., 180,520 bytes = models/final_model.json"
+    },
+    {
+      "check": "the pipeline is the 12-feature / 40-column artifact",
+      "passed": true,
+      "detail": "steps ['preprocess', 'model']; 40 matrix columns from 12 features"
+    },
+    {
+      "check": "the cut is T34's price, re-derived from C/V",
+      "passed": true,
+      "detail": "0.075000 equals T34's record and C/V = 0.075000"
+    },
+    {
+      "check": "a client at 0.5 is called, and the price is the boundary",
+      "passed": true,
+      "detail": "0.5 -> True, price -> False, price+0.001 -> True"
+    },
+    {
+      "check": "expected value is p*V - C, and the price is break-even",
+      "passed": true,
+      "detail": "EV(0.5) = +8.50 EUR, EV(price) = +0.000000 EUR, EV = p x 20.00 - 1.50"
+    },
+    {
+      "check": "the euro inputs are labelled assumptions and the grid agrees",
+      "passed": true,
+      "detail": "C 1.50 EUR (ASSUMED), V 20.00 EUR (ASSUMED); the sensitivity grid returns 0.0750 at C=1.50, V=20.00"
+    },
+    {
+      "check": "duration, pdays and the target are absent from the form and the matrix",
+      "passed": true,
+      "detail": "11 form fields; forbidden in the form: none; forbidden in the frame/matrix: none"
+    },
+    {
+      "check": "every categorical default is a level the encoder knows",
+      "passed": true,
+      "detail": "5 categorical fields, 36,168 training rows; wrong defaults: none"
+    },
+    {
+      "check": "the default client is inside the form's ranges",
+      "passed": true,
+      "detail": "age 39, day 16, balance 451, campaign 2, previous 0"
+    },
+    {
+      "check": "a client with no prior contact gets recency 'never', not a zero-day value",
+      "passed": true,
+      "detail": "previous 0, recency_band 'never'"
+    },
+    {
+      "check": "the frame handed to the pipeline is the shipped twelve, in order",
+      "passed": true,
+      "detail": "12 columns in the shipped order: ['age', 'day', 'previous_capped', 'balance_arsinh', 'marital', 'housing', 'contact', 'month', 'poutcome', 'campaign_bucket', 'recency_band', 'previously_contacted']"
+    },
+    {
+      "check": "the twelve feature contributions partition the 40 columns",
+      "passed": true,
+      "detail": "12 features cover all 40 columns exactly once"
+    },
+    {
+      "check": "the twelve contributions add up to the score",
+      "passed": true,
+      "detail": "|sum of twelve + reference - margin| = 4.605e-07; reference -2.04695"
+    },
+    {
+      "check": "the explained margin is the probability the app displays",
+      "passed": true,
+      "detail": "|sigmoid(margin) - predict_proba| = 2.027e-09 on the default client"
+    },
+    {
+      "check": "the driver table is sorted by absolute contribution and every value is shown",
+      "passed": true,
+      "detail": "12 drivers, largest |contribution| 0.2545, smallest 0.0014"
+    },
+    {
+      "check": "the displayed score is a finite probability",
+      "passed": true,
+      "detail": "P(subscribe) = 0.072244 for the default client"
+    },
+    {
+      "check": "the three T38 exemplars load from the record",
+      "passed": true,
+      "detail": "cells ['false_negative', 'false_positive', 'true_positive']; missing none"
+    },
+    {
+      "check": "each exemplar rebuilds to the score T38 recorded",
+      "passed": true,
+      "detail": "max |rebuilt score - T38 record| over 3 clients = 0.000e+00"
+    },
+    {
+      "check": "the three exemplars sit in the cells their names claim",
+      "passed": true,
+      "detail": "scores {'true_positive': 0.3819, 'false_positive': 0.1133, 'false_negative': 0.055}; labels {'true_positive': 1, 'false_positive': 0, 'false_negative': 1}; all on the expected side: True"
+    },
+    {
+      "check": "each exemplar's twelve contributions add up to its score",
+      "passed": true,
+      "detail": "max |sum + reference - margin| over 3 exemplars = 6.853e-07"
+    },
+    {
+      "check": "the Streamlit app exists, compiles and is a UI over this module",
+      "passed": true,
+      "detail": "app.py: 263 lines, compiles, imports the core"
+    },
+    {
+      "check": "the demo never loads the held-out half",
+      "passed": true,
+      "detail": "held-out loads in the demo path: {'src/demo.py': 0, 'app/app.py': 0}"
+    }
+  ],
+  "checks_passed": 22,
+  "checks_total": 22,
+  "checks_ok": true,
+  "elapsed_seconds": 0.9
+}

@@ -12,7 +12,7 @@ model, and reports what the ranking is worth in euro — with every figure trace
 | **Target** | `y` — did this client subscribe to a term deposit? (5,289 of 45,211 did — 11.70%) |
 | **Model** | XGBoost, 12 features / 40 matrix columns, tuned, no imbalance treatment |
 | **Operating cut** | **0.0750** — the price of a call (`C/V`), not a fitted number |
-| **Status** | **42 of 46 tasks complete**; see [What is not here yet](#what-is-not-here-yet) |
+| **Status** | **43 of 46 tasks complete**; see [What is not here yet](#what-is-not-here-yet) |
 | **Python** | **3.11** — required, not preferred (see [Quick start](#quick-start)) |
 
 ---
@@ -77,6 +77,26 @@ Nothing needs to be downloaded: the raw CSVs are committed under `data/raw/` (se
 
 ---
 
+## The interactive demo
+
+```bash
+streamlit run app/app.py        # from the repository root, with the venv active
+```
+
+The app scores `models/final_model.joblib` — loaded, never re-fitted — from eleven client attributes and
+returns **P(subscribe)** with the twelve SHAP contributions behind it. The cut it uses is the price,
+**7.50% = C/V**, not 0.5; `C = 1.50 EUR` and `V = 20.00 EUR` are labelled as assumptions beside every
+euro figure. It also loads the three T38 exemplar clients (true positive, false positive, false negative)
+so the demo can be used without typing a client first.
+
+The interface deliberately does not ask for `duration`, because it is recorded after the call ends. It
+does not treat 0.5 as a decision rule, and it does not present the euro figures as a bank's own data.
+Those three refusals are checked mechanically: `src.demo` runs **22 headless checks** over the same core
+the app imports, including the artifact digest, the C/V identity, the absent leak, the additivity of the
+twelve contributions and the three exemplars' recorded scores.
+
+---
+
 ## Reproduce every number
 
 Each module is runnable as `python -m src.<name>`, validates its own output, prints its checks and
@@ -111,6 +131,7 @@ python -m src.playbook          # eight recommendations as records
 # 6. deliverables
 python -m src.report            # report.md -> report.pdf (needs Chrome, Edge or Chromium)
 python -m src.deck              # presentation.pptx
+python -m src.demo              # headless checks for the Streamlit demo core
 python -m src.readme            # re-checks this README against the repository
 ```
 
@@ -134,13 +155,13 @@ byte-identical figures.
 depositiq-term-deposit-prediction/
 ├── data/raw/              bank-full.csv, bank.csv, bank-additional/, bank-names.txt
 ├── data/processed/        train.csv, test.csv (+ the 20-feature variant)
-├── src/                   24 modules, each runnable as `python -m src.<name>`
+├── src/                   25 modules, each runnable as `python -m src.<name>`
 ├── notebooks/             01_data_understanding, 02_preprocessing, 03_eda
 ├── models/                artifacts + the JSON record behind every claim
 ├── reports/               6 CSV tables + 19 figures
 ├── docs/                  the report, the deck, and 11 supporting documents
-├── app/                   (empty - the demo is task T43)
-└── PROGRESS.md            46-task checklist, 63-entry decisions log, session log
+├── app/                   app.py - the Streamlit demo (T43)
+└── PROGRESS.md            46-task checklist, 64-entry decisions log, session log
 ```
 
 Start with the two deliverables, then follow whichever thread you need:
@@ -212,18 +233,17 @@ cross-validated balanced accuracy. All are recorded in `PROGRESS.md`, with the f
 
 ## What is not here yet
 
-The repository is **42 of 46 tasks** into a 46-task plan, and the four open items are deliverables
+The repository is **43 of 46 tasks** into a 46-task plan, and the three open items are deliverables
 rather than analysis:
 
 | Task | Missing piece |
 |---|---|
-| T43 | `app/app.py` — a Streamlit demo returning a probability with its top SHAP drivers |
 | T44 | an end-to-end rerun from a fresh clone, recorded in `PROGRESS.md` |
 | T45 | `docs/viva_qa.md` — 25+ likely questions with answers |
 | T46 | `docs/demo_script.md` — a five-minute walkthrough |
 
-`app/` is empty, and this README says so rather than describing a demo that does not exist. No number
-above depends on those tasks.
+The Streamlit demo is present at `app/app.py` and is checked by `python -m src.demo`; no number above
+depends on the three remaining tasks.
 
 ---
 

@@ -246,5 +246,187 @@ precedence bug was caught only because 4.96% contradicted T31's recorded mean of
 value −2.04695 was then checked against `base_score` instead of being described from memory, which is how
 §8.1's 0.0256 discrepancy became a recorded fact rather than a wrong sentence.
 
-Recorded as **D58** in `PROGRESS.md`. Next: **T38** — local explanations for one true positive, one false
-positive and one false negative, on the same artifact.
+Recorded as **D58** in `PROGRESS.md`.
+
+---
+
+# 9. Three clients, explained (T38)
+
+Averages do not get called. This section takes one client from each of the three interesting cells of the
+campaign — a true positive, a false positive and a false negative — and shows which features moved **that**
+client's score, with the exact values the model saw. `src/local_explain.py`, **16/16** checks, **76.7 s**
+(the run varies 50–80 s with machine load), `python -m src.local_explain` exits **0**. Figure: `reports/figures/10_shap_local.png`; numbers in
+`models/shap_local.json` and `reports/shap_local.csv`.
+
+## 9.1 The cells are defined against the price, not against 0.5
+
+T34 adopted **0.0750** (call when P exceeds C/V), so "positive" here means *above the price*. A 0.5 rule
+would relabel **12,867** clients — every one of them currently called — as negative, which is a campaign
+nobody runs.
+
+| cell | definition | in-sample (this step) | share of training half | T34's out-of-fold |
+|---|---|---|---|---|
+| true positive | y = 1, p ≥ 0.0750 | **3,523** | 9.74% | 3,296 |
+| false positive | y = 0, p ≥ 0.0750 | **11,059** | 30.58% | 11,570 |
+| false negative | y = 1, p < 0.0750 | **708** | 1.96% | 935 |
+| true negative | y = 0, p < 0.0750 | 20,878 | 57.73% | — |
+
+The counts differ from T34's **on purpose and by construction**: T34's table is built on *out-of-fold*
+scores, while these cells use the **artifact's own in-sample scores** — the same scores and the same matrix
+T37 explained, because the explanation must belong to the model on display. In sample the model clears the
+price for 15,290 clients against T34's 14,866 and misses 708 subscribers against 935, because it has seen
+these labels. Both numbers are recorded; neither replaces the other.
+
+One caveat on the counts, measured rather than assumed: the same score has two routes — the pipeline's
+`predict_proba` and SHAP's decomposition through the logistic link — and they disagree by at most
+**4.49e-07**. **43** clients sit within 1e-4 of the cut, and exactly **one** of them changes cell depending
+on the route. The cells above use the **served** probability, and the check that measures the flip is what
+makes "to the client" an honest claim rather than an implied exactness.
+
+## 9.2 The selection rule, fixed before any client was looked at
+
+> **The exemplar of a cell is the client whose score is closest to that cell's median score; ties are
+> broken by the lowest training row index.**
+
+The rule reads `y` and `p` and nothing else — no SHAP value, no intuition about which story would read
+well. It exists because the alternative is the trap this section is most exposed to: pick the most
+confident false negative, explain it, and let a reader conclude that the 708 are like that one. The middle
+of the cell is a typical member; a check re-derives the choice from the scores alone and fails if any other
+client in the cell is strictly closer to the median. All three exemplars sit at the **50th percentile of
+their own cell** by construction — typical *of the cell*, which is not the same as typical of the file.
+
+## 9.3 True positive — training row 19,263, p = 0.3819, y = 1
+
+**margin −0.4815 = reference −2.04695 + sum of twelve +1.5654.**
+
+| feature | value | contribution | T37 global rank |
+|---|---|---|---|
+| **`month`** | **oct** | **+1.8824** | 2 |
+| **`contact`** | **unknown** | **−0.6989** | 1 |
+| `day` | 27 | +0.3295 | 3 |
+| `campaign_bucket` | 1 | +0.1626 | 9 |
+| `housing` | yes | +0.0740 | 5 |
+| the other six | — | net −0.0792 | — |
+
+One feature did the work: `month=oct` contributed **+1.8824**, nearly four times the margin the client
+finished with. `day=27` and a first call in this campaign (`campaign_bucket=1`) added the rest.
+
+The striking part is the second row. **`contact=unknown` — the model's single most important feature
+overall — took 0.6989 of it back**, and the client still converted. That is the local/global distinction in
+one row: the top-ranked feature is not the top contributor for every client, and a 22.14% share of global
+importance is perfectly consistent with a large *negative* push here.
+
+**In business language:** this client was reached in October, and the month carried them past the missing
+channel. It is also the honest counter-example to §8.4's data-quality story — an `unknown` channel did not
+make this client un-subscribable, it made them look worse on paper.
+
+## 9.4 False positive — training row 23,374, p = 0.1133, y = 0
+
+**margin −2.0578 = reference −2.04695 + sum of twelve −0.0109.**
+
+| feature | value | contribution | T37 global rank |
+|---|---|---|---|
+| **`day`** | **2** | **−0.5130** | 3 |
+| `poutcome` | failure | −0.2790 | 6 |
+| `month` | feb | −0.1042 | 2 |
+| `marital` | married | −0.0765 | 7 |
+| `balance_arsinh` | 9.37 | **+0.3471** | 4 |
+| `contact` | cellular | +0.2434 | 1 |
+| `housing` | no | +0.2168 | 5 |
+| `previous_capped` | 2 | +0.1961 | 10 |
+| the other four | — | net −0.0415 | — |
+
+**The twelve contributions nearly cancel: −0.0109.** This client has no story. They have a good balance
+(+0.3471), a mortgage-free record (+0.2168) and a cellular call (+0.2434) pulling them over the price, and
+a call early in the month (−0.5130) with a failed previous campaign (−0.2790) pulling them back under it —
+netting out to the model's reference value almost exactly.
+
+**In business language, and this is the finding:** a false positive at a 7.5% price is not an error that
+needs explaining, it is arithmetic. The reference value is **11.4361%**, the cut is **7.50%**, so a
+completely average client clears the cut and roughly **30.58%** of the file is in this cell by construction.
+The false positive is the **modal** cell, and its exemplar sits at the reference — the most ordinary client
+in the list.
+
+## 9.5 False negative — training row 10,760, p = 0.0550, y = 1
+
+**margin −2.8446 = reference −2.04695 + sum of twelve −0.7976.**
+
+| feature | value | contribution | T37 global rank |
+|---|---|---|---|
+| **`balance_arsinh`** | **0.00** | **−0.3502** | 4 |
+| **`month`** | **jul** | **−0.3121** | 2 |
+| `previous_capped` | 0 | −0.1579 | 10 |
+| `age` | 49 | −0.1458 | 8 |
+| `poutcome` | unknown | −0.1439 | 6 |
+| `marital` | married | −0.1230 | 7 |
+| `contact` | cellular | +0.2329 | 1 |
+| `housing` | no | +0.1328 | 5 |
+| the other four | — | net +0.0694 | — |
+
+Four client-side drags and two scheduling ones outweighed everything positive. **The client had no balance
+at all** (arcsinh 0.00, −0.3502) and was reached in **July** (−0.3121) on a **first** contact with **no
+previous campaign** (−0.1579) — the exact profile the model has learned to discount. They subscribed anyway.
+
+**In business language:** this is the miss that matters. The cut is at logit(0.0750) = **−2.5123** and this
+client sits at −2.8446, so the model was **0.3323 log-odds** short — about two percentage points of
+probability. It is a ranking miss of the kind T32's PR-AUC already quantified, not a category error: no
+single feature made the client look impossible, and `contact=cellular` was actively arguing the other way.
+
+## 9.6 What the three say together
+
+1. **Campaign-side variables take two of the three largest slots.** The single biggest contribution is
+   `month=oct` (**+1.8824**) for the true positive and `day=2` (**−0.5130**) for the false positive; in the
+   false negative a client attribute finally leads (`balance_arsinh` 0.00, **−0.3502**) with `month=jul`
+   second (**−0.3121**). That is T37's 55.7% campaign-side share showing up client by client — and the
+   reminder that a share is an average: in the one client the campaign most wanted, the model's own
+   financial signal led.
+2. **`balance_arsinh` is the only client attribute that reached the top two of any client** — +0.3471 for
+   the false positive, −0.3502 for the false negative, and −0.0069 for the true positive. A client's
+   financial position is doing less per-client work than its 8.49% global share suggests, because the
+   campaign variables are doing the deciding.
+3. **The two errors are ordering misses of 0.3–0.5 log-odds, not absurd calls.** The false negative needed
+   +0.3323 to cross; the false positive cleared the cut with contributions summing to −0.0109. Both look
+   like the base rate being asked to do a job it cannot do at the margin, which is what a price below the
+   average score implies.
+
+## 9.7 What this section does not claim
+
+- **Three clients are illustrations, not a sample.** Each is the median of its cell, so the three together
+  say nothing about the *distribution* of explanations across the file — only what one typical member of
+  each cell looks like.
+- **The scores are in-sample** (9.1), so the confidence here is optimistic relative to the held-out half,
+  which was not read.
+- **Not causal.** `month=jul` did not make this client not subscribe; it is where the campaign happened to
+  be, and it is confounded with 2008–2010 conditions (§8.7).
+- **A local explanation explains the model, not the client.** It says why the score came out as it did —
+  not why the person said yes or no. Nothing in this dataset observes that.
+- **No client is identified.** Row indices are positional in `data/processed/train.csv`; the dataset carries
+  no identifiers, and none are invented here.
+
+## 9.8 Verification
+
+`python -m src.local_explain` → exit **0**, **16/16** checks. The ones that would catch a wrong analysis:
+
+| check | result |
+|---|---|
+| explained model is T31's artifact | sha256 `7a40752f75a264a0…`, 180,520 bytes, 40 columns, 36,168 rows |
+| the cut is T34's, re-derived | 0.075000 = `threshold_choice.json` = `cost.break_even_threshold()` |
+| the four cells partition the training half | 3,523 + 11,059 + 708 + 20,878 = 36,168 |
+| each exemplar sits in the cell it names | scores 0.38189 / 0.11326 / 0.05496 agree with their labels |
+| the three exemplars are distinct | rows 19,263 / 23,374 / 10,760 |
+| **the rule was followed** | no other member of any cell is strictly closer to its median |
+| per-client additivity | max \|sum of 12 + reference − margin\| = **6.853e-07** |
+| the margin is the probability the cells were defined on | **8.598e-09** vs `predict_proba` |
+| the counts do not depend on the score's route | **1** of 36,168 clients flips; max difference **4.49e-07** |
+| local values match `pred_contribs` | **0.000e+00** over 3 rows × 12 features |
+| twelve features partition the 40 columns | all 40 indices, once each |
+| global ranks come from T37's record | no mismatch |
+| above the price is treated as called | 12,867 clients sit in (0.0750, 0.5); row 158 at p = 0.0761 is labelled **FP** |
+| `duration` and the target absent | none among the features named |
+| held-out half never loaded | 0 references |
+| figure written | 197 KB |
+
+The rule check is the one worth keeping: it recomputes the median distance from `p` alone and would fail if
+the exemplars had ever been chosen for their explanations rather than their scores.
+
+Recorded as **D59** in `PROGRESS.md`. Next: **T39** — the campaign playbook and the ranked recommendations.

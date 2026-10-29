@@ -1,0 +1,448 @@
+{
+  "task": "T38",
+  "variant": "full",
+  "artifact": "final_model.joblib",
+  "artifact_sha256": "7a40752f75a264a0933bae2dc42feb28385b6ab75de36c32782c8a7ab8f2ed5f",
+  "artifact_bytes": 180520,
+  "rows": 36168,
+  "cut": 0.075,
+  "cut_source": "models/threshold_choice.json (T34), re-derived from cost.break_even_threshold()",
+  "cells_in_sample": {
+    "true_positive": 3523,
+    "false_positive": 11059,
+    "false_negative": 708
+  },
+  "clients_within_1e-4_of_cut": 43,
+  "cell_flips_between_derivations": 1,
+  "cells_out_of_fold_t34": {
+    "true_positive": 3296,
+    "false_positive": 11570,
+    "false_negative": 935
+  },
+  "cells_note": "cells are defined on the artifact's in-sample training scores, the same scores T37 explained; T34's counts are out-of-fold, so they differ by construction",
+  "base_value": -2.046949625015259,
+  "selection_rule": "the client whose score is closest to the cell's median score, ties broken by the lowest training row index",
+  "exemplars": {
+    "true_positive": {
+      "row": 19263,
+      "clients_in_cell": 3523,
+      "cell_share_of_training": 0.09740654722406547,
+      "cell_median_score": 0.38189131021499634,
+      "score": 0.38189131021499634,
+      "mean_score_in_cell": 0.4021933972835541,
+      "distance_to_median": 0.0,
+      "minimum_distance_in_cell": 0.0,
+      "score_percentile_in_cell": 0.500141924496168,
+      "label": 1,
+      "share_of_all_train_rows": 0.09740654722406547,
+      "margin": -0.48152831196784973
+    },
+    "false_positive": {
+      "row": 23374,
+      "clients_in_cell": 11059,
+      "cell_share_of_training": 0.3057675293076753,
+      "cell_median_score": 0.11326217651367188,
+      "score": 0.11326217651367188,
+      "mean_score_in_cell": 0.17026697099208832,
+      "distance_to_median": 0.0,
+      "minimum_distance_in_cell": 0.0,
+      "score_percentile_in_cell": 0.5000452120444887,
+      "label": 0,
+      "share_of_all_train_rows": 0.3057675293076753,
+      "margin": -2.0578441619873047
+    },
+    "false_negative": {
+      "row": 10760,
+      "clients_in_cell": 708,
+      "cell_share_of_training": 0.019575315195753153,
+      "cell_median_score": 0.05501161143183708,
+      "score": 0.054961346089839935,
+      "mean_score_in_cell": 0.05346301570534706,
+      "distance_to_median": 5.0265341997146606e-05,
+      "minimum_distance_in_cell": 5.0265341997146606e-05,
+      "score_percentile_in_cell": 0.5,
+      "label": 1,
+      "share_of_all_train_rows": 0.019575315195753153,
+      "margin": -2.8445956707000732
+    }
+  },
+  "profiles": {
+    "true_positive": [
+      {
+        "feature": "contact",
+        "contribution": -0.6988856275565922,
+        "value": "unknown",
+        "columns": 3,
+        "global_rank": 1,
+        "global_share": 0.2214127503494494
+      },
+      {
+        "feature": "marital",
+        "contribution": -0.10501088295131922,
+        "value": "married",
+        "columns": 3,
+        "global_rank": 7,
+        "global_share": 0.0773792941510913
+      },
+      {
+        "feature": "poutcome",
+        "contribution": -0.05435289884917438,
+        "value": "unknown",
+        "columns": 4,
+        "global_rank": 6,
+        "global_share": 0.0797422139275886
+      },
+      {
+        "feature": "previous_capped",
+        "contribution": -0.029889674857258797,
+        "value": "0",
+        "columns": 1,
+        "global_rank": 10,
+        "global_share": 0.045803131262310025
+      },
+      {
+        "feature": "recency_band",
+        "contribution": -0.00862378062447533,
+        "value": "never",
+        "columns": 5,
+        "global_rank": 11,
+        "global_share": 0.014592734367574706
+      },
+      {
+        "feature": "balance_arsinh",
+        "contribution": -0.006850434932857752,
+        "value": "6.77",
+        "columns": 1,
+        "global_rank": 4,
+        "global_share": 0.08488639907185268
+      },
+      {
+        "feature": "age",
+        "contribution": 0.00430691335350275,
+        "value": "39",
+        "columns": 1,
+        "global_rank": 8,
+        "global_share": 0.056089340262223335
+      },
+      {
+        "feature": "previously_contacted",
+        "contribution": 0.016236882656812668,
+        "value": "0",
+        "columns": 1,
+        "global_rank": 12,
+        "global_share": 0.003549207785999235
+      },
+      {
+        "feature": "housing",
+        "contribution": 0.0739777609705925,
+        "value": "yes",
+        "columns": 2,
+        "global_rank": 5,
+        "global_share": 0.08047220724258931
+      },
+      {
+        "feature": "campaign_bucket",
+        "contribution": 0.16256503900513053,
+        "value": "1",
+        "columns": 6,
+        "global_rank": 9,
+        "global_share": 0.05453862448748544
+      },
+      {
+        "feature": "day",
+        "contribution": 0.3295357823371887,
+        "value": "27",
+        "columns": 1,
+        "global_rank": 3,
+        "global_share": 0.10601490436270214
+      },
+      {
+        "feature": "month",
+        "contribution": 1.8824118487536907,
+        "value": "oct",
+        "columns": 12,
+        "global_rank": 2,
+        "global_share": 0.17551919272913405
+      }
+    ],
+    "false_positive": [
+      {
+        "feature": "day",
+        "contribution": -0.5129939317703247,
+        "value": "2",
+        "columns": 1,
+        "global_rank": 3,
+        "global_share": 0.10601490436270214
+      },
+      {
+        "feature": "poutcome",
+        "contribution": -0.27899311669170856,
+        "value": "failure",
+        "columns": 4,
+        "global_rank": 6,
+        "global_share": 0.0797422139275886
+      },
+      {
+        "feature": "month",
+        "contribution": -0.10424292925745249,
+        "value": "feb",
+        "columns": 12,
+        "global_rank": 2,
+        "global_share": 0.17551919272913405
+      },
+      {
+        "feature": "marital",
+        "contribution": -0.07650647079572082,
+        "value": "married",
+        "columns": 3,
+        "global_rank": 7,
+        "global_share": 0.0773792941510913
+      },
+      {
+        "feature": "campaign_bucket",
+        "contribution": -0.040651754243299365,
+        "value": "2",
+        "columns": 6,
+        "global_rank": 9,
+        "global_share": 0.05453862448748544
+      },
+      {
+        "feature": "age",
+        "contribution": -0.016234900802373886,
+        "value": "56",
+        "columns": 1,
+        "global_rank": 8,
+        "global_share": 0.056089340262223335
+      },
+      {
+        "feature": "recency_band",
+        "contribution": 0.00016389979282394052,
+        "value": "180+ d",
+        "columns": 5,
+        "global_rank": 11,
+        "global_share": 0.014592734367574706
+      },
+      {
+        "feature": "previously_contacted",
+        "contribution": 0.015265020541846752,
+        "value": "1",
+        "columns": 1,
+        "global_rank": 12,
+        "global_share": 0.003549207785999235
+      },
+      {
+        "feature": "previous_capped",
+        "contribution": 0.1960694044828415,
+        "value": "2",
+        "columns": 1,
+        "global_rank": 10,
+        "global_share": 0.045803131262310025
+      },
+      {
+        "feature": "housing",
+        "contribution": 0.21678666025400162,
+        "value": "no",
+        "columns": 2,
+        "global_rank": 5,
+        "global_share": 0.08047220724258931
+      },
+      {
+        "feature": "contact",
+        "contribution": 0.24337971210479736,
+        "value": "cellular",
+        "columns": 3,
+        "global_rank": 1,
+        "global_share": 0.2214127503494494
+      },
+      {
+        "feature": "balance_arsinh",
+        "contribution": 0.3470645546913147,
+        "value": "9.37",
+        "columns": 1,
+        "global_rank": 4,
+        "global_share": 0.08488639907185268
+      }
+    ],
+    "false_negative": [
+      {
+        "feature": "balance_arsinh",
+        "contribution": -0.3501843512058258,
+        "value": "0.00",
+        "columns": 1,
+        "global_rank": 4,
+        "global_share": 0.08488639907185268
+      },
+      {
+        "feature": "month",
+        "contribution": -0.3120629508048296,
+        "value": "jul",
+        "columns": 12,
+        "global_rank": 2,
+        "global_share": 0.17551919272913405
+      },
+      {
+        "feature": "previous_capped",
+        "contribution": -0.15792305767536163,
+        "value": "0",
+        "columns": 1,
+        "global_rank": 10,
+        "global_share": 0.045803131262310025
+      },
+      {
+        "feature": "age",
+        "contribution": -0.1457781195640564,
+        "value": "49",
+        "columns": 1,
+        "global_rank": 8,
+        "global_share": 0.056089340262223335
+      },
+      {
+        "feature": "poutcome",
+        "contribution": -0.14388046180829406,
+        "value": "unknown",
+        "columns": 4,
+        "global_rank": 6,
+        "global_share": 0.0797422139275886
+      },
+      {
+        "feature": "marital",
+        "contribution": -0.12295734463259578,
+        "value": "married",
+        "columns": 3,
+        "global_rank": 7,
+        "global_share": 0.0773792941510913
+      },
+      {
+        "feature": "previously_contacted",
+        "contribution": -0.020656190812587738,
+        "value": "0",
+        "columns": 1,
+        "global_rank": 12,
+        "global_share": 0.003549207785999235
+      },
+      {
+        "feature": "recency_band",
+        "contribution": -0.01856868003960699,
+        "value": "never",
+        "columns": 5,
+        "global_rank": 11,
+        "global_share": 0.014592734367574706
+      },
+      {
+        "feature": "day",
+        "contribution": 0.03194534406065941,
+        "value": "9",
+        "columns": 1,
+        "global_rank": 3,
+        "global_share": 0.10601490436270214
+      },
+      {
+        "feature": "campaign_bucket",
+        "contribution": 0.07667043164838105,
+        "value": "1",
+        "columns": 6,
+        "global_rank": 9,
+        "global_share": 0.05453862448748544
+      },
+      {
+        "feature": "housing",
+        "contribution": 0.13284966722130775,
+        "value": "no",
+        "columns": 2,
+        "global_rank": 5,
+        "global_share": 0.08047220724258931
+      },
+      {
+        "feature": "contact",
+        "contribution": 0.2328997803851962,
+        "value": "cellular",
+        "columns": 3,
+        "global_rank": 1,
+        "global_share": 0.2214127503494494
+      }
+    ]
+  },
+  "checks": [
+    {
+      "check": "the explained model is T31's artifact, on its 40-column matrix",
+      "passed": true,
+      "detail": "sha256 7a40752f75a264a0..., 180,520 bytes, 40 columns, 36,168 rows"
+    },
+    {
+      "check": "the cell boundary is the price T34 adopted, not 0.5",
+      "passed": true,
+      "detail": "cut 0.075000 equals T34's record (0.075000) and the C/V identity (0.075000); derived again by `threshold`/`cost`, not typed in"
+    },
+    {
+      "check": "the four cells partition the training half",
+      "passed": true,
+      "detail": "{'true_positive': 3523, 'false_positive': 11059, 'false_negative': 708, 'TN': 20878} sum to 36,168 = 36,168 rows"
+    },
+    {
+      "check": "each exemplar actually sits in the cell it names",
+      "passed": true,
+      "detail": "every exemplar's label agrees with its cell; scores {'true_positive': 0.38189, 'false_positive': 0.11326, 'false_negative': 0.05496}; wrong: none"
+    },
+    {
+      "check": "the three exemplars are three different clients",
+      "passed": true,
+      "detail": "training rows [19263, 23374, 10760]"
+    },
+    {
+      "check": "the exemplar is the client nearest its cell's median score",
+      "passed": true,
+      "detail": "true_positive: |p - median| = 0.000000 of 3,523 clients; false_positive: |p - median| = 0.000000 of 11,059 clients; false_negative: |p - median| = 0.000050 of 708 clients; violations: none"
+    },
+    {
+      "check": "each client's twelve contributions add up to that client's score",
+      "passed": true,
+      "detail": "max over the three clients |sum of 12 feature values + reference - margin| = 6.853e-07, reference -2.04695"
+    },
+    {
+      "check": "the explained margin is the probability the cells were defined on",
+      "passed": true,
+      "detail": "max |sigmoid(shap margin) - predict_proba| = 8.598e-09 over the three clients"
+    },
+    {
+      "check": "the quoted cell counts do not depend on how the score is derived",
+      "passed": true,
+      "detail": "1 of 36,168 clients change cell between `predict_proba` and the SHAP decomposition (max |p - p_shap| = 4.49e-07); 43 clients sit within 1e-4 of the cut and the notes quote the served version, so the counts are stated to that client"
+    },
+    {
+      "check": "the local values reproduce from xgboost's own contributions",
+      "passed": true,
+      "detail": "max |pred_contribs - shap| over 3 rows x 12 features = 0.000e+00"
+    },
+    {
+      "check": "the twelve features partition the 40 columns",
+      "passed": true,
+      "detail": "12 features cover all 40 column indices exactly once"
+    },
+    {
+      "check": "`duration` and the target are not explained",
+      "passed": true,
+      "detail": "12 features named across the three profiles; forbidden: none"
+    },
+    {
+      "check": "the global ranks shown beside each client come from T37's record",
+      "passed": true,
+      "detail": "every annotated global rank equals T37's record; wrong: none"
+    },
+    {
+      "check": "a client above the price but below 0.5 is treated as called",
+      "passed": true,
+      "detail": "12,867 clients sit between 0.0750 and 0.5; row 158 at p = 0.0761 is labelled FP - a 0.5 rule would call it negative"
+    },
+    {
+      "check": "the held-out half is never loaded",
+      "passed": true,
+      "detail": "0 references to the held-out half in src/local_explain.py"
+    },
+    {
+      "check": "the figure was written",
+      "passed": true,
+      "detail": "10_shap_local.png: 197 KB"
+    }
+  ],
+  "elapsed_seconds": 76.7
+}

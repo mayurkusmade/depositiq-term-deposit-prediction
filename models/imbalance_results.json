@@ -1,0 +1,435 @@
+{
+  "task": "T29",
+  "variant": "full",
+  "estimator": "xgboost_gbdt (src.train.ESTIMATORS)",
+  "training_rows": 36168,
+  "positives": 4231,
+  "base_rate": 0.11698186241981863,
+  "features": [
+    "age",
+    "day",
+    "previous_capped",
+    "balance_arsinh",
+    "marital",
+    "housing",
+    "contact",
+    "month",
+    "poutcome",
+    "campaign_bucket",
+    "recency_band",
+    "previously_contacted"
+  ],
+  "folds": 5,
+  "fold_seed": 42,
+  "sd_ddof": 1,
+  "threshold_rule": "leave-one-fold-out: F1-maximising cut on the other four folds' out-of-fold predictions, applied to the held-out fold",
+  "arms": {
+    "weights": {
+      "treatment": "scale_pos_weight=7.548334",
+      "note": "the shipped configuration: reweight the positive class in the loss",
+      "seconds": 9.3,
+      "summary": {
+        "roc_auc": {
+          "mean": 0.7993321651560436,
+          "sd": 0.008884106737117193
+        },
+        "pr_auc": {
+          "mean": 0.44203249253159793,
+          "sd": 0.013386848598112807
+        },
+        "brier": {
+          "mean": 0.1636724792917986,
+          "sd": 0.002102662164558409
+        },
+        "mean_pred": {
+          "mean": 0.38920541405677794,
+          "sd": 0.0025307730857998295
+        },
+        "f1_nested": {
+          "mean": 0.4847938077786941,
+          "sd": 0.011837167331629359
+        },
+        "f1_at_half": {
+          "mean": 0.4470000784011101,
+          "sd": 0.012057258874907313
+        },
+        "threshold": {
+          "mean": 0.6050181865692139,
+          "sd": 0.004180793301832819
+        }
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7928279753260769,
+          "pr_auc": 0.43759564525002503,
+          "brier": 0.1634360548629752,
+          "mean_pred": 0.38691234588623047,
+          "accuracy_at_half": 0.8126900746474979,
+          "threshold": 0.6091667413711548,
+          "f1_nested": 0.4834578441835646,
+          "f1_at_half": 0.4453540728612362
+        },
+        {
+          "fold": 2,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.8112849373307813,
+          "pr_auc": 0.43503694278638383,
+          "brier": 0.16099445753881886,
+          "mean_pred": 0.38796401023864746,
+          "accuracy_at_half": 0.8249930881946365,
+          "threshold": 0.6001051664352417,
+          "f1_nested": 0.4916979110873058,
+          "f1_at_half": 0.4608177172061329
+        },
+        {
+          "fold": 3,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.791188528794746,
+          "pr_auc": 0.42581166005323656,
+          "brier": 0.16642730275167025,
+          "mean_pred": 0.3904911279678345,
+          "accuracy_at_half": 0.8067459220348355,
+          "threshold": 0.6096123456954956,
+          "f1_nested": 0.46524064171123,
+          "f1_at_half": 0.427986906710311
+        },
+        {
+          "fold": 4,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "valid_rows": 7233,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7951757985062002,
+          "pr_auc": 0.45702991345816946,
+          "brier": 0.16255745516380632,
+          "mean_pred": 0.3876243829727173,
+          "accuracy_at_half": 0.8186091524955067,
+          "threshold": 0.602850079536438,
+          "f1_nested": 0.49571734475374735,
+          "f1_at_half": 0.44920235096557515
+        },
+        {
+          "fold": 5,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "valid_rows": 7233,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.8061835858224133,
+          "pr_auc": 0.454688301110175,
+          "brier": 0.16494712614172233,
+          "mean_pred": 0.3930352032184601,
+          "accuracy_at_half": 0.8150145167980091,
+          "threshold": 0.6033565998077393,
+          "f1_nested": 0.4878552971576227,
+          "f1_at_half": 0.4516393442622951
+        }
+      ]
+    },
+    "none": {
+      "treatment": "scale_pos_weight=1",
+      "note": "no treatment at all: the control that makes the other two interpretable",
+      "seconds": 9.5,
+      "summary": {
+        "roc_auc": {
+          "mean": 0.7993034924812709,
+          "sd": 0.007879002977689717
+        },
+        "pr_auc": {
+          "mean": 0.4443653091601174,
+          "sd": 0.013147649433690446
+        },
+        "brier": {
+          "mean": 0.08206254643236696,
+          "sd": 0.001303645485895342
+        },
+        "mean_pred": {
+          "mean": 0.11683470159769058,
+          "sd": 0.001567322312934576
+        },
+        "f1_nested": {
+          "mean": 0.48780999804398917,
+          "sd": 0.011800783434717275
+        },
+        "f1_at_half": {
+          "mean": 0.32797084917960345,
+          "sd": 0.023102916702748638
+        },
+        "threshold": {
+          "mean": 0.19742486476898194,
+          "sd": 0.0055227065027935
+        }
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7936420571372742,
+          "pr_auc": 0.43857308266536676,
+          "brier": 0.08257743632895803,
+          "mean_pred": 0.11595094949007034,
+          "accuracy_at_half": 0.8927287807575338,
+          "threshold": 0.20146915316581726,
+          "f1_nested": 0.4797752808988764,
+          "f1_at_half": 0.31327433628318585
+        },
+        {
+          "fold": 2,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.8101128963733716,
+          "pr_auc": 0.4354292361173832,
+          "brier": 0.08259094145080176,
+          "mean_pred": 0.11583004891872406,
+          "accuracy_at_half": 0.8930052529720763,
+          "threshold": 0.1934586763381958,
+          "f1_nested": 0.4968944099378882,
+          "f1_at_half": 0.31382978723404253
+        },
+        {
+          "fold": 3,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7924336790214923,
+          "pr_auc": 0.4309159341865861,
+          "brier": 0.0836960304974633,
+          "mean_pred": 0.11605246365070343,
+          "accuracy_at_half": 0.8918993641139066,
+          "threshold": 0.193597212433815,
+          "f1_nested": 0.47149972329828443,
+          "f1_at_half": 0.3067375886524823
+        },
+        {
+          "fold": 4,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "valid_rows": 7233,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7951274030693997,
+          "pr_auc": 0.45816858054733595,
+          "brier": 0.08068649874364306,
+          "mean_pred": 0.11678121238946915,
+          "accuracy_at_half": 0.897829393059588,
+          "threshold": 0.2051406055688858,
+          "f1_nested": 0.4991472427515634,
+          "f1_at_half": 0.35571054925893636
+        },
+        {
+          "fold": 5,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "valid_rows": 7233,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.8052014268048167,
+          "pr_auc": 0.4587397122839154,
+          "brier": 0.08076182514096865,
+          "mean_pred": 0.11955883353948593,
+          "accuracy_at_half": 0.8958938199917047,
+          "threshold": 0.1934586763381958,
+          "f1_nested": 0.49173333333333336,
+          "f1_at_half": 0.35030198446937016
+        }
+      ]
+    },
+    "smote": {
+      "treatment": "SMOTE(random_state=42) inside the pipeline",
+      "note": "synthetic minority rows, synthesised from the fitted fold's training rows only",
+      "seconds": 28.3,
+      "summary": {
+        "roc_auc": {
+          "mean": 0.779922051081549,
+          "sd": 0.01045042392144507
+        },
+        "pr_auc": {
+          "mean": 0.41519975089228967,
+          "sd": 0.023366476987019866
+        },
+        "brier": {
+          "mean": 0.12209777328290472,
+          "sd": 0.00315235468280938
+        },
+        "mean_pred": {
+          "mean": 0.29665658473968504,
+          "sd": 0.004510515834868742
+        },
+        "f1_nested": {
+          "mean": 0.45235730823538567,
+          "sd": 0.022165886334052472
+        },
+        "f1_at_half": {
+          "mean": 0.4490485817875367,
+          "sd": 0.02197145838095385
+        },
+        "threshold": {
+          "mean": 0.5279300689697266,
+          "sd": 0.0030339655751227693
+        }
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7729201176555924,
+          "pr_auc": 0.40614403341292943,
+          "brier": 0.12442577273541183,
+          "mean_pred": 0.3001503050327301,
+          "accuracy_at_half": 0.8599668233342549,
+          "threshold": 0.5254945755004883,
+          "f1_nested": 0.44405182567726736,
+          "f1_at_half": 0.43753470294280955
+        },
+        {
+          "fold": 2,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7919594918663984,
+          "pr_auc": 0.4173317370508969,
+          "brier": 0.1173462790375951,
+          "mean_pred": 0.28901612758636475,
+          "accuracy_at_half": 0.872684545203207,
+          "threshold": 0.5311477184295654,
+          "f1_nested": 0.44302176696542894,
+          "f1_at_half": 0.4475104979004199
+        },
+        {
+          "fold": 3,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "valid_rows": 7234,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7673021073465157,
+          "pr_auc": 0.3802569183097848,
+          "brier": 0.12540412477672463,
+          "mean_pred": 0.2962060272693634,
+          "accuracy_at_half": 0.8560962123306608,
+          "threshold": 0.5261841416358948,
+          "f1_nested": 0.42453397474443777,
+          "f1_at_half": 0.4194088120468489
+        },
+        {
+          "fold": 4,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "valid_rows": 7233,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7784753013009211,
+          "pr_auc": 0.43605731074844256,
+          "brier": 0.12212078168421828,
+          "mean_pred": 0.2988416850566864,
+          "accuracy_at_half": 0.8689340522604728,
+          "threshold": 0.5254945755004883,
+          "f1_nested": 0.47596439169139465,
+          "f1_at_half": 0.47216035634743875
+        },
+        {
+          "fold": 5,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "valid_rows": 7233,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7889532372383177,
+          "pr_auc": 0.43620875493939454,
+          "brier": 0.12119190818057385,
+          "mean_pred": 0.29906877875328064,
+          "accuracy_at_half": 0.8676897552882621,
+          "threshold": 0.531329333782196,
+          "f1_nested": 0.4742145820983995,
+          "f1_at_half": 0.46862853970016655
+        }
+      ]
+    }
+  },
+  "checks": [
+    {
+      "check": "every arm ran the same five folds",
+      "passed": true,
+      "detail": "5 folds replayed into all 3 arms, each with 5 folds"
+    },
+    {
+      "check": "every arm scored the identical validation rows",
+      "passed": true,
+      "detail": "identical validation rows in every arm: True; disagreements: none"
+    },
+    {
+      "check": "no arm added rows at prediction time",
+      "passed": true,
+      "detail": "every fold returns 7234 scores; wrong: none"
+    },
+    {
+      "check": "SMOTE adds exactly the rows balancing requires, on the fold's training rows",
+      "passed": true,
+      "detail": "28,934 rows (3,385 pos / 25,549 neg) -> 51,098 (25,549 pos), added 22,164 = 25,549 - 3,385"
+    },
+    {
+      "check": "the preprocessor was fitted on real training rows, not on synthetic ones",
+      "passed": true,
+      "detail": "scaler mean matches the fold's training rows to 0.0e+00; the resampled matrix's means are 4.086e+01 away, which is what a leak would have produced"
+    },
+    {
+      "check": "the arms differ in the treatment and in nothing else",
+      "passed": true,
+      "detail": "one preprocessing definition across 3 arms; scale_pos_weight {'weights': 7.548334, 'none': 1.0, 'smote': 1.0}; steps ['preprocess', 'smote', 'model'] vs ['preprocess', 'model']"
+    },
+    {
+      "check": "each fold's F1 threshold came from the other folds only",
+      "passed": true,
+      "detail": "re-derived from the other four folds for all 15 folds; drift: none"
+    },
+    {
+      "check": "re-running fold 1 reproduces every arm exactly",
+      "passed": true,
+      "detail": "fold 1 of all 3 arms reproduces bit-identically; drift: none"
+    },
+    {
+      "check": "no arm produced a degenerate fold",
+      "passed": true,
+      "detail": "every PR-AUC strictly inside (0, 1) and every mean p inside [0, 1]; bad: none"
+    },
+    {
+      "check": "the shipped feature set is T25's frozen decision",
+      "passed": true,
+      "detail": "12 features"
+    }
+  ],
+  "checks_passed": 10,
+  "checks_total": 10,
+  "elapsed_seconds": 61.1,
+  "checks_ok": true
+}

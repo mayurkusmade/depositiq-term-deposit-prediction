@@ -1,7 +1,7 @@
 # DepositIQ — Model Selection Log
 
 **Rubric:** Criterion 6 — Model Selection & Implementation (15 marks)
-**Task:** T26–T28 (this section); extended by T29, consolidated in T31 | **Status:** T26–T28 complete
+**Task:** T26–T28 (this section); T29 is in `docs/06_imbalance.md`; consolidated in T31 | **Status:** T26–T28 complete
 **Date:** 2026-10-29
 **Source of every number here:** the run of `python -m src.train`, recorded in
 `models/cv_results.json` and printed by the module. Nothing below was computed by hand (D06).
@@ -275,16 +275,18 @@ ceremony, and the forest remains the bottleneck: it costs five times what XGBoos
 
 ---
 
-## 8. What T29–T31 inherit
+## 8. What T30–T31 inherit
 
 * A model is an entry in `ESTIMATORS` plus a `MODEL_PATHS` line. It gets the folds, the preprocessing
   and the scorer unchanged; add it to `REDUCTION_ESTIMATORS` and the §5 ablation covers it for free.
 * The floor to beat is **PR-AUC 0.1170 / ROC-AUC 0.5000**, not 0.5 PR-AUC.
 * The number to beat is now XGBoost: **PR-AUC 0.4420 (3.78×), ROC-AUC 0.7993**.
-* Threshold metrics wait for T34's recalibration; imbalance variants are T29's to compare on
-  **PR-AUC**, which is the metric that responds to the positive class. T29 has three baselines to beat
-  there, and one specific question: whether SMOTE inside the folds beats the weight-based handling all
-  three models already use.
+* Threshold metrics wait for T34's recalibration.
+* **T29 has since answered the imbalance question** (`docs/06_imbalance.md`, D49): SMOTE is worse than
+  doing nothing in 0/5 folds, and dropping `scale_pos_weight` costs nothing measurable while **halving**
+  the Brier score. So the number T30 should tune against is the **untreated** estimator's **PR-AUC
+  0.4444**, not the weighted 0.4420 in the table above — the table records the models as they were built,
+  and T29 is where that build was questioned.
 * **D46's revisit trigger was evaluated and did not fire** — XGBoost on 40 columns reached PR-AUC
   **0.4420** against the 0.4008 that would have reopened the feature set.
 * T30 now has a measured starting point rather than a guess: depth 3 / lr 0.05 / 400 rounds, with 1.8 s

@@ -1,0 +1,47 @@
+recommendation,label,value,record,path
+R1,clients with no recorded channel,0.2871599203715992,shap_global,directions.0.levels.2.share_of_clients
+R1,their subscription rate,0.04111303678028115,shap_global,directions.0.levels.2.subscribe_rate
+R1,rate for `cellular` clients,0.14834860430428298,shap_global,directions.0.levels.0.subscribe_rate
+R1,`contact=unknown` share of total model importance,0.10957561890424529,shap_global,columns_table.0.share
+R1,its contribution for one client,-0.6988856275565922,shap_local,profiles.true_positive.0.contribution
+R2,models called at the adopted cut,14866.0,threshold,at_chosen.clients_called
+R2,share of the file that is,0.4110263216102632,lift,translation.train_oof.coverage
+R2,subscribers reached,0.7790120538879698,lift,translation.train_oof.recall
+R2,net value of the campaign,43621.0,threshold,at_chosen.net_value_eur
+R2,net value of calling everyone,30368.0,threshold,comparisons.0.net_value_eur
+R2,calls a fixed order would need for the same recall,28175.307965020093,lift,translation.train_oof.calls_a_fixed_recall_would_need
+R2,calls saved by the ranking,13309.307965020093,lift,translation.train_oof.calls_saved
+R3,coverage where calls saved peaks,0.1889239106392391,lift,savings_peak.train_oof.coverage
+R3,calls saved there,15187.507681399195,lift,savings_peak.train_oof.calls_saved
+R3,calls at a 5% capacity cap,1809.0,threshold,capacity.0.clients_called
+R3,calls between that peak and the cut,8033.0,lift,block_after_peak.train_oof.calls
+R3,their conversion rate,0.08963027511515001,lift,block_after_peak.train_oof.marginal_rate
+R3,net value of that block,2350.5,lift,block_after_peak.train_oof.net_for_the_block_eur
+R3,held-out calls in the same block,1547.0,lift,block_after_peak.held_out.calls
+R3,held-out marginal conversion of that block,0.07756948933419522,lift,block_after_peak.held_out.marginal_rate
+R3,held-out net value of the same block,79.5,lift,block_after_peak.held_out.net_for_the_block_eur
+R3,net value of the grid's money peak,44009.5,threshold,empirical_best.net_value_eur
+R3,shortfall of the adopted cut from that peak,388.5,threshold,shortfall_vs_best_eur
+R4,PR-AUC the leak would add,0.17879512399201108,duration,gap.pr_auc_gap
+R4,euros it would appear to add,20340.0,duration,gap.euro_gap
+R4,calls it would appear to save,-4320.0,duration,gap.calls_gap
+R5,assumed cost per call,1.5,threshold,prices.call_cost_eur
+R5,assumed value per subscription,20.0,threshold,prices.value_per_subscription_eur
+R5,break-even probability,0.075,threshold,prices.break_even
+R5,cost per subscription at the cut,6.765473300970874,threshold,at_chosen.cost_per_subscription_eur
+R6,"accuracy at the cut, held out",0.6641601238527037,holdout,cuts.0.accuracy
+R6,accuracy of always predicting no,0.8830181375801813,derived,accuracy_of_always_no
+R6,"precision at the cut, held out",0.22673294669980668,holdout,cuts.0.precision
+R6,"recall of subscribers, held out",0.775992438563327,holdout,cuts.0.recall
+R6,subscribers a 0.5 cut would have missed,3192.0,threshold,comparisons.3.subscribers_missed
+R6,net value of a 0.5 cut,18248.0,threshold,comparisons.3.net_value_eur
+R7,"shipped PR-AUC, cross-validated",0.4460153160186124,cv,models.xgboost_tuned.summary.pr_auc.mean
+R7,random forest PR-AUC,0.4346223316486638,cv,models.random_forest.summary.pr_auc.mean
+R7,logistic baseline PR-AUC,0.4008393388799725,cv,models.logreg_balanced.summary.pr_auc.mean
+R7,held-out PR-AUC of the artifact,0.46156496958059895,holdout,metrics.pr_auc
+R7,matrix width,40.0,final,matrix_columns
+R8,`month` share of model importance,0.17551919272913405,shap_global,features_table.1.share
+R8,March's contribution to a client,1.3736265939771557,shap_global,directions.1.levels.0.mean_contribution
+R8,May's contribution,-0.2998966478022823,shap_global,directions.1.levels.11.mean_contribution
+R8,share of the file reached in May,0.30585047555850475,shap_global,directions.1.levels.11.share_of_clients
+R8,campaign-side share of total importance,0.5574854719287711,shap_global,campaign_side.share

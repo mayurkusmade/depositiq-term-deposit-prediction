@@ -1,0 +1,639 @@
+{
+  "task": "T39",
+  "scope": "At the price of a call, the average client is worth calling (p* = 7.50% is below the 11.6982% base rate), so this model converts a fixed call budget better than a fixed order - it does not justify cutting campaign spend.",
+  "recommendations": [
+    {
+      "id": "R1",
+      "scope": "data-quality",
+      "title": "Make `contact` a required field before the next campaign",
+      "action": "Record the contact channel on every call and re-score the file once it is filled. Treat the 28.72% of clients currently coded `unknown` as unmeasured, not as poor prospects.",
+      "expected": "No conversion lift is claimed. The effect is on **scoring**: 28.72% of the file is currently assigned the model's worst channel value, and their 4.11% rate is a statement about a blank field. Filling it moves those clients into the level that describes them; the first campaign afterwards measures whether that changes anything.",
+      "check": "Share of `unknown` in the scored file (target: near zero) and the measured rate of the re-coded group in the next campaign, against the 4.11% recorded here.",
+      "falsifier": "If clients re-coded away from `unknown` still subscribe at about 4.11%, the level was carrying real information and this recommendation is wrong.",
+      "evidence": [
+        {
+          "recommendation": "R1",
+          "label": "clients with no recorded channel",
+          "record": "shap_global",
+          "path": "directions.0.levels.2.share_of_clients",
+          "value": 0.2871599203715992,
+          "text": "28.72%",
+          "ref": "shap_global.json:directions.0.levels.2.share_of_clients",
+          "resolved": true
+        },
+        {
+          "recommendation": "R1",
+          "label": "their subscription rate",
+          "record": "shap_global",
+          "path": "directions.0.levels.2.subscribe_rate",
+          "value": 0.04111303678028115,
+          "text": "4.11%",
+          "ref": "shap_global.json:directions.0.levels.2.subscribe_rate",
+          "resolved": true
+        },
+        {
+          "recommendation": "R1",
+          "label": "rate for `cellular` clients",
+          "record": "shap_global",
+          "path": "directions.0.levels.0.subscribe_rate",
+          "value": 0.14834860430428298,
+          "text": "14.83%",
+          "ref": "shap_global.json:directions.0.levels.0.subscribe_rate",
+          "resolved": true
+        },
+        {
+          "recommendation": "R1",
+          "label": "`contact=unknown` share of total model importance",
+          "record": "shap_global",
+          "path": "columns_table.0.share",
+          "value": 0.10957561890424529,
+          "text": "10.96%",
+          "ref": "shap_global.json:columns_table.0.share",
+          "resolved": true
+        },
+        {
+          "recommendation": "R1",
+          "label": "its contribution for one client",
+          "record": "shap_local",
+          "path": "profiles.true_positive.0.contribution",
+          "value": -0.6988856275565922,
+          "text": "-0.6989",
+          "ref": "shap_local.json:profiles.true_positive.0.contribution",
+          "resolved": true
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "scope": "fixed-budget",
+      "title": "Call the list in model order, and stop at 0.0750",
+      "action": "Sort the campaign by P(subscribe) and call down the list while the score is at or above 0.0750. On this file that is 41.10% of clients, which reaches 77.90% of the subscribers.",
+      "expected": "13,309.31 fewer calls than working the file in any order for the same 3,296 subscribers, worth 19,963.96 EUR of call time; the campaign nets 43,621.00 EUR in total.",
+      "check": "Precision inside the called block each campaign, against the 22.17% measured here, and net EUR per 1,000 calls.",
+      "falsifier": "If the called block converts far below 22.17%, the ranking has stopped describing this population; if it converts far above, the cut is leaving money on the table and should be re-derived.",
+      "evidence": [
+        {
+          "recommendation": "R2",
+          "label": "models called at the adopted cut",
+          "record": "threshold",
+          "path": "at_chosen.clients_called",
+          "value": 14866.0,
+          "text": "14,866",
+          "ref": "threshold_choice.json:at_chosen.clients_called",
+          "resolved": true
+        },
+        {
+          "recommendation": "R2",
+          "label": "share of the file that is",
+          "record": "lift",
+          "path": "translation.train_oof.coverage",
+          "value": 0.4110263216102632,
+          "text": "41.10%",
+          "ref": "lift_results.json:translation.train_oof.coverage",
+          "resolved": true
+        },
+        {
+          "recommendation": "R2",
+          "label": "subscribers reached",
+          "record": "lift",
+          "path": "translation.train_oof.recall",
+          "value": 0.7790120538879698,
+          "text": "77.90%",
+          "ref": "lift_results.json:translation.train_oof.recall",
+          "resolved": true
+        },
+        {
+          "recommendation": "R2",
+          "label": "net value of the campaign",
+          "record": "threshold",
+          "path": "at_chosen.net_value_eur",
+          "value": 43621.0,
+          "text": "43,621.00 EUR",
+          "ref": "threshold_choice.json:at_chosen.net_value_eur",
+          "resolved": true
+        },
+        {
+          "recommendation": "R2",
+          "label": "net value of calling everyone",
+          "record": "threshold",
+          "path": "comparisons.0.net_value_eur",
+          "value": 30368.0,
+          "text": "30,368.00 EUR",
+          "ref": "threshold_choice.json:comparisons.0.net_value_eur",
+          "resolved": true
+        },
+        {
+          "recommendation": "R2",
+          "label": "calls a fixed order would need for the same recall",
+          "record": "lift",
+          "path": "translation.train_oof.calls_a_fixed_recall_would_need",
+          "value": 28175.307965020093,
+          "text": "28,175",
+          "ref": "lift_results.json:translation.train_oof.calls_a_fixed_recall_would_need",
+          "resolved": true
+        },
+        {
+          "recommendation": "R2",
+          "label": "calls saved by the ranking",
+          "record": "lift",
+          "path": "translation.train_oof.calls_saved",
+          "value": 13309.307965020093,
+          "text": "13,309",
+          "ref": "lift_results.json:translation.train_oof.calls_saved",
+          "resolved": true
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "scope": "fixed-budget",
+      "title": "Do not stop the list where calls saved peaks - stop it where capacity or the price does",
+      "action": "If agent hours are capped, choose the cut by capacity from the recorded table (e.g. 5% of the file = 1,809 calls) instead of pruning to the savings peak at 18.89% coverage.",
+      "expected": "The 8,033 calls between the savings peak and the cut convert at 8.96%, above the 7.50% price, for +2,350.50 EUR. Pruning to the peak would give up that money to save calls the campaign was already going to spend. The grid's best cut is only 388.50 EUR ahead, so the exact cut is not where the value is - capacity is.",
+      "check": "Marginal conversion of the block between any two candidate cuts, priced at C and V before the list is shortened.",
+      "falsifier": "The held-out block contributes only +79.50 EUR on 1,547 calls (7.76%), so on fresh data this recommendation is thin: if the marginal rate falls below 7.50%, stopping earlier becomes correct.",
+      "evidence": [
+        {
+          "recommendation": "R3",
+          "label": "coverage where calls saved peaks",
+          "record": "lift",
+          "path": "savings_peak.train_oof.coverage",
+          "value": 0.1889239106392391,
+          "text": "18.89%",
+          "ref": "lift_results.json:savings_peak.train_oof.coverage",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "calls saved there",
+          "record": "lift",
+          "path": "savings_peak.train_oof.calls_saved",
+          "value": 15187.507681399195,
+          "text": "15,188",
+          "ref": "lift_results.json:savings_peak.train_oof.calls_saved",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "calls at a 5% capacity cap",
+          "record": "threshold",
+          "path": "capacity.0.clients_called",
+          "value": 1809.0,
+          "text": "1,809",
+          "ref": "threshold_choice.json:capacity.0.clients_called",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "calls between that peak and the cut",
+          "record": "lift",
+          "path": "block_after_peak.train_oof.calls",
+          "value": 8033.0,
+          "text": "8,033",
+          "ref": "lift_results.json:block_after_peak.train_oof.calls",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "their conversion rate",
+          "record": "lift",
+          "path": "block_after_peak.train_oof.marginal_rate",
+          "value": 0.08963027511515001,
+          "text": "8.96%",
+          "ref": "lift_results.json:block_after_peak.train_oof.marginal_rate",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "net value of that block",
+          "record": "lift",
+          "path": "block_after_peak.train_oof.net_for_the_block_eur",
+          "value": 2350.5,
+          "text": "2,350.50 EUR",
+          "ref": "lift_results.json:block_after_peak.train_oof.net_for_the_block_eur",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "held-out calls in the same block",
+          "record": "lift",
+          "path": "block_after_peak.held_out.calls",
+          "value": 1547.0,
+          "text": "1,547",
+          "ref": "lift_results.json:block_after_peak.held_out.calls",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "held-out marginal conversion of that block",
+          "record": "lift",
+          "path": "block_after_peak.held_out.marginal_rate",
+          "value": 0.07756948933419522,
+          "text": "7.76%",
+          "ref": "lift_results.json:block_after_peak.held_out.marginal_rate",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "held-out net value of the same block",
+          "record": "lift",
+          "path": "block_after_peak.held_out.net_for_the_block_eur",
+          "value": 79.5,
+          "text": "79.50 EUR",
+          "ref": "lift_results.json:block_after_peak.held_out.net_for_the_block_eur",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "net value of the grid's money peak",
+          "record": "threshold",
+          "path": "empirical_best.net_value_eur",
+          "value": 44009.5,
+          "text": "44,009.50 EUR",
+          "ref": "threshold_choice.json:empirical_best.net_value_eur",
+          "resolved": true
+        },
+        {
+          "recommendation": "R3",
+          "label": "shortfall of the adopted cut from that peak",
+          "record": "threshold",
+          "path": "shortfall_vs_best_eur",
+          "value": 388.5,
+          "text": "388.50 EUR",
+          "ref": "threshold_choice.json:shortfall_vs_best_eur",
+          "resolved": true
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "scope": "prohibition",
+      "title": "Never feed call `duration` into the model, or use it as a manual scoring hint",
+      "action": "Keep `duration` out of the scored matrix and out of any agent's ranking. It is recorded when the call ends, so it cannot inform the decision to make the call.",
+      "expected": "The gap is **not** money left on the table: +0.1788 PR-AUC and +20,340.00 EUR from a column that does not exist at decision time. The deployable model's PR-AUC is 0.4448 pooled.",
+      "check": "A scan of the scored matrix each release: 40 columns, twelve features, no `duration` and no target.",
+      "falsifier": "If a future system captured the *expected* call length before dialling - not the actual one - the column would become legitimate and this prohibition would no longer apply.",
+      "evidence": [
+        {
+          "recommendation": "R4",
+          "label": "PR-AUC the leak would add",
+          "record": "duration",
+          "path": "gap.pr_auc_gap",
+          "value": 0.17879512399201108,
+          "text": "0.1788",
+          "ref": "duration_comparison.json:gap.pr_auc_gap",
+          "resolved": true
+        },
+        {
+          "recommendation": "R4",
+          "label": "euros it would appear to add",
+          "record": "duration",
+          "path": "gap.euro_gap",
+          "value": 20340.0,
+          "text": "20,340.00 EUR",
+          "ref": "duration_comparison.json:gap.euro_gap",
+          "resolved": true
+        },
+        {
+          "recommendation": "R4",
+          "label": "calls it would appear to save",
+          "record": "duration",
+          "path": "gap.calls_gap",
+          "value": -4320.0,
+          "text": "-4,320",
+          "ref": "duration_comparison.json:gap.calls_gap",
+          "resolved": true
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "scope": "pricing",
+      "title": "Establish the value of a subscription before booking any euro figure",
+      "action": "Replace the assumed V = 20.00 EUR with the bank's own number before the 43,621.00 EUR is planned against. The ranking's advantage survives any V above 6.77 EUR; the euro headline does not.",
+      "expected": "Every euro figure in this playbook is linear in V. At V = 20.00 the campaign nets 43,621.00 EUR; at the cut each subscription costs 6.77 EUR in calls, so any V above that keeps the campaign profitable.",
+      "check": "Re-run the pricing with the real V and C; the break-even moves to C/V and the recommended cut moves with it.",
+      "falsifier": "If the bank's V is below 6.77 EUR, the cut is unprofitable and a stricter cut - or no campaign - is correct. If C is materially higher than 1.50 EUR, the same applies.",
+      "evidence": [
+        {
+          "recommendation": "R5",
+          "label": "assumed cost per call",
+          "record": "threshold",
+          "path": "prices.call_cost_eur",
+          "value": 1.5,
+          "text": "1.50 EUR",
+          "ref": "threshold_choice.json:prices.call_cost_eur",
+          "resolved": true
+        },
+        {
+          "recommendation": "R5",
+          "label": "assumed value per subscription",
+          "record": "threshold",
+          "path": "prices.value_per_subscription_eur",
+          "value": 20.0,
+          "text": "20.00 EUR",
+          "ref": "threshold_choice.json:prices.value_per_subscription_eur",
+          "resolved": true
+        },
+        {
+          "recommendation": "R5",
+          "label": "break-even probability",
+          "record": "threshold",
+          "path": "prices.break_even",
+          "value": 0.075,
+          "text": "7.50%",
+          "ref": "threshold_choice.json:prices.break_even",
+          "resolved": true
+        },
+        {
+          "recommendation": "R5",
+          "label": "cost per subscription at the cut",
+          "record": "threshold",
+          "path": "at_chosen.cost_per_subscription_eur",
+          "value": 6.765473300970874,
+          "text": "6.77 EUR",
+          "ref": "threshold_choice.json:at_chosen.cost_per_subscription_eur",
+          "resolved": true
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "scope": "monitoring",
+      "title": "Track precision and net value, never accuracy",
+      "action": "Report precision inside the called block, recall of subscribers and net EUR per 1,000 calls. Retire accuracy from the campaign dashboard.",
+      "expected": "The model is **less accurate** than predicting `no` for everyone (66.42% against 88.30%) and far more useful: 77.60% of held-out subscribers reached. Grading it at 0.5 instead of at the price would reach 1,039 subscribers and net 18,248.00 EUR against 3,296 and 43,621.00.",
+      "check": "Precision and net EUR per 1,000 calls, quarter on quarter, against 22.67% and the same cut.",
+      "falsifier": "If precision inside the called block stays at the base rate over several campaigns, the ranking has stopped adding value regardless of its accuracy.",
+      "evidence": [
+        {
+          "recommendation": "R6",
+          "label": "accuracy at the cut, held out",
+          "record": "holdout",
+          "path": "cuts.0.accuracy",
+          "value": 0.6641601238527037,
+          "text": "66.42%",
+          "ref": "holdout_eval.json:cuts.0.accuracy",
+          "resolved": true
+        },
+        {
+          "recommendation": "R6",
+          "label": "accuracy of always predicting no",
+          "record": "derived",
+          "path": "accuracy_of_always_no",
+          "value": 0.8830181375801813,
+          "text": "88.30%",
+          "ref": "models/playbook.json:derived.accuracy_of_always_no",
+          "resolved": true
+        },
+        {
+          "recommendation": "R6",
+          "label": "precision at the cut, held out",
+          "record": "holdout",
+          "path": "cuts.0.precision",
+          "value": 0.22673294669980668,
+          "text": "22.67%",
+          "ref": "holdout_eval.json:cuts.0.precision",
+          "resolved": true
+        },
+        {
+          "recommendation": "R6",
+          "label": "recall of subscribers, held out",
+          "record": "holdout",
+          "path": "cuts.0.recall",
+          "value": 0.775992438563327,
+          "text": "77.60%",
+          "ref": "holdout_eval.json:cuts.0.recall",
+          "resolved": true
+        },
+        {
+          "recommendation": "R6",
+          "label": "subscribers a 0.5 cut would have missed",
+          "record": "threshold",
+          "path": "comparisons.3.subscribers_missed",
+          "value": 3192.0,
+          "text": "3,192",
+          "ref": "threshold_choice.json:comparisons.3.subscribers_missed",
+          "resolved": true
+        },
+        {
+          "recommendation": "R6",
+          "label": "net value of a 0.5 cut",
+          "record": "threshold",
+          "path": "comparisons.3.net_value_eur",
+          "value": 18248.0,
+          "text": "18,248.00 EUR",
+          "ref": "threshold_choice.json:comparisons.3.net_value_eur",
+          "resolved": true
+        }
+      ]
+    },
+    {
+      "id": "R7",
+      "scope": "modelling",
+      "title": "Keep the twelve-feature XGBoost; do not re-open the feature set or the imbalance weight",
+      "action": "Ship the persisted artifact as is. Do not add back the five dropped features, do not weight the classes, and do not re-tune on a hunch.",
+      "expected": "The shipped model beats both alternatives on ranking (0.4460 against 0.4346 and 0.4008) with 40 columns instead of 65, and holds 0.4616 PR-AUC on rows it never saw.",
+      "check": "The D46 revisit trigger: if a 40-column XGBoost ever lands below the logistic baseline's 0.4008, the feature set is re-opened.",
+      "falsifier": "A re-measurement that puts the shipped configuration below 0.4008 PR-AUC, or a business change that adds a genuinely new column, which is a T22-style audit rather than a re-tune.",
+      "evidence": [
+        {
+          "recommendation": "R7",
+          "label": "shipped PR-AUC, cross-validated",
+          "record": "cv",
+          "path": "models.xgboost_tuned.summary.pr_auc.mean",
+          "value": 0.4460153160186124,
+          "text": "0.4460",
+          "ref": "metrics_cv.json:models.xgboost_tuned.summary.pr_auc.mean",
+          "resolved": true
+        },
+        {
+          "recommendation": "R7",
+          "label": "random forest PR-AUC",
+          "record": "cv",
+          "path": "models.random_forest.summary.pr_auc.mean",
+          "value": 0.4346223316486638,
+          "text": "0.4346",
+          "ref": "metrics_cv.json:models.random_forest.summary.pr_auc.mean",
+          "resolved": true
+        },
+        {
+          "recommendation": "R7",
+          "label": "logistic baseline PR-AUC",
+          "record": "cv",
+          "path": "models.logreg_balanced.summary.pr_auc.mean",
+          "value": 0.4008393388799725,
+          "text": "0.4008",
+          "ref": "metrics_cv.json:models.logreg_balanced.summary.pr_auc.mean",
+          "resolved": true
+        },
+        {
+          "recommendation": "R7",
+          "label": "held-out PR-AUC of the artifact",
+          "record": "holdout",
+          "path": "metrics.pr_auc",
+          "value": 0.46156496958059895,
+          "text": "0.4616",
+          "ref": "holdout_eval.json:metrics.pr_auc",
+          "resolved": true
+        },
+        {
+          "recommendation": "R7",
+          "label": "matrix width",
+          "record": "final",
+          "path": "matrix_columns",
+          "value": 40.0,
+          "text": "40",
+          "ref": "final_model.json:matrix_columns",
+          "resolved": true
+        }
+      ]
+    },
+    {
+      "id": "R8",
+      "scope": "scheduling",
+      "title": "Use `month` to schedule, never to predict a client",
+      "action": "Read the month effects as a calendar signal when planning the campaign, and keep them out of any statement about a client's propensity.",
+      "expected": "Campaign-side features carry 55.7% of total importance, so the largest levers are how and when the bank calls. That is a scheduling and data-quality agenda, not a targeting one.",
+      "check": "Conversion by month next campaign, against the 50.90% (March) and 6.68% (May) recorded here, with volume held roughly constant.",
+      "falsifier": "These are 2008-2010 months confounded with the economic conditions this dataset variant cannot see. If conversion by month flattens under a different macro environment, the signal was the period, not the calendar.",
+      "evidence": [
+        {
+          "recommendation": "R8",
+          "label": "`month` share of model importance",
+          "record": "shap_global",
+          "path": "features_table.1.share",
+          "value": 0.17551919272913405,
+          "text": "17.55%",
+          "ref": "shap_global.json:features_table.1.share",
+          "resolved": true
+        },
+        {
+          "recommendation": "R8",
+          "label": "March's contribution to a client",
+          "record": "shap_global",
+          "path": "directions.1.levels.0.mean_contribution",
+          "value": 1.3736265939771557,
+          "text": "1.3736",
+          "ref": "shap_global.json:directions.1.levels.0.mean_contribution",
+          "resolved": true
+        },
+        {
+          "recommendation": "R8",
+          "label": "May's contribution",
+          "record": "shap_global",
+          "path": "directions.1.levels.11.mean_contribution",
+          "value": -0.2998966478022823,
+          "text": "-0.2999",
+          "ref": "shap_global.json:directions.1.levels.11.mean_contribution",
+          "resolved": true
+        },
+        {
+          "recommendation": "R8",
+          "label": "share of the file reached in May",
+          "record": "shap_global",
+          "path": "directions.1.levels.11.share_of_clients",
+          "value": 0.30585047555850475,
+          "text": "30.59%",
+          "ref": "shap_global.json:directions.1.levels.11.share_of_clients",
+          "resolved": true
+        },
+        {
+          "recommendation": "R8",
+          "label": "campaign-side share of total importance",
+          "record": "shap_global",
+          "path": "campaign_side.share",
+          "value": 0.5574854719287711,
+          "text": "55.75%",
+          "ref": "shap_global.json:campaign_side.share",
+          "resolved": true
+        }
+      ]
+    }
+  ],
+  "derived": {
+    "net_eur_per_1000_calls_train": 2934.2795641060134,
+    "net_eur_per_1000_calls_held_out": 3034.658933996134,
+    "cost_per_subscription_all_calls_eur": 12.822500590876862,
+    "share_of_file_called_train": 0.4110263216102632,
+    "share_of_file_called_held_out": 0.40042021453057614,
+    "subscribers_reached_held_out_share": 0.775992438563327,
+    "precision_at_cut_held_out": 0.22673294669980668,
+    "accuracy_of_always_no": 0.8830181375801813,
+    "campaign_side_share": 0.5574854719287711,
+    "client_side_share": 0.44251452807122915
+  },
+  "sources": {
+    "cv": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\metrics_cv.json",
+    "threshold": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\threshold_choice.json",
+    "lift": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\lift_results.json",
+    "holdout": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\holdout_eval.json",
+    "duration": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\duration_comparison.json",
+    "shap_global": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\shap_global.json",
+    "shap_local": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\shap_local.json",
+    "train": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\cv_results.json",
+    "final": "D:\\diabetes+130-us+hospitals+for+years+1999-2008\\depositiq-term-deposit-prediction\\models\\final_model.json"
+  },
+  "checks": [
+    {
+      "check": "the playbook has at least six recommendations",
+      "passed": true,
+      "detail": "8 recommendations (minimum 6)"
+    },
+    {
+      "check": "every recommendation is actionable, measurable and falsifiable",
+      "passed": true,
+      "detail": "every recommendation carries ['id', 'scope', 'title', 'action', 'evidence', 'expected', 'check', 'falsifier']; missing: none"
+    },
+    {
+      "check": "the recommendation ids are unique",
+      "passed": true,
+      "detail": "['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8']"
+    },
+    {
+      "check": "every cited number resolves to a saved record",
+      "passed": true,
+      "detail": "46 figures resolved from the records; broken: none"
+    },
+    {
+      "check": "every cited number still matches its record on disk",
+      "passed": true,
+      "detail": "46 figures re-read from disk; mismatched: none"
+    },
+    {
+      "check": "no recommendation rests on a single figure",
+      "passed": true,
+      "detail": "each recommendation cites at least two figures; thin: none"
+    },
+    {
+      "check": "the D18 scope is stated and attached",
+      "passed": true,
+      "detail": "['R2', 'R3'] carry the fixed-budget scope; the sentence names it"
+    },
+    {
+      "check": "`duration` is mentioned only where it is forbidden",
+      "passed": true,
+      "detail": "`duration` appears in ['R4']; it must appear only as the prohibition R4"
+    },
+    {
+      "check": "the campaign's net value is revenue minus call cost",
+      "passed": true,
+      "detail": "3,296 x 20.00 - 14,866 x 1.50 = 43,621.00 EUR, recorded 43,621.00"
+    },
+    {
+      "check": "the pricing band R5 quotes is measured",
+      "passed": true,
+      "detail": "cost per subscription: 6.77 EUR at the cut against 12.82 EUR calling everyone - the band where targeting is the difference between profit and loss"
+    },
+    {
+      "check": "the training and held-out halves describe the same campaign",
+      "passed": true,
+      "detail": "coverage 41.10% vs 40.04%; recall 77.90% vs 77.60%"
+    },
+    {
+      "check": "the derived quantities are internally consistent",
+      "passed": true,
+      "detail": "campaign 55.75% + client 44.25% = 1; net per 1,000 calls 2,934.28 EUR"
+    }
+  ]
+}

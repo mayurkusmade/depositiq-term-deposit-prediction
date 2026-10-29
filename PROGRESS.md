@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-30 00:20
-**Overall completion:** 70% (32 / 46 tasks)
+**Last updated:** 2026-10-30 03:15
+**Overall completion:** 85% (39 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -16,9 +16,9 @@
 | 5 | Feature Engineering / Selection | 10 | 4 / 4 ✅ | T22–T25 |
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
-| 8 | Business Insights & Recommendations | 10 | 2 / 3 | T37–T39 |
+| 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
 | 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **38 / 46** | |
+| | **Total** | **100** | **39 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,37 +28,29 @@
 
 ## NEXT TASK
 
-**T39 | Phase 8 – Business Insights & Recommendations | Campaign playbook and ranked recommendations.**
-Open: `docs/08_recommendations.md`. **The last task of Phase 8, and the one the rubric actually marks: at
-least six actionable recommendations, each backed by a number this project measured.**
-**Done when:** six or more recommendations are written, every figure traceable to a saved record, and the
-playbook states what the bank should do, in what order, and what it cannot expect.
-**Carry in:** eight constraints, each one a result that has already been measured. **(1) No new modelling
-and no new numbers.** T39 is synthesis: every figure must come from a saved record - `models/*.json`,
-`reports/*.csv` - and anything genuinely new (an aggregate, a ratio) must be produced by a script in
-`src/` and written to a file, never typed (D06). **(2) The scope is D18's, and it is narrower than it
-sounds.** `p* = 7.50%` sits **below** the 11.6982% base rate, so the average client is still worth calling
-(EV +0.84 EUR): this model **converts a fixed call budget better**, it does **not** justify cutting spend.
-Any recommendation implying "targeting saves money" is out of scope. **(3) The business cut is 0.0750 at
-41.10% coverage**, worth **43,621 EUR** and **13,309 calls saved** against a fixed order (T34, T35); every
-capacity, agent-hours or list-size statement has to be derived from that cut, not asserted.
-**(4) The strongest single action is a data-quality one.** `contact=unknown` is the top column of forty
-(**10.96%** of importance), covers **28.72%** of clients and scores them at **4.11%** against
-`cellular`'s **14.83%** (T37 §8.4, T38 §9.3). The playbook's first recommendation should be that one, and
-it must say honestly that **the model can only use the value it is given** - fixing the field changes how
-those clients are scored, it does not relabel them today. **(5) `month` is a schedule lever with a
-confound.** `mar` +1.3736 at a 50.90% rate, `oct` +1.0379, `sep` +0.9792 against `may` -0.2999 and
-**30.6%** of the file (T37 §8.4). 2008–2010 conditions are uncontrolled in this variant (D19/D20), so the
-recommendation is "schedule against the calendar the model learned", **never** "March causes subscriptions".
-**(6) `duration` must not appear as an input**, at any point, in any recommendation (D05, T36 §9: +0.1788
-PR-AUC and +20,340 EUR, and dead at decision time). **(7) Price everything with D17's ASSUMED figures**
-(C = 1.50 EUR, V = 20.00 EUR) and label them as assumptions inside the recommendation that uses them -
-the bank's real numbers are unknown, and a playbook that hides that is a guess with a citation.
-**(8) Each recommendation carries a metric and a check.** State what would have to be true for the
-recommendation to be wrong, and which saved number would show it - e.g. the `duration`-free model's
-PR-AUC **0.4448**, the top-decile lift **4.3652x** (D15's >2x), or the false-negative cost the price
-accepts.
-
+**T40 | Phase 9 – Deliverables | The final report.** Open: `docs/report.md` (+ PDF).
+**Phase 8 is closed: all nine rubric criteria now have their evidence on disk**, and this task assembles it
+into one document a marker can read top to bottom. **Done when:** every rubric criterion is covered from
+saved numbers alone, the narrative order is problem → data → method → evaluation → recommendation, and a
+reader who has not seen the notebooks can follow it.
+**Carry in:** six constraints. **(1) No new numbers** (D06): everything in the report already exists in
+`models/*.json`, `reports/*.csv` or one of the eleven documents in `docs/`, and any figure genuinely new -
+a percentage, a ratio - is produced by `src/playbook.py` or a sibling and written to a file. The report's
+job is selection and order, not analysis. **(2) The nine criteria are the report's skeleton**, so each
+criterion opens with its own evidence rather than the report following the project's chronology: 1 problem
+(`docs/01`), 2 data (`docs/02`), 3 preprocessing (D43/D51, `src/clean.py` 21 checks), 4 EDA (`docs/04`),
+5 features (T22–T25, D42), 6 modelling (`docs/06*`), 7 evaluation (`docs/07*`), 8 business
+(`docs/08*`), 9 documentation (this report). **(3) The scope sentence travels with the headline** (D18):
+p* = **7.50%** is below the **11.6982%** base rate, so this converts a fixed budget better, it does not cut
+spend. Any euro figure quoted without that sentence is a claim the project does not make. **(4) The three
+prohibitions are stated where the result is**: `duration` never as an input (D05/D57), no accuracy as a
+headline (D48), and no causal reading of `month` (D19/D20). **(5) Prices are assumptions** (D17): C =
+**1.50 EUR**, V = **20.00 EUR**, and every euro in the report is linear in V, so the sentence that says so
+belongs next to the first number, not in a footnote. **(6) The held-out half is spent once** (D53/D54):
+report its numbers as *reported*, never as a basis for a choice made after seeing them, and say plainly
+that the 9,043 rows are from the same campaign.
+**Output:** `docs/report.md` plus a rendered PDF; diagrams drawn from `reports/figures/` rather than new
+plots, so no figure appears in the report that is not in a record.
 
 ---
 
@@ -145,6 +137,8 @@ stops being evidence |
 | D39 | 2026-10-28 | `docs/04_eda_insights.md` carries **seven** insights selected from the notebook's eighteen findings, ranked by **money at stake**, then **planner actionability**, then **survival under a control** | The task asked for at least five, and all eighteen would bury the two that move money. The order puts the **€32,906** call-budget loss first because it is both large and immediately actionable, and demotes `duration` (I6) and `day`/recency (I7) to constraints on what may be built, because they remove work rather than win subscriptions — a reader who wants the full eighteen is sent to notebook §6, which stays the exhaustive record |
 | D38 | 2026-10-28 | The numeric correlation matrix and the categorical Cramér's V tables are **two halves of one feature ranking**, and neither is quoted as a ranking on its own | `duration` is the strongest number in the matrix (+0.3967) and unusable (D05); the strongest *usable* numeric is −0.1526; `poutcome` at V = 0.3102 is the strongest association anywhere in the data and does not appear in the heatmap at all, because Pearson cannot see a categorical column. Any statement of the form "the top predictors are …" therefore has to name which half it came from |
 
+| D60 | 2026-10-30 | **The playbook is eight recommendations held as data in `src/playbook.py`, each figure a file-plus-key-path pair re-read from disk, ordered data quality → pricing → ranking → instrumentation, with the D18 scope sentence ahead of any euro figure and `duration` permitted only in the recommendation that forbids it** | Three reasons the recommendations are not prose. **A sentence cannot be checked; a record can.** Every one of the **46** cited figures is resolved by `resolve()` and re-read in `validate()`, so a mistyped key path, a stale model or a number carried over from an older run fails the command rather than being marked — and a figure with no record behind it cannot be written at all, which is what the `derived()` function is for: the ten quantities the document needs (net per 1,000 calls on each half, cost per subscription both ways, held-out recall and precision, the always-`no` accuracy, the campaign/client split) are computed from records, not dictated. **Eight, not the required six**, because two of the eight are prohibitions rather than actions - R4 on `duration` and R7 against re-opening the feature set - and a prohibition is only credible next to the number it declines: **+0.1788** PR-AUC and **20,340.00 EUR** that would be banked by a model that has seen the answer, and a **0.4460** baseline that a future re-tune must beat to be worth doing. **The order is by leverage, not by importance**: R1 first because `contact=unknown` covers **28.72%** of clients at a **-1.0150** contribution, so one required field changes how nearly three clients in ten are scored, and no other recommendation touches that many rows for so little work; R5 second because it decides the cut, and every euro in the document is linear in an **assumed** V = **20.00 EUR**; R2/R3 after it, because how the list is worked only matters once the price is real. **Why R3 is written as a refusal:** calls saved peaks at **18.89%** coverage while the price puts the cut at **41.10%**, and the block between them converts at **8.96%** for **+2,350.50 EUR** - profitable, so pruning to the peak is an optimisation that loses money. The honest form is therefore "do not stop where calls saved peaks", with the held-out half stated beside it: **1,547** calls at **7.76%** for **+79.50 EUR** is a rounding error, so on fresh data the same policy may well flip, and the recommendation says so. **Why the scope sentence leads:** p* = **7.50%** sits below the **11.6982%** base rate, so the campaign already pays; the measured gain is **+13,253.00 EUR (+43.6%)** on **21,302 fewer calls**, which is a fixed-budget improvement. A playbook that omitted this would license a spend cut the model never justified (D18). **Scope:** one classic telemarketing campaign, prices assumed, no causal month effect, three clients and eight recommendations are not a validation set |
+
 ---
 
 ## Task Checklist
@@ -207,7 +201,7 @@ Tick only after the deliverable is verified to exist and run.
 ### Phase 8 — Explainability & Business Insights
 - [x] T37 | Rubric 8 | Global SHAP analysis | Output: `reports/figures/09_shap_summary.png` | **done 2026-10-30** (`src/explain.py`; TreeSHAP on **the artifact** - sha256 **7a40752f...**, checked first - on the **training half**, **36,168 rows x 40 columns over 12 features**; additivity **5.010e-06** and `sigmoid(margin)` vs `predict_proba` **7.521e-08**; contributions equal xgboost's `pred_contribs` to **0.0**; **aggregated by signed sum within each one-hot block** so the twelve feature values stay additive, with the naive per-column alternative measured as **inflation** (`month` **+58.52%**, `campaign_bucket` **+49.63%**, `poutcome` **+35.91%**) and fragmentation named as the real cost (`month=jun` alone is only 9th of 40); top drivers **`contact` 22.14%**, **`month` 17.55%**, `day` 10.60%, `balance_arsinh` 8.49%, `housing` 8.05%, `poutcome` 7.97%; **`contact=unknown` is 28.72% of clients and contributes -1.0150 on a 4.11% rate**, the top column of forty; **`poutcome=success` +1.6841 on 3.33% of clients** is the largest single-level effect but the feature is 7.97% overall, which is why mean|SHAP| is not per-client influence; **55.7% of importance is campaign-side** (`contact`/`month`/`day`/`campaign_bucket`) against **44.3%** client-side; against T25's permutation ranking **Spearman +0.755** with four gaps of 3+ explained rather than averaged (`balance_arsinh` 4 vs 9, `poutcome` 6 vs 3, `age` 8 vs 5, `recency_band` 11 vs 7); the reference value **-2.04695** is the booster's bias, not the mean margin **-2.49678**, so the average contribution is **-0.44983**; **17/17 in-module checks** pass and `python -m src.explain` exits **0** in **38.8 s**; **32 further checks** recompute the whole table from `pred_contribs` without importing the module or `shap`, re-derive every level/rate quoted in the prose, and trace **115 numeric tokens** in `docs/08_explainability.md` to the records with **0 unmatched**)
 - [x] T38 | Rubric 8 | Local SHAP explanations for exemplar clients | Output: `reports/figures/10_shap_local.png` | **done 2026-10-30** (`src/local_explain.py`; cells defined against **the price**, not 0.5 - T34's **0.0750** re-derived from C/V - giving in-sample **TP 3,523 / FP 11,059 / FN 708 / TN 20,878** against T34's out-of-fold **3,296 / 11,570 / 935**, both recorded because the explanation belongs to the artifact and T34's table is a different denominator; the exemplar rule is **pre-registered**: the client whose score is closest to its cell's median, ties by lowest row index, so the illustrations are typical rather than worst cases - rows **19,263 / 23,374 / 10,760**, all at the 50th percentile of their own cell; **TP** row 19,263 **p = 0.3819**, `month=oct` **+1.8824** against `contact=unknown` **-0.6989** (the model's top global feature taking most of it back); **FP** row 23,374 **p = 0.1133** with contributions summing to **-0.0109**, i.e. a completely average client, which is the finding - at a 7.5% price below the 11.4361% reference the modal cell **is** the false positive (**30.58%** of the file); **FN** row 10,760 **p = 0.0550** dragged down by `balance_arsinh = 0.00` (**-0.3502**) and `month=jul` (**-0.3121**) and missing the cut by only **0.3323 log-odds**; per-client additivity **6.853e-07**, `pred_contribs` **0.0**, 12 features cover the 40 columns; **16/16 in-module checks** pass and `python -m src.local_explain` exits **0** in **76.7 s**; **70 further checks** rebuild the cells, the rule and all three profiles without importing the module or `shap`, and trace **179 numeric tokens** in `docs/08_explainability.md` to the records with **0 unmatched**)
-- [ ] T39 | Rubric 8 | Business recommendations and campaign playbook | Output: `docs/08_recommendations.md` | Done when: at least 6 actionable recommendations are backed by the actual measured metrics
+- [x] T39 | Rubric 8 | Business recommendations and campaign playbook | Output: `docs/08_recommendations.md` | **done 2026-10-30** (`src/playbook.py` writes `reports/playbook.csv` and `models/playbook.json`; the eight recommendations live in the module as data and each figure is a **file-plus-key-path pair re-read from disk**, so **46 figures** across **9 records** resolve and **12/12** checks pass, including one that re-reads every figure and compares it with the value the document cites - a stale record fails the build instead of shipping; `duration` appearing anywhere except **R4** also fails, so the prohibition is enforced mechanically; **scope first** (D18): calling everyone nets **30,368.00 EUR** and the cut nets **43,621.00 EUR**, so the model is worth **+13,253.00 EUR (+43.6%)** and **21,302 fewer calls** - an improvement on a campaign that already pays, not a rescue of one that does not; **R1 is a data-quality action**, because `contact=unknown` covers **28.72%** of clients, is worth **-1.0150** log-odds, and scores them at **4.11%** against **14.83%** for `cellular`, with **no lift claimed** - filling the field changes how those clients are scored, it does not relabel them; **R3 refuses the obvious optimisation**: calls saved peaks at **18.89%** coverage (**15,188** calls saved) but the **8,033** calls past it still convert at **8.96%** for **+2,350.50 EUR**, so the cut is sized by **capacity** - and the held-out half prices that same block at **1,547** calls and **7.76%** for only **+79.50 EUR**, which the document states as the thinnest recommendation rather than hiding; **R4** carries the `duration` gap (**+0.1788** PR-AUC, **20,340.00 EUR**, dead at dial time); **R7** keeps the 40-column XGBoost on **0.4460** against **0.4346** and **0.4008** PR-AUC, with tuning worth **+0.0016**; **R8** reads `month` as a calendar (**17.55%** of importance, March **+1.3736** at **50.90%**, May **-0.2999** at **6.68%** on **30.59%** of the file) and names the 2008-2010 confound; campaign-side features carry **55.75%** of importance against **44.25%** for the client's own, which is why the playbook is mostly about *how* the bank calls; `python -m src.playbook` exits **0** in **9.4 s**, and **78 independent checks** recompute every table cell and every derived euro without importing the module and trace **63 numeric tokens** in the document to the records with **0 unmatched**)
 
 ### Phase 9 — Deliverables
 - [ ] T40 | Rubric 9 | Write the final report | Output: `docs/report.md` (+ PDF) | Done when: all nine rubric criteria are covered using only real numbers from saved runs
@@ -228,6 +222,8 @@ Tick only after the deliverable is verified to exist and run.
 |---|---|---|
 | `src/local_explain.py`, `reports/shap_local.csv`, `reports/figures/10_shap_local.png`, `models/shap_local.json` | Phase 8 (**T38**): `cell_of()` labels rows `TP`/`FP`/`FN`/`TN` against the **price** from T34's record, re-derived through `cost.break_even_threshold()` rather than typed; `pick_exemplars()` executes the pre-registered rule (closest to the cell median, ties by lowest row index) and keeps the distances so `validate()` can re-derive the minimum from the scores alone; `value_of()` reads a categorical's level off its one-hot block and formats a numeric, so the figure labels what the model actually saw; `local_profile()` sums each block's **signed** contributions, keeping the aggregation rule and the reference value identical to T37 so local and global are comparable. The cells are built on the served `predict_proba`, and `validate()`'s **16 checks** cover the digest, the C/V identity, the four-cell partition, cell membership, distinctness, the selection rule, per-client additivity, the margin-versus-`predict_proba` identity, the derivation-stability count, `pred_contribs`, the 12/40 partition, the absent leak, the global ranks read back from T37, the 0.5-misrule counter-example, the unread held-out half and the figure | 2026-10-30 |
 | `src/explain.py`, `reports/shap_importance.csv`, `reports/figures/09_shap_summary.png`, `models/shap_global.json` | Phase 8 (**T37**): `load_artifact()` pins T31's digest so a re-fit cannot be explained silently; `design_matrix()` takes the matrix the estimator actually saw; `explain()` returns TreeSHAP values, the margin they must reconstruct, and xgboost's own `pred_contribs` for comparison (the sklearn wrapper rejects a `DMatrix` argument to `predict` in this version, which is why the array goes in and the DMatrix is built only for `pred_contribs`); `feature_table()` sums **signed** contributions per one-hot block and carries the naive per-column alternative as a measured `inflation`; `column_table()` keeps the un-aggregated view the figure's beeswarm needs; `compare_with_t25()` ranks T25's pinned permutation values **within the twelve** and marks gaps of 3+; `directions()` reads which level (or which end of a numeric range) moves a client, with `level_rates()` filling in the measured subscription rate behind each sentence. `validate()`'s **17 checks** cover the digest, the pipeline shape, the absent leak, the 12/40 partition, T25's kept set, additivity, the probability identity, the `pred_contribs` agreement, feature-level additivity, the aggregation bound, the shares, both rank permutations, the pin, the per-column table, the reference-vs-mean distinction, the unread held-out half and the figure. The figure is a beeswarm over 40 columns (**6,000** of **36,168** rows, seed 42, `color_bar=False` because a 0/1 scale is meaningless), the 12-feature importance bar with the naive sum overlaid, and a dumbbell of the two rankings | 2026-10-30 |
+| `src/playbook.py`, `reports/playbook.csv`, `models/playbook.json` | Phase 8 (**T39**): `Recommendation` records carry `action`, `evidence`, `expected`, `check` and `falsifier` with `scope` set on the two that spend the fixed budget, and `evidence` entries are `(record, key path, formatting)` triples resolved by `resolve()`, so a number cannot be written that no record holds; `derived()` computes the ten quantities the document needs - net EUR per 1,000 calls on each half, cost per subscription both ways, coverage, held-out recall and precision, the always-`no` accuracy, the campaign/client split - instead of typing them; `validate()` re-reads every cited figure from disk and compares it with what was written (**46/46**), checks each recommendation carries all five fields and at least two figures, and fails if `duration` is mentioned outside **R4**; `render()` emits the CSV and JSON | 2026-10-30 |
+| `docs/08_recommendations.md` | Criterion 8 (**T39**): the D18 scope paragraph before any number, the eight recommendations as a table of headline figure and falsifier, then one section each with *do / why / what to expect / how to check / what would make it wrong*, the order to act in, six explicit non-promises, and the verification table - the last task of Phase 8 | 2026-10-30 |
 | `docs/08_explainability.md` | Criterion 8 (**T37** and **T38**): the instrument and the artifact it explains, the reference-value table and the 0.0256 gap, the aggregation rule with the measured inflation and the fragmentation cost, the twelve-feature table, eight business-language driver paragraphs each with its level contribution and measured rate, the four disagreements with T25 and why neither ranking is corrected, the 55.7%/44.3% campaign-versus-client split with its three consequences, what the step does not claim, the verification table including the two defects it caught; **§9** (T38) then defines the three cells against the price, states the pre-registered selection rule, explains one client per cell with its twelve contributions and the values behind them, draws what the three say together, and lists the 16-check table | 2026-10-30 |
 | `src/threshold.py`, `models/threshold_choice.json`, `reports/figures/07_threshold_curve.png` | Phase 7 (**T34**): `choose()` takes the training arrays and nothing else - the signature is the guarantee that the held-out half cannot influence the choice; `sweep()`, `capacity_table()` and `sensitivity()` all price their cuts through `cost.expected_campaign_value` rather than re-deriving euros, and `held_out_check()` runs after the cut is fixed and records the held-out optimum so a check can prove it was **not** adopted. `validate()`'s **15 checks** cover the price identity, one out-of-fold score per row, the T30 fold reproduction, the money arithmetic at all 403 points, the plateau, the three rejected cuts, cost per captured subscription, capacity fill, sensitivity monotonicity, training-only provenance, held-out profitability, the figure, and a read-back of the file against the run. The JSON records the decision with its provenance, the five compared cuts, the 403-point curve, the capacity and sensitivity tables, the held-out block and the figure's path and size | 2026-10-30 |
 | `docs/07_threshold.md` | Phase 7 (**T34**): the price and where it comes from, why the choice was made on the training folds, money at five cuts, the flat optimum and which edge the price sits on, capacity when calls are capped, the held-out check, why ROI and net value disagree, the 20-cell sensitivity grid, what the step does not prove, and the verification table with the two defects it caught | 2026-10-30 |
@@ -1988,6 +1984,66 @@ helper needs an interactive sign-in the agent shell cannot drive.
 `models/shap_local.json`, `docs/08_explainability.md`, `PROGRESS.md`.
 **Next:** T39 — the campaign playbook, closing Phase 8.
 
+### 2026-10-30 — Session 41  (T39 complete, Phase 8 closed)
+
+**Completed:** **T39** — `src/playbook.py`, `reports/playbook.csv` (8 rows), `models/playbook.json` and
+`docs/08_recommendations.md`; criterion 8 is **3 / 3** and **Phase 8 is closed**.
+
+**The recommendations are data, not prose.** Each one carries its action, its evidence, what to expect, how
+to check it and what would make it wrong; each figure is a **file plus key path** resolved on every run, so
+**46 figures across nine records** resolve and `validate()` re-reads them from disk before writing anything.
+A number with no record behind it cannot be written at all — the ten quantities the document needs (net per
+1,000 calls on each half, cost per subscription both ways, the held-out recall and precision, the
+always-`no` accuracy, the campaign/client split) are computed by `derived()`, not typed. A check also fails
+if `duration` appears anywhere except **R4**, so the prohibition is enforced by the build.
+
+**The scope sentence comes before the first number.** Calling everyone nets **30,368.00 EUR**; the cut nets
+**43,621.00 EUR**. The model is worth **+13,253.00 EUR (+43.6%)** and **21,302 fewer calls** on a campaign
+that already pays — an improvement to a fixed budget, not a rescue, which is D18's narrow claim and the one
+a reader is most likely to overstate.
+
+**R1 is a data-quality action, and it claims no lift.** `contact=unknown` covers **28.72%** of clients, is
+worth **-1.0150** log-odds, and those clients subscribe at **4.11%** against **14.83%** for `cellular`.
+Filling the field changes how they are *scored*; it does not relabel them today, and the document says so
+in the recommendation rather than in a caveat at the end.
+
+**R3 refuses the obvious optimisation, and shows what it costs.** Calls saved peaks at **18.89%** coverage
+(**15,188** calls) while the price puts the cut at **41.10%**; the **8,033** calls between them still
+convert at **8.96%** for **+2,350.50 EUR**, so pruning to the peak gives up money to save calls the campaign
+was going to make. On the held-out half that same block is **1,547** calls at **7.76%** for **+79.50 EUR**
+— the thinnest recommendation in the playbook, stated as such, because on fresh data the same policy may
+flip.
+
+**The two prohibitions carry the number they decline.** R4: `duration` would add **+0.1788** PR-AUC and
+**20,340.00 EUR** on **4,320** fewer calls, and is recorded when the call ends. R7: the shipped
+configuration leads on **0.4460** PR-AUC against **0.4346** and **0.4008**, tuning moved it **+0.0016**, and
+the re-open trigger is a measurement below **0.4008**. R8 reads `month` as a calendar (**17.55%** of
+importance, March **+1.3736** at **50.90%**, May **-0.2999** at **6.68%** on **30.59%** of the file) with
+the 2008–2010 confound named; campaign-side features carry **55.75%** of importance against **44.25%** for
+the client's own, which is the sentence the whole playbook follows from.
+
+**Verified:** `python -m src.playbook` exits **0** with **12/12** checks, **8** recommendations and **46**
+figures resolved, in **9.4 s**; **78 independent checks** recompute every table cell, every derived euro and
+the always-`no` accuracy from the records **without importing the module**, then trace **63 numeric tokens**
+in the document to those records — **0 unmatched**.
+
+**Five defects, all mine.** (1) R6's **3,192** missed subscribers was read from the **adopted cut's**
+`subscribers_missed` field, where the sentence is about a **0.5** rule; the 0.5 row says **3,192** as well,
+but only after reading the right row — the label was right by luck and is now sourced. (2) Three figures in
+the prose had no record behind them at all (a standard error, a coverage range, a raw row count); each was
+replaced with the recorded equivalent, which is what the record-or-nothing rule exists for. (3) The
+verifier's percentage check asserted **43.63%** where the doc correctly rounds to **43.6%** — a verifier
+bug, fixed by checking the rounding rather than a finer figure. (4) Its token scan matched the fragment
+`253.00` inside `19,253.00`, because a comma thousands separator breaks the number apart; separators are
+now stripped before matching. (5) The doc's ×-rounding of one decimal place hid that same issue on three
+figures, which is why the fix belongs in the tokenizer and not in the prose.
+
+**Blocked:** the push, as recorded in Open Questions item 10 — six commits now local, `origin/main` at
+`caefa9a`, and the credential helper needs an interactive sign-in the agent shell cannot drive.
+**Uncommitted:** `src/playbook.py`, `reports/playbook.csv`, `models/playbook.json`,
+`docs/08_recommendations.md`, `PROGRESS.md`.
+**Next:** T40 — the final report, assembling the nine criteria from the records already on disk.
+
 ---
 
 ## Open Questions / Blockers
@@ -2020,12 +2076,12 @@ data was altered. Any older path references elsewhere should be updated to `data
    will re-pin — but everything in the plan works on 3.11, so this is optional.
 9. **Will the marker run our code?** If the project is graded by running it, the marker's Python
    version must be ≥ 3.11. Nothing in `requirements.txt` works on 3.9 or older.
-10. **BLOCKER — four commits unpushed (item 1 reopened, 2026-10-30, Session 39).** A push failed again,
+10. **BLOCKER — six commits unpushed (item 1 reopened, 2026-10-30, Session 41).** A push failed again,
     and this time with a name rather than a hang: `GIT_TERMINAL_PROMPT=0 GIT_TERMINAL... git push origin
     main` returns `fatal: could not read Username for 'https://github.com': terminal prompts disabled`, so
     the credential helper that worked non-interactively in Session 26 no longer supplies a token to this
-    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **5 commits ahead**: `33fff7a`
-    (T34), `7bce0c1` (T35), `d149f58` (T36), `7612071` (T37) and the T38 commit, per `git log
+    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **6 commits ahead**: `33fff7a`
+    (T34), `7bce0c1` (T35), `d149f58` (T36), `7612071` (T37), the T38 commit and this one, per `git log
     --oneline origin/main..main`. Nothing is lost and the tree is clean; the fix is a
     interactive credential sign-in, which the agent's shell cannot drive. Run `git push origin main` from
     your own terminal, or re-authenticate Git Credential Manager, and this closes.

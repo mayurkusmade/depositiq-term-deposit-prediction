@@ -33,3 +33,7 @@ streamlit==1.52.2
 # --- Notebooks ---------------------------------------------------------------
 jupyterlab==4.6.4
 ipykernel==7.4.0
+
+# --- Deliverables ------------------------------------------------------------
+# The deck (T41). The report's PDF needs no package: it is Chromium printing HTML.
+python-pptx==1.0.2

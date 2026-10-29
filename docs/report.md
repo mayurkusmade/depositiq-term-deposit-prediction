@@ -555,13 +555,16 @@ Prohibition two. Reported once, because it is the metric everyone asks for:
 | Cut | Accuracy | Balanced accuracy |
 |---|---|---|
 | Always "no" | **88.3003%** | 50% |
-| 0.5 | 89.6052% | 61.26% |
+| 0.5 | 89.6052% | 61.28% |
 | Price (0.0750) | **66.42%** | 71.27% |
 
-The always-"no" model is **88.3003%** accurate and finds nobody. The model the bank should use scores
-**66.42%** at its cut — *worse by 22 points* — while finding **77.60%** of subscribers. Accuracy
-maximises at **0.5** on this class balance, which calls **396** clients and misses **801** of the
-1,058. A metric that ranks "call nobody" above "call the right 40%" is not a metric to lead with.
+Every figure in that table is **held out**, from the same 9,043 rows — the cross-validated pair is
+**89.3801%** and **0.6126** and is not mixed into this one. The always-"no" model is **88.3003%**
+accurate and finds nobody. The model the bank should use scores **66.42%** at its cut — *worse by 22
+points* — while finding **77.60%** of subscribers. The most accurate cut here is **0.5**, at **89.6052%**,
+and it still misses **801** of the 1,058. The accuracy-maximising cut on these rows is **89.76%** at
+**0.478284**, which is why 0.5 is carried as a convention rather than as a target. A metric that ranks
+"call nobody" above "call the right 40%" is not a metric to lead with.
 
 ---
 

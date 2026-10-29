@@ -1,13 +1,13 @@
 {
   "task": "T40",
   "report": "docs\\report.md",
-  "words": 7289,
-  "lines": 831,
+  "words": 7346,
+  "lines": 834,
   "figures": 9,
   "distinct_figures": 9,
   "records_cited": 12,
-  "numeric_tokens": 497,
-  "admissible_values": 52848,
+  "numeric_tokens": 503,
+  "admissible_values": 52862,
   "unmatched": [],
   "criteria": [
     {
@@ -56,8 +56,8 @@
       "source": ""
     }
   ],
-  "html_bytes": 64663,
-  "pdf_bytes": 2794041,
+  "html_bytes": 65015,
+  "pdf_bytes": 2796387,
   "pdf_pages": 27,
   "pdf_renderer": "chrome.exe",
   "checks_passed": 30,

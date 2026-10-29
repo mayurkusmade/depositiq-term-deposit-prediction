@@ -402,10 +402,16 @@ def _walk_numbers(node: object, target: set[str]) -> None:
             target.add(_normalise(token))
 
 
-def record_numbers() -> set[str]:
+def record_numbers(exclude: Path | None = None) -> set[str]:
+    """Every number the records hold.
+
+    `exclude` names a second record to skip besides this module's own, which T41 uses so the deck cannot
+    be validated against the numbers it just wrote: a trace that admits its own output proves nothing.
+    """
     allowed: set[str] = set()
+    skip = {RECORD_PATH.name} | ({exclude.name} if exclude is not None else set())
     for path in sorted(config.MODELS_DIR.glob("*.json")):
-        if path.name == RECORD_PATH.name:
+        if path.name in skip:
             continue
         _walk_numbers(json.loads(path.read_text(encoding="utf-8")), allowed)
     for path in sorted(config.REPORTS_DIR.glob("*.csv")):

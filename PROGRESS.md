@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-30 04:05
-**Overall completion:** 87% (40 / 46 tasks)
+**Last updated:** 2026-10-30 21:55
+**Overall completion:** 89% (41 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -17,8 +17,8 @@
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
-| 9 | Documentation & Presentation | 10 | 7 / 13 | T01–T06, T41–T46 |
-| | **Total** | **100** | **40 / 46** | |
+| 9 | Documentation & Presentation | 10 | 8 / 13 | T01–T06, T41–T46 |
+| | **Total** | **100** | **41 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,24 +28,25 @@
 
 ## NEXT TASK
 
-**T41 | Phase 9 – Deliverables | The slide deck.** Open: `docs/presentation.pptx` (or an outline plus an export).
-**Phase 9 is a third done and the report it must summarise now exists**: `docs/report.md` is **7,289 words**
-over **27 rendered pages**, covers all nine criteria in rubric order, and its **497 decimal tokens** all trace
-to a record or a supporting document. **Done when:** at most 15 slides, business-first narrative, and a
-results table taken from the actual runs rather than retyped from the report.
-**Carry in:** five constraints. **(1) ≤ 15 slides, and slide 1 is the decision**, not the dataset: who is
-called, at what price, with what measured gain. **(2) The scope sentence travels with the first euro figure**
-(D18) — p* = **7.50%** sits below the **11.6982%** base rate, so the deck sells a better use of a fixed call
-budget and never a budget cut. **(3) Every slide's number comes from a record**; the deck's figures are
-**43,621.00 EUR** on the training half and **10,988.50 EUR** held out, **41.10%** of the list called for
-**77.90%** of subscribers, top-decile lift **4.3652×**, and PR-AUC **0.4460** cross-validated against
-**0.4616** held out. **(4) The three prohibitions get a slide-time form too** — `duration` never an input,
-accuracy never a headline, `month` never a cause — because a deck is where a nuance is most likely to be
-dropped for space. **(5) The held-out half is reported, not re-used** (D53/D54): no slide may imply a choice
-was made after seeing it.
-**Output:** `docs/presentation.pptx` if a writer is available, otherwise `docs/presentation_outline.md` with
-the per-slide copy and a rendered PDF, and `models/presentation.json` recording which record each number on
-each slide came from.
+**T42 | Phase 9 – Deliverables | The README, and the repo hygiene it implies.** Open: `README.md`.
+**Phase 9 is two thirds done**: the report (**27 pages**) and the deck (**15 slides**) exist, and between them
+they carry the project's whole argument. What does not exist is the thing a marker reaches for first — there
+is no `README.md` at the repository root, so a clean clone has no entry point, no install line, and no map from
+`src/` to the claims in the report. **Done when:** a clean clone can reproduce the results by following the
+README alone.
+**Carry in:** five constraints. **(1) The command sequence must be real** — the sixteen modules, their runtimes
+(`src.train` at **182.3 s** is the longest) and their outputs, in dependency order, taken from `docs/report.md`
+§ 9.4 rather than remembered. **(2) State the Python 3.11 ceiling** (D09): fourteen exact pins, and
+`xgboost 3.2.0` / `shap 0.51.0` are the newest releases that install on 3.11 — the README is where that
+constraint gets discovered, so it belongs at the top and not in a footnote. **(3) The headline figures in the
+README are the same figures** — PR-AUC **0.4460** cross-validated and **0.4616** held out, **43,621.00 EUR** on
+the training half and **10,988.50 EUR** held out, **41.10%** of the list called for **77.90%** of subscribers —
+each traced to a record, because a README is the one document nobody re-runs. **(4) Repo hygiene:** `data/raw/`
+and `data/processed/` stay uncommitted per `.gitignore`, the 19 figures and `docs/presentation.pptx` are
+committed, and no absolute path appears anywhere (D11). **(5) Name what is still missing** — the Streamlit
+demo (T43) and the viva material (T45–T46) do not exist yet, and a README that implies a finished repository
+would be the project's only dishonest document.
+**Output:** `README.md` at the repository root; T44 then follows it as though the repository were new.
 
 ---
 
@@ -134,6 +135,7 @@ stops being evidence |
 
 | D60 | 2026-10-30 | **The playbook is eight recommendations held as data in `src/playbook.py`, each figure a file-plus-key-path pair re-read from disk, ordered data quality → pricing → ranking → instrumentation, with the D18 scope sentence ahead of any euro figure and `duration` permitted only in the recommendation that forbids it** | Three reasons the recommendations are not prose. **A sentence cannot be checked; a record can.** Every one of the **46** cited figures is resolved by `resolve()` and re-read in `validate()`, so a mistyped key path, a stale model or a number carried over from an older run fails the command rather than being marked — and a figure with no record behind it cannot be written at all, which is what the `derived()` function is for: the ten quantities the document needs (net per 1,000 calls on each half, cost per subscription both ways, held-out recall and precision, the always-`no` accuracy, the campaign/client split) are computed from records, not dictated. **Eight, not the required six**, because two of the eight are prohibitions rather than actions - R4 on `duration` and R7 against re-opening the feature set - and a prohibition is only credible next to the number it declines: **+0.1788** PR-AUC and **20,340.00 EUR** that would be banked by a model that has seen the answer, and a **0.4460** baseline that a future re-tune must beat to be worth doing. **The order is by leverage, not by importance**: R1 first because `contact=unknown` covers **28.72%** of clients at a **-1.0150** contribution, so one required field changes how nearly three clients in ten are scored, and no other recommendation touches that many rows for so little work; R5 second because it decides the cut, and every euro in the document is linear in an **assumed** V = **20.00 EUR**; R2/R3 after it, because how the list is worked only matters once the price is real. **Why R3 is written as a refusal:** calls saved peaks at **18.89%** coverage while the price puts the cut at **41.10%**, and the block between them converts at **8.96%** for **+2,350.50 EUR** - profitable, so pruning to the peak is an optimisation that loses money. The honest form is therefore "do not stop where calls saved peaks", with the held-out half stated beside it: **1,547** calls at **7.76%** for **+79.50 EUR** is a rounding error, so on fresh data the same policy may well flip, and the recommendation says so. **Why the scope sentence leads:** p* = **7.50%** sits below the **11.6982%** base rate, so the campaign already pays; the measured gain is **+13,253.00 EUR (+43.6%)** on **21,302 fewer calls**, which is a fixed-budget improvement. A playbook that omitted this would license a spend cut the model never justified (D18). **Scope:** one classic telemarketing campaign, prices assumed, no causal month effect, three clients and eight recommendations are not a validation set |
 | D61 | 2026-10-30 | **The final report is checked three ways — structure, coverage, provenance — and rendered to PDF by a headless browser already on the machine, so the deliverable adds no dependency** | Three reasons the report is generated rather than typed. **Its risk is transcription, not arithmetic.** Every other document was written beside the module that computed its figures; this one synthesises twelve records and eleven documents, so a misquoted 0.4460 is the failure mode and no test would ever run again to catch it. The provenance check therefore parses **every decimal in the document** — **497 tokens** — and requires each to exist in a `models/*.json` record, a `reports/*.csv` column, or a supporting document; thousands separators are stripped before matching because a comma splits `43,621.00` into a fragment that matches nothing, which is the same tokenizer defect T39 hit. **It caught three real errors, and they were mine:** `77.87%` reached subscribers in two places where the records say **77.90%** (3,296 / 4,231) — copied from an older progress note rather than from `lift_results.json`, which is exactly the drift the check exists for; and a pair of balance-band rates (**5.36%**, **16.44%**) that appear in no record and no document, replaced with the quoted **−0.00023 ± 0.00085** ablation and the **3,001 rows (8.30%)** of negative balances that *are* on file. **The four constraints are asserted, not trusted:** the D18 scope sentence must precede the first `EUR` total (it does, at byte 1,790 against 2,281), the price assumptions must be declared in the same breath, and each of the three prohibitions must appear inside the section where its result is presented — a prohibition stated only in the summary is one a reader will not connect to anything. **The renderer is deliberately small and the PDF is not a new dependency:** a ~120-line markdown subset (headings, tables, lists, code, images, bold/italic) and Chromium's own `--print-to-pdf`, which exists on every Windows and macOS machine — so the deliverable **27 pages, 2,794,041 bytes, 9 embedded figures** — is reproducible without adding a single pin to `requirements.txt`. A missing browser is reported as a failed check, never as a silent HTML-only run. **Scope:** the report selects and orders evidence; it computes nothing new, and its only derived claims (**3.95×** the base rate, the counts behind each percentage) are recomputed by the independent verifier from the records |
+| D62 | 2026-10-30 | **The deck is generated from a fifteen-slide `SPEC` by `src/deck.py` with `python-pptx==1.0.2`, and validated against the saved `.pptx` rather than the objects that built it, with the figure column widened to 6.34 in and every slide's citations checked to exist** | Three reasons. **The risk here is layout, which no test of the data would catch.** The report's risk was transcription; a deck's is a text box that overflows, a caption that runs past the bottom edge, or a chart shrunk until its labels are decoration — so the checks read coordinates, font sizes and text back out of the saved package (**24/24** in module, **38** independently through the XML) instead of trusting the code that placed them. That discipline found **two inherited errors** in `docs/report.md` § 7.6: a held-out accuracy beside a cross-validated balanced accuracy (**61.26%** where the held-out pair says **61.28%**), and a claim that accuracy maximises at **0.5** when the record's own peak is **89.76%** at **0.478284**. Both are repaired in the report and the deck, and they are the trace's blind spot made concrete: a token-level trace admits a number that appears *anywhere* in the documents, so a figure lifted from the wrong column passes it — which is why the deck additionally checks each slide against the **specific** record it cites. **Fifteen slides, ordered by decision rather than by rubric:** the answer and its scope, the decision, the price, then the evidence, then the eight recommendations — a deck that walks the nine criteria in order is a report read aloud. **The figure column is 6.34 inches, not 5.8:** the first build was exported to PNG through PowerPoint and looked at, and the project's multi-panel charts were unreadable at an even split, so the split, the baseline alignment and the type sizes were changed in response — a layout assertion that was never rendered is a guess. **Scope:** the deck selects and compresses; it computes nothing, and every number on it is the report's, traced to the same records. |
 
 ---
 
@@ -201,7 +203,7 @@ Tick only after the deliverable is verified to exist and run.
 
 ### Phase 9 — Deliverables
 - [x] T40 | Rubric 9 | Write the final report | Output: `docs/report.md` (+ PDF) | **done 2026-10-30** (`src/report.py` → `docs/report.md`, `docs/report.html`, `docs/report.pdf` and `models/report.json`; **7,289 words over 27 rendered pages**, covering the nine criteria **in rubric order**, each section naming the document or module that carries its evidence; **9 figures embedded**, every one a file under `reports/figures/` that a record already produced; **12 records cited and re-parsed**; and **497 decimal tokens** all matched against a value in a `models/*.json` record, a `reports/*.csv` column or one of the eleven supporting documents — **0 unmatched**; the **D18 scope sentence sits at byte 1,790, before the first `EUR` total at 2,281**, with the price assumptions declared in the same paragraph; the three prohibitions are asserted where their results are (`duration` in §5.4, accuracy in §7.6, causal `month` in §8.1); `python -m src.report` exits **0** with **30/30** checks in **3.4 s**, and **45 independent checks** recompute the headline euros from the records without importing the module — every one of the fourteen quoted totals matched to the cent, every percentage re-derived from its counts; **three defects caught by that trace and fixed** — `77.87%` twice where the record says **77.90%**, and a balance-band pair that existed in no record at all)
-- [ ] T41 | Rubric 9 | Build the slide deck | Output: `docs/presentation.pptx` (or outline + export) | Done when: ≤ 15 slides, business-first narrative, results table taken from actual runs
+- [x] T41 | Rubric 9 | Build the slide deck | Output: `docs/presentation.pptx`, `src/deck.py`, `models/deck.json` | **done 2026-10-30** (15 slides, business-first: the answer and its scope, the decision, the price, then the evidence, then the eight recommendations; **24/24** in-module checks and **38 independent** ones that open the package as a zip and parse its XML without python-pptx, recomputing **3,296 × 20 − 14,866 × 1.5 = 43,621.00 EUR** from confusion counts and confirming the six embedded charts are byte-identical to `reports/figures/`; **157** decimal tokens trace to a record or document and the **33** slide-foot citations are each verified to exist; geometry, type size and text overflow are checked against the **saved** file; all **15** slides were exported to PNG through PowerPoint and inspected, which is how charts too small to read at 5.8 in were caught; **two inherited report defects found and fixed** — § 7.6 paired a held-out accuracy with a CV balanced accuracy (**61.26%** → **61.28%**) and claimed accuracy peaked at 0.5 when the record's peak is **89.76%** at **0.478284**)
 - [ ] T42 | Rubric 9 | Finalise README and repo hygiene | Output: `README.md` | Done when: a clean clone can reproduce the results by following the README alone
 - [ ] T43 | Rubric 9 | Build the interactive demo | Output: `app/app.py` (Streamlit) | Done when: it runs locally, accepts client attributes, and returns a probability with the top SHAP drivers
 - [ ] T44 | Rubric 9 | End-to-end rerun from a clean clone | Output: verification checklist recorded in `PROGRESS.md` | Done when: fresh clone + install + run reproduces the reported metrics
@@ -2091,6 +2093,67 @@ traced.
 
 ---
 
+### 2026-10-30 — Session 43  (T41 complete, Phase 9 two thirds done)
+
+**Completed:** **T41** — `src/deck.py`, `docs/presentation.pptx` (**15 slides**, 1,342,750 bytes, sha256
+`7ffd11f8…`) and `models/deck.json`; criterion 9 is **8 / 13**.
+
+**The slides are data, and the numbers are checked after the file is saved.** `SPEC` holds the fifteen slides as
+text, tables and figure names; the build writes the package and then reopens it, so every check runs against the
+bytes PowerPoint will open rather than against the objects that produced them. **157 decimal tokens** trace to a
+record or a supporting document; the **33** citations printed at the foot of the slides are each verified to
+exist; and geometry — inside the slide, above the source line, no text block taller than its box, no type
+below 9 pt — is read back out of the file, so an overflowing text box fails the command instead of being
+discovered in the presentation.
+
+**Business-first, in the order a decision needs it.** Cover → the answer and its scope → the decision → the
+price → the data → what the campaign already gets wrong → `duration` → features → models → the operating
+point → held out → lift → accuracy → what drives the score → eight recommendations. The D18 scope
+sentence is the **second bullet of slide 2**, before the first euro total (byte 161 against 294), and each of the
+three prohibitions has its own slide rather than a footnote — a deck is where a nuance is most likely to be
+dropped for space.
+
+**Two defects the deck inherited from the report, caught by its verifier.** (1) § 7.6 of `docs/report.md` put
+a **held-out** accuracy (**89.6052%**) beside a **cross-validated** balanced accuracy (**61.26%**); the held-out
+pair is **89.6052% / 61.28%** and the row now says so, with the CV pair (**89.3801%**, **0.6126**) named as the
+other table instead of being mixed into this one. (2) The same paragraph claimed accuracy "maximises at **0.5**",
+which the record's own `peak_on_held_out` contradicts: the accuracy-maximising cut is **89.76%** at **0.478284**.
+Both are corrected in the report and the deck, and `python -m src.report` was re-run to rebuild the 27-page PDF
+around the fix. This is a defect class rather than an incident: a token-level trace admits a number that appears
+*anywhere* in the documents, so a figure lifted from the wrong column passes it. The deck's verifier checks each
+slide against the **specific** record it cites, which is what caught both.
+
+**Four defects in my own code.** A caption box was sized as figure-plus-caption, which pushed six captions off
+the bottom of their slides. The geometry check was **vacuous** — it iterated the wrong XML namespace and found
+**8** shapes where there are **112**, so it was passing on nothing. The determinism check passed by luck:
+python-pptx stamps every zip member with the clock, so two builds in the same second match and two a second
+apart do not; it now compares **package parts** (**72**, 0 differing). And a text helper was handed shapes where
+it expected a slide.
+
+**The layout was looked at, not assumed.** All fifteen slides were exported to PNG through PowerPoint's COM
+interface and inspected, which is how two real problems surfaced: the project's multi-panel charts sat in a
+5.8-inch column where the panel titles were unreadable, and a lone figure was centred so it floated below the
+baseline of the text beside it. Figure columns now take **6.34** of the 11.93 available inches, figures are
+top-aligned, and body type went up one point. `pywin32` is used for that inspection only and is **not** a project
+dependency.
+
+**One new pin, and it is the one D10 reserved.** `python-pptx==1.0.2` under a Deliverables heading; the PDF still
+needs no package at all, because it is Chromium printing HTML.
+
+**Verified:** `python -m src.deck` exits **0** with **24/24** checks in **1.6 s** (two builds, since determinism
+is checked by rebuilding); **38 independent checks** open the `.pptx` as a zip and parse its XML without
+python-pptx, recompute every euro from confusion counts (**3,296 × 20 − 14,866 × 1.5 = 43,621.00 EUR**),
+re-derive the SHAP shares from `mean_abs`, and confirm the six embedded images are **byte-identical** to
+`reports/figures/*.png`.
+
+**Blocked:** the push, as Open Questions item 10 — now **eight** commits local.
+**Uncommitted:** `src/deck.py`, `docs/presentation.pptx`, `models/deck.json`, `requirements.txt`, `src/report.py`,
+`docs/report.md`, `docs/report.pdf`, `models/report.json`, `PROGRESS.md`.
+**Next:** T42 — the README. Every other deliverable is downstream of it, and T44's clean-clone rerun cannot
+begin until it exists.
+
+---
+
 ## Open Questions / Blockers
 
 1. ~~**BLOCKER — GitHub push pending.**~~ **Resolved 2026-10-27 (Session 18).** The push of `8278fae`
@@ -2121,12 +2184,12 @@ data was altered. Any older path references elsewhere should be updated to `data
    will re-pin — but everything in the plan works on 3.11, so this is optional.
 9. **Will the marker run our code?** If the project is graded by running it, the marker's Python
    version must be ≥ 3.11. Nothing in `requirements.txt` works on 3.9 or older.
-10. **BLOCKER — six commits unpushed (item 1 reopened, 2026-10-30, Session 41).** A push failed again,
+10. **BLOCKER — eight commits unpushed, this one included (item 1 reopened 2026-10-30, Session 41; still open at Session 43).** A push failed again,
     and this time with a name rather than a hang: `GIT_TERMINAL_PROMPT=0 GIT_TERMINAL... git push origin
     main` returns `fatal: could not read Username for 'https://github.com': terminal prompts disabled`, so
     the credential helper that worked non-interactively in Session 26 no longer supplies a token to this
-    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **6 commits ahead**: `33fff7a`
-    (T34), `7bce0c1` (T35), `d149f58` (T36), `7612071` (T37), the T38 commit and this one, per `git log
+    shell. `origin/main` is at **`caefa9a`** (T33) and the local branch is **8 commits ahead**: `33fff7a`
+    (T34), `7bce0c1` (T35), `d149f58` (T36), `7612071` (T37), the T38 commit, the T39–T41 commits and this one, per `git log
     --oneline origin/main..main`. Nothing is lost and the tree is clean; the fix is a
     interactive credential sign-in, which the agent's shell cannot drive. Run `git push origin main` from
     your own terminal, or re-authenticate Git Credential Manager, and this closes.

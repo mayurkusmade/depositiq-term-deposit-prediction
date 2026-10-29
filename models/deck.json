@@ -1,0 +1,44 @@
+{
+  "slides": 15,
+  "layout": [],
+  "figures": [
+    "slide 3",
+    "slide 6",
+    "slide 8",
+    "slide 10",
+    "slide 12",
+    "slide 14"
+  ],
+  "titles": [
+    "Which clients to call today",
+    "Spend the same calls better, not fewer",
+    "Seven calls in eight are wasted",
+    "The cut is a price, not a parameter",
+    "No missing values, and that is the problem",
+    "The fourth call costs more than it earns",
+    "The column that doubles the money and must not be used",
+    "Seventeen features became twelve, and the loss was measured",
+    "One harness, seven builds, and a fix that made it worse",
+    "The cut is the price the bank already pays",
+    "On clients it never saw, the ranking holds",
+    "The top tenth of the list converts 4.5 times the base rate",
+    "The best model by accuracy finds nobody",
+    "The top driver is a blank field",
+    "Eight actions, each with the number that would prove it wrong"
+  ],
+  "bytes": 1342750,
+  "sha256": "85a84a4a9a6a9e4fe811be9bf06e84198608e33784bb5a419ca67f65db39bc12",
+  "slide_count": 15,
+  "max_allowed": 15,
+  "figures_planned": [
+    "01_target_distribution.png",
+    "04_campaign_vs_target.png",
+    "06_feature_importance.png",
+    "07_threshold_curve.png",
+    "08_lift_gain.png",
+    "09_shap_summary.png"
+  ],
+  "generator": "src/deck.py",
+  "checks": 24,
+  "failures": []
+}

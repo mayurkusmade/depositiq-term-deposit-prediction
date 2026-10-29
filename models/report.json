@@ -7,7 +7,7 @@
   "distinct_figures": 9,
   "records_cited": 12,
   "numeric_tokens": 490,
-  "admissible_values": 53121,
+  "admissible_values": 53205,
   "unmatched": [],
   "criteria": [
     {
@@ -57,7 +57,7 @@
     }
   ],
   "html_bytes": 65278,
-  "pdf_bytes": 2798478,
+  "pdf_bytes": 2798473,
   "pdf_pages": 27,
   "pdf_renderer": "chrome.exe",
   "checks_passed": 30,

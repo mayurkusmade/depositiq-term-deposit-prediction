@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-30 23:10
-**Overall completion:** 96% (44 / 46 tasks)
+**Last updated:** 2026-10-30 23:55
+**Overall completion:** 98% (45 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -17,8 +17,8 @@
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
-| 9 | Documentation & Presentation | 10 | 11 / 13 | T01–T06, T41–T46 |
-| | **Total** | **100** | **44 / 46** | |
+| 9 | Documentation & Presentation | 10 | 12 / 13 | T01–T06, T41–T46 |
+| | **Total** | **100** | **45 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,15 +28,14 @@
 
 ## NEXT TASK
 
-**T45 | Phase 10 – Viva Preparation | Viva Q&A bank.** Output: `docs/viva_qa.md`.
-**Done when:** at least **25 likely questions** are answered, and between them they cover **every rubric
-criterion** — not just the modelling chapters. Each answer should name the record or document that holds
-its evidence, so a question about a decimal can be answered by opening the file rather than re-deriving
-the number from memory.
-**Carry in:** the report, deck, playbook and README are the source of the answers; do not introduce a new
-figure that no record holds. The three prohibitions (`duration`, accuracy, causal `month`) and the
-D18 scope sentence should each have a question that forces them into the open, because they are the
-points a viva is most likely to probe.
+**T46 | Phase 10 – Viva Preparation | Demo script and rehearsal checklist.** Output: `docs/demo_script.md`.
+**Done when:** a **five-minute walkthrough** is scripted, with a rehearsal checklist, and **every claim
+traces to a saved figure or metric** — the script may point at a number, but it may not introduce one.
+**Carry in:** `app/app.py` and `src/demo.py` already score the default client and the three T38 exemplars;
+the script should drive the demo, not replace it. The report, deck, playbook and viva bank are the source
+of every sentence, and the three prohibitions and the D18 scope sentence belong in the spoken track, not
+only in the written one. Rehearse the failure paths too: what to say if the app is slow, if a number is
+challenged, or if the examiner asks for a file rather than a slide.
 
 ---
 
@@ -132,6 +131,8 @@ stops being evidence |
 
 | D65 | 2026-10-30 | **The clean-clone rerun is the only test of the README's claim, and what it checks is the artifacts rather than the prose: a fresh clone at the pushed commit, a fresh venv, the 14 pins, and the 22 commands in the README's own order, with every rebuilt record compared to the committed one** | Three reasons. **A command list can be internally consistent and still fail in order.** `duration_compare` reads `models/best_params.json` (from `src.tune`) and `models/threshold_choice.json` (from `src.threshold`), so the README's original position before both was wrong in a way no static check could see; the clone failed at 4.5 s with `FileNotFoundError`, the order moved after `lift`, and `src.readme` now enforces **18** constraints including both dependencies. **A runtime is not a result.** `docs/report.md` and the README quoted exact seconds from one machine; when the clone's `src.train` took **188.1 s** against the quoted **182.3 s**, the report's provenance check refused the decimal — correctly, because a marker on another laptop will get a third number. Exact seconds now live only in each record's `elapsed_seconds`, the documents use qualitative bands, and the README's **eight-to-ten-minute** claim is checked against the sum of the 12 records (**562.0 s = 9.4 min** in the clone) rather than a rounded anecdote. **A figure is an output too.** The SHAP values were identical across runs but `09_shap_summary.png` was not, because `shap.summary_plot` jitters with the global NumPy RNG; passing `rng=PLOT_SEED` made two fresh runs byte-identical (**B0EF0026…**, **455,211 bytes**), which is what lets the figure be compared at all. **What the comparison showed:** all **5** joblibs, all **4** processed CSVs, all **6** report CSVs and **7 of 8** figures byte-identical; every substantive JSON metric identical after NaN handling; the remaining differences are the records that cite the edited prose (`deck.json`, `readme.json`, `report.json`), the regenerated report/deck files, and the newly seeded figure. **Two clean-room mistakes were mine, not the repository's:** deleting `docs/report.md` as if it were generated broke `src.report` (it is the source the renderer reads, so it was restored from `HEAD`), and treating a missing browser as skippable would have hidden a failed deliverable — the machine had one, so `src.report` rendered **30/30** and the PDF was produced. **Scope:** one clone on one Windows machine at one commit; the byte-identity result is evidence of determinism on that stack, not a promise across every OS and BLAS build. |
 
+| D66 | 2026-10-30 | **The viva bank is a document plus a validator (`src/viva.py`): 37 questions covering all nine rubric criteria, each with an answer and an evidence line, and every decimal traced to a record or an upstream document — with the bank and the demo script excluded from its own sources** | Three reasons. **A viva is a different reading task from a report.** A report can be skimmed; an answer has to survive a follow-up, so the bank carries four questions per criterion, an evidence line per question, and an *If pressed* follow-up where the obvious answer is incomplete. **Coverage is a property of the bank, not of the author's memory.** The validator parses the nine sections, counts the questions per criterion, checks sequential numbering and the 25-question floor, and fails if a criterion is thin — the first draft had only three questions in criterion 9, which is exactly the chapter a viva is most likely to probe. **A number without a record is a liability in a viva, not a rhetorical flourish.** Every decimal is matched against `models/*.json`, `reports/*.csv`, the report, or one of the eleven analysis documents; the bank and the downstream demo script are excluded so it cannot quote itself, and the first draft's three untraceable EDA rates were replaced with figures that a record holds. **Scope:** 37 questions, 8,061 words, 59 links, 364 tokens; 33/33 checks. The bank is not a script to memorise — it is an index to the files that win the argument. |
+
 ---
 
 ## Task Checklist
@@ -204,7 +205,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T44 | Rubric 9 | End-to-end rerun from a clean clone | Output: verification checklist recorded in `PROGRESS.md` | **done 2026-10-30** (a **fresh clone of the pushed repo** at `c1e70b6`, **105 tracked files**, Python **3.11.9**, a fresh `.venv`, all **14 pins** installed, `src.config.ROOT` resolving to the clone and no `.venv`/bytecode tracked; the **22 documented commands** were run in README order and all exit **0** after the fixes below; **`src.report` 30/30**, **`src.deck`** passes, **`src.demo` 22/22**, **`src.readme` 34/34** in the clone; the rebuilt artifacts match `HEAD`: **all 5 joblibs, all 4 processed CSVs, all 6 report CSVs and 7 of 8 figures byte-identical**, every substantive JSON metric identical after NaN handling, with differences only in the records that cite the edited prose (`deck.json`, `readme.json`, `report.json`), the regenerated report/deck files, and the now-seeded SHAP figure; **four defects found and fixed** — the README ran `duration_compare` before `tune` and `threshold` even though it reads both records, `docs/report.md` quoted machine-specific seconds that its own provenance check could not re-find, `09_shap_summary.png` was unseeded inside `shap.summary_plot`, and a clean-room script had deleted `docs/report.md` as if it were generated when it is a source document; the full sequence took **about 15.4 minutes** on this machine, with the **12 recorded steps summing to 562.0 s = 9.4 min**, inside the README's corrected **eight-to-ten-minute** band)
 
 ### Phase 10 — Viva Preparation
-- [ ] T45 | Rubric 9 | Viva Q&A bank | Output: `docs/viva_qa.md` | Done when: 25+ likely questions are answered, covering every rubric criterion
+- [x] T45 | Rubric 9 | Viva Q&A bank | Output: `docs/viva_qa.md` | **done 2026-10-30** (`docs/viva_qa.md` + `src/viva.py` + `models/viva.json`; **37 questions**, at least four for each of the nine rubric criteria (criterion 7 carries five), every question with an **Answer**, an **Evidence** line naming a record, document or module, and where useful an **If pressed** follow-up; the bank opens with a coverage map and closes with five numbers to know cold, the three prohibitions in one line each and the D18 scope sentence; **8,061 words**, **59 links**, every relative link resolves; the validator checks the nine sections, sequential numbering, the 25-question floor, four-per-criterion coverage, answer and evidence length, the three prohibitions, the scope sentence, the price identity `0.0750 = C/V = 1.50/20.00`, every link, and **every decimal**; **364 decimal tokens** all trace to a `models/*.json` record, a `reports/*.csv` column, the report or one of the eleven analysis documents, with `viva_qa.md` and `demo_script.md` excluded from the sources so the bank cannot quote itself; **33/33 checks** pass and `python -m src.viva` exits **0**)
 - [ ] T46 | Rubric 9 | Demo script and rehearsal checklist | Output: `docs/demo_script.md` | Done when: a 5-minute walkthrough is scripted and every claim traces to a saved figure or metric
 
 ---
@@ -213,6 +214,7 @@ Tick only after the deliverable is verified to exist and run.
 
 | File | Contents | Created |
 |---|---|---|
+| `docs/viva_qa.md`, `src/viva.py`, `models/viva.json` | Phase 10 (**T45**): the viva bank and its validator. The document holds **37 questions** - four per rubric criterion, five for evaluation - each with an **Answer**, an **Evidence** line naming a record, document or module, and an optional **If pressed** follow-up; it opens with a coverage map and closes with five numbers to know cold, the three prohibitions in one line each and the D18 scope sentence. `src/viva.py` parses the nine sections, checks sequential numbering, the 25-question floor, four-per-criterion coverage, answer and evidence length, the prohibitions, the scope sentence, the price identity `0.0750 = C/V = 1.50/20.00`, and every relative link; its provenance trace admits numbers from `models/*.json`, `reports/*.csv`, the report and the eleven analysis documents, excluding `viva_qa.md` and `demo_script.md` so the bank cannot quote itself. **33/33 checks** pass over **364** decimal tokens | 2026-10-30 |
 | `src/demo.py`, `app/app.py`, `models/demo.json` | Phase 9 (**T43**): the interactive demo. `src/demo.py` is the tested core - `load_model()` loads `models/final_model.joblib` only after its sha256 and size match `models/final_model.json`; `training_profile()` reads the categorical vocabulary and median/mode defaults from the processed training half through `split.load_split`; `client_frame()` turns **11 business facts** into the **12 shipped features** using `features.engineer`'s own derivations (`previous > 0` flag, the cap, `balance_arsinh`, `campaign_bucket`, `recency_band` with the explicit `never` level); `shipped_frame()` selects `select.shipped_features()` in order; `explain_client()` scores with `predict_proba`, builds the 40-column matrix, aggregates TreeSHAP by **signed sum within each one-hot block** (D58) and sorts by absolute contribution; `should_call()` / `expected_value()` price the call at **C = 1.50 EUR / V = 20.00 EUR** and compare against **0.0750 = C/V**, never 0.5; `example_clients()` rebuilds the three T38 exemplars from `models/shap_local.json` + the training split. `validate()`'s **22 checks** cover the artifact digest, the 12/40 shape, the price identity, the 0.5 counter-example, the EV arithmetic, the labelled assumptions, the absent `duration`/`pdays`/`y`, the categorical defaults, the shipped column order, the 12-feature partition of 40 columns, additivity, the margin-versus-probability identity, the driver sort, the finite score, the three exemplars' scores and cells, their additivity, the app compiling, and the unread held-out half. `app/app.py` is the thin Streamlit UI: an 11-field sidebar, three exemplar presets, live score, decision and EV, the top-five and all-twelve driver tables, a bar chart, the model/assumptions expanders and the sensitivity grid | 2026-10-30 |
 | `src/local_explain.py`, `reports/shap_local.csv`, `reports/figures/10_shap_local.png`, `models/shap_local.json` | Phase 8 (**T38**): `cell_of()` labels rows `TP`/`FP`/`FN`/`TN` against the **price** from T34's record, re-derived through `cost.break_even_threshold()` rather than typed; `pick_exemplars()` executes the pre-registered rule (closest to the cell median, ties by lowest row index) and keeps the distances so `validate()` can re-derive the minimum from the scores alone; `value_of()` reads a categorical's level off its one-hot block and formats a numeric, so the figure labels what the model actually saw; `local_profile()` sums each block's **signed** contributions, keeping the aggregation rule and the reference value identical to T37 so local and global are comparable. The cells are built on the served `predict_proba`, and `validate()`'s **16 checks** cover the digest, the C/V identity, the four-cell partition, cell membership, distinctness, the selection rule, per-client additivity, the margin-versus-`predict_proba` identity, the derivation-stability count, `pred_contribs`, the 12/40 partition, the absent leak, the global ranks read back from T37, the 0.5-misrule counter-example, the unread held-out half and the figure | 2026-10-30 |
 | `src/explain.py`, `reports/shap_importance.csv`, `reports/figures/09_shap_summary.png`, `models/shap_global.json` | Phase 8 (**T37**): `load_artifact()` pins T31's digest so a re-fit cannot be explained silently; `design_matrix()` takes the matrix the estimator actually saw; `explain()` returns TreeSHAP values, the margin they must reconstruct, and xgboost's own `pred_contribs` for comparison (the sklearn wrapper rejects a `DMatrix` argument to `predict` in this version, which is why the array goes in and the DMatrix is built only for `pred_contribs`); `feature_table()` sums **signed** contributions per one-hot block and carries the naive per-column alternative as a measured `inflation`; `column_table()` keeps the un-aggregated view the figure's beeswarm needs; `compare_with_t25()` ranks T25's pinned permutation values **within the twelve** and marks gaps of 3+; `directions()` reads which level (or which end of a numeric range) moves a client, with `level_rates()` filling in the measured subscription rate behind each sentence. `validate()`'s **17 checks** cover the digest, the pipeline shape, the absent leak, the 12/40 partition, T25's kept set, additivity, the probability identity, the `pred_contribs` agreement, feature-level additivity, the aggregation bound, the shares, both rank permutations, the pin, the per-column table, the reference-vs-mean distinction, the unread held-out half and the figure. The figure is a beeswarm over 40 columns (**6,000** of **36,168** rows, seed 42, `color_bar=False` because a 0/1 scale is meaningless), the 12-feature importance bar with the naive sum overlaid, and a dumbbell of the two rankings | 2026-10-30 |
@@ -2321,6 +2323,46 @@ tree and the affected records regenerated there.
 **Uncommitted:** `README.md`, `src/readme.py`, `docs/report.md`, `src/explain.py`, the regenerated records
 and figures, and `PROGRESS.md`.
 **Next:** T45 — the viva Q&A bank.
+
+---
+
+### 2026-10-30 — Session 47  (T45 complete)
+
+**Completed:** **T45** — the viva Q&A bank; criterion 9 is **12 / 13** and the project is **45 / 46**.
+
+**The bank is written for a conversation, not for a shelf.** `docs/viva_qa.md` holds **37 questions** —
+four for each of the nine rubric criteria, five for evaluation because that is where a marker pushes
+hardest — each with a short **Answer**, an **Evidence** line naming the record, document or module that
+holds the number, and, where the first answer is incomplete, an **If pressed** follow-up. It opens with a
+coverage map so a reader can see the nine criteria at a glance, and closes with five numbers to know cold,
+the three prohibitions in one line each, and the D18 scope sentence. The document is **8,061 words** and
+**59 links**; every relative link resolves.
+
+**The validator is the point.** `src/viva.py` parses the document rather than trusting it: the nine
+criterion sections and their order, sequential question numbering, the 25-question floor, at least four
+questions per criterion, an Answer and an Evidence line for every question, minimum answer and evidence
+length, the three prohibitions, the D18 scope sentence, the price identity **0.0750 = C/V = 1.50 / 20.00**,
+every relative link, and **every decimal**. The provenance trace admits numbers from `models/*.json`,
+`reports/*.csv`, the report and the eleven analysis documents, and deliberately excludes `viva_qa.md`
+itself and the downstream `demo_script.md`, so the bank cannot admit a number by quoting itself. **364
+decimal tokens** all trace; **33/33 checks** pass and `python -m src.viva` exits **0**.
+
+**Two defects were found while writing it, and both were fixed rather than excused.** The first draft had
+**36 questions** but only **three** in criterion 9 — the validator's coverage check caught it, and Q37 on
+the interactive demo brought that criterion to four. Three EDA rates in Q10 (**6.90% → 16.61%** and
+**14.60% → 3.93%**) were not present in any upstream source; they were replaced with the qualitative claim
+that the rate varies by more than ten percentage points, which the records do support, rather than
+widening the source list until the numbers passed. `src/report.py` now excludes both downstream documents
+from its own `SOURCE_DOCS`, so adding the bank cannot make the report's provenance check circular.
+
+**Verified:** `python -m src.viva` exits **0** with **33/33** checks; **37** questions, per-criterion
+counts **4/4/4/4/4/4/5/4/4**, **8,061** words, **59** links, **364** numeric tokens, **53,110** admissible
+values. The record is `models/viva.json`.
+
+**Blocked:** none.
+**Uncommitted:** `docs/viva_qa.md`, `src/viva.py`, `models/viva.json`, `src/report.py`, `README.md`,
+`PROGRESS.md`, and the regenerated report/deck/readme records.
+**Next:** T46 — the five-minute demo script and rehearsal checklist.
 
 ---
 

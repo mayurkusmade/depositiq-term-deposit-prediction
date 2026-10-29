@@ -12,7 +12,7 @@ model, and reports what the ranking is worth in euro — with every figure trace
 | **Target** | `y` — did this client subscribe to a term deposit? (5,289 of 45,211 did — 11.70%) |
 | **Model** | XGBoost, 12 features / 40 matrix columns, tuned, no imbalance treatment |
 | **Operating cut** | **0.0750** — the price of a call (`C/V`), not a fitted number |
-| **Status** | **44 of 46 tasks complete**; see [What is not here yet](#what-is-not-here-yet) |
+| **Status** | **45 of 46 tasks complete**; see [What is not here yet](#what-is-not-here-yet) |
 | **Python** | **3.11** — required, not preferred (see [Quick start](#quick-start)) |
 
 ---
@@ -134,6 +134,7 @@ python -m src.report            # report.md -> report.pdf (needs Chrome, Edge or
 python -m src.deck              # presentation.pptx
 python -m src.demo              # headless checks for the Streamlit demo core
 python -m src.readme            # re-checks this README against the repository
+python -m src.viva              # re-checks the viva bank and traces every decimal
 ```
 
 Two further modules are utilities rather than pipeline steps: `python -m src.config` prints every resolved
@@ -156,13 +157,13 @@ byte-identical figures.
 depositiq-term-deposit-prediction/
 ├── data/raw/              bank-full.csv, bank.csv, bank-additional/, bank-names.txt
 ├── data/processed/        train.csv, test.csv (+ the 20-feature variant)
-├── src/                   25 modules, each runnable as `python -m src.<name>`
+├── src/                   26 modules, each runnable as `python -m src.<name>`
 ├── notebooks/             01_data_understanding, 02_preprocessing, 03_eda
 ├── models/                artifacts + the JSON record behind every claim
 ├── reports/               6 CSV tables + 19 figures
-├── docs/                  the report, the deck, and 11 supporting documents
+├── docs/                  the report, the deck, and 12 supporting documents
 ├── app/                   app.py - the Streamlit demo (T43)
-└── PROGRESS.md            46-task checklist, 65-entry decisions log, session log
+└── PROGRESS.md            46-task checklist, 66-entry decisions log, session log
 ```
 
 Start with the two deliverables, then follow whichever thread you need:
@@ -179,6 +180,7 @@ Start with the two deliverables, then follow whichever thread you need:
 | [docs/07_threshold.md](docs/07_threshold.md) · [docs/07_lift.md](docs/07_lift.md) | the operating cut and the ranking's value per hundred calls |
 | [docs/08_explainability.md](docs/08_explainability.md) | SHAP globally and for three clients |
 | [docs/08_recommendations.md](docs/08_recommendations.md) | eight recommendations, each with a falsifier |
+| [docs/viva_qa.md](docs/viva_qa.md) | 37 likely viva questions, four per rubric criterion, each with a record |
 | [PROGRESS.md](PROGRESS.md) | every task, every decision and every defect found, in order |
 
 ---
@@ -212,7 +214,7 @@ variant is a parameter and not a default.
 
 ## How the numbers were checked
 
-Three layers, applied to every task, because a number that cannot be re-derived is a number that will
+Four layers, applied to every task, because a number that cannot be re-derived is a number that will
 eventually be wrong:
 
 1. **In-module checks** — each module validates its own output before writing it, and exits non-zero on
@@ -222,8 +224,9 @@ eventually be wrong:
    `searchsorted` counts, xgboost's own `pred_contribs` instead of `shap`), and traces every number in
    the prose to a record.
 3. **Numeric traces** — documents are parsed for every decimal, and each one must exist in a
-   `models/*.json` record, a `reports/*.csv` column or a supporting document. The report's 497 tokens,
-   the deck's 157 and the playbook's 63 all pass; a number with no record behind it fails the build.
+   `models/*.json` record, a `reports/*.csv` column or a supporting document. The report's 490 tokens,
+   the deck's 157, the playbook's 63 and the viva bank's 364 all pass; a number with no record behind it
+   fails the build.
 4. **A clean-clone rerun** — the pushed repository was cloned outside the working tree, given a fresh
    virtual environment and the pinned install, and run through the command list above in order. The
    fitted artifacts, processed data, report tables and seven of eight figures came back byte-identical;
@@ -239,16 +242,15 @@ cross-validated balanced accuracy. All are recorded in `PROGRESS.md`, with the f
 
 ## What is not here yet
 
-The repository is **44 of 46 tasks** into a 46-task plan, and the two open items are deliverables
+The repository is **45 of 46 tasks** into a 46-task plan, and the one open item is a deliverable
 rather than analysis:
 
 | Task | Missing piece |
 |---|---|
-| T45 | `docs/viva_qa.md` — 25+ likely questions with answers |
 | T46 | `docs/demo_script.md` — a five-minute walkthrough |
 
 The Streamlit demo is present at `app/app.py` and is checked by `python -m src.demo`; no number above
-depends on the two remaining tasks.
+depends on the one remaining task.
 
 ---
 

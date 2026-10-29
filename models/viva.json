@@ -1,0 +1,44 @@
+{
+  "task": "T45",
+  "document": "docs/viva_qa.md",
+  "bytes": 50523,
+  "sha256": "933b1c4993883a2d0c9f1958a7c2affcbcfb4768d7572fa3e13564dde02f3de1",
+  "lines": 773,
+  "words": 8061,
+  "questions": 37,
+  "per_criterion": {
+    "1": 4,
+    "2": 4,
+    "3": 4,
+    "4": 4,
+    "5": 4,
+    "6": 4,
+    "7": 5,
+    "8": 4,
+    "9": 4
+  },
+  "criteria_covered": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "prohibitions": [
+    "`duration` is never an input",
+    "accuracy is never a headline",
+    "`month` is never read as a cause"
+  ],
+  "scope_phrase": "converts a fixed call budget",
+  "numeric_tokens": 364,
+  "admissible_values": 53110,
+  "unmatched": [],
+  "links": 59,
+  "checks_passed": 33,
+  "checks_total": 33,
+  "checks_ok": true
+}

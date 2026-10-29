@@ -5,7 +5,7 @@ Why this file exists
 --------------------
 T40 is the deliverable a marker reads top to bottom, and the one document in the project that could
 plausibly contain a number no run produced. Every other document was written next to a module that
-computed its figures; this one is a synthesis of twelve records and ten documents, so the risk is not
+computed its figures; this one is a synthesis of twelve records and eleven documents, so the risk is not
 arithmetic but **transcription**. A report that misquotes 0.4460 as 0.4640 is worse than no report,
 because it looks authoritative and no test will ever run again.
 
@@ -16,7 +16,7 @@ So the report is checked three ways, and all three are mechanical:
 2. **Coverage** - every figure the markdown embeds exists on disk, and every record cited in the
    appendix loads and parses.
 3. **Provenance** - **every decimal number in the document is matched against a value held in a
-   `models/*.json` record, a `reports/*.csv` column, or one of the ten supporting documents.** A number
+   `models/*.json` record, a `reports/*.csv` column, or one of the eleven analysis documents.** A number
    that appears in the report and nowhere else is a defect, and the check fails rather than printing a
    warning. This is the same discipline T37, T38 and T39 applied to their own prose.
 
@@ -106,8 +106,12 @@ MIN_PDF_PAGES: int = 8
 
 # Documents admitted as sources for the provenance trace. `report.md` is excluded: the trace exists to
 # prove the report did not invent a number, so quoting the report against itself would be vacuous.
+# Downstream deliverables (the viva bank and the demo script) are excluded too: they quote the report, so
+# admitting them would let a number circulate between two documents with no record behind it.
+DOWNSTREAM_DOCS: frozenset[str] = frozenset({"viva_qa.md", "demo_script.md"})
 SOURCE_DOCS: tuple[Path, ...] = tuple(
-    path for path in sorted(config.DOCS_DIR.glob("*.md")) if path.name != REPORT_MD.name
+    path for path in sorted(config.DOCS_DIR.glob("*.md"))
+    if path.name != REPORT_MD.name and path.name not in DOWNSTREAM_DOCS
 )
 
 

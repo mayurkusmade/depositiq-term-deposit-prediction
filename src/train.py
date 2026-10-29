@@ -261,15 +261,23 @@ def fold_metrics(y_true: np.ndarray, scores: np.ndarray) -> dict:
     }
 
 
-def cross_validate(
+def cross_validate_factory(
     name: str,
+    make,
+    role: str,
+    note: str,
     frame: pd.DataFrame,
     y: pd.Series,
     folds: list[tuple[np.ndarray, np.ndarray]],
     columns: list[str],
 ) -> dict:
     """
-    Fit one estimator once per fold and score its out-of-fold predictions.
+    Fit one estimator factory once per fold and score its out-of-fold predictions.
+
+    The factory is a parameter rather than a registry lookup because T30's search scores candidate
+    parameter sets that are not registered estimators, and it has to do that through **this** loop: a
+    candidate scored by a second, parallel implementation would make "tuned beats untuned" two
+    experiments rather than a comparison (D45).
 
     `frame.iloc[...]` rather than `.loc[...]` on purpose: the splitter returns **positions**, and the
     engineered frame's index is whatever `load_split` produced, so positional indexing is the only
@@ -279,7 +287,7 @@ def cross_validate(
     fits: list[Pipeline] = []
 
     for fold, (train_idx, valid_idx) in enumerate(folds, start=1):
-        pipeline = make_pipeline(ESTIMATORS[name]["make"](), columns)
+        pipeline = make_pipeline(make(), columns)
         pipeline.fit(frame.iloc[train_idx], y.iloc[train_idx])
         scores = pipeline.predict_proba(frame.iloc[valid_idx])[:, 1]
         estimator = pipeline.named_steps[STEP_MODEL]
@@ -301,12 +309,26 @@ def cross_validate(
 
     return {
         "estimator": name,
-        "role": ESTIMATORS[name]["role"],
-        "note": ESTIMATORS[name]["note"],
+        "role": role,
+        "note": note,
         "folds": records,
         "summary": summarise(records),
         "fits": fits,
     }
+
+
+def cross_validate(
+    name: str,
+    frame: pd.DataFrame,
+    y: pd.Series,
+    folds: list[tuple[np.ndarray, np.ndarray]],
+    columns: list[str],
+) -> dict:
+    """Score a **registered** estimator on the run's folds. See `cross_validate_factory`."""
+    entry = ESTIMATORS[name]
+    return cross_validate_factory(
+        name, entry["make"], entry["role"], entry["note"], frame, y, folds, columns
+    )
 
 
 def reduction_check(

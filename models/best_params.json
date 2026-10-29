@@ -1,0 +1,598 @@
+{
+  "task": "T30",
+  "variant": "full",
+  "training_rows": 36168,
+  "positives": 4231,
+  "base_rate": 0.11698186241981863,
+  "features": [
+    "age",
+    "day",
+    "previous_capped",
+    "balance_arsinh",
+    "marital",
+    "housing",
+    "contact",
+    "month",
+    "poutcome",
+    "campaign_bucket",
+    "recency_band",
+    "previously_contacted"
+  ],
+  "folds": 5,
+  "fold_seed": 42,
+  "sd_ddof": 1,
+  "search": {
+    "method": "RandomizedSearchCV",
+    "space": {
+      "n_estimators": [
+        200,
+        300,
+        400,
+        600,
+        800
+      ],
+      "learning_rate": [
+        0.02,
+        0.03,
+        0.05,
+        0.08,
+        0.1
+      ],
+      "max_depth": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "min_child_weight": [
+        1,
+        3,
+        5,
+        10
+      ],
+      "subsample": [
+        0.7,
+        0.8,
+        0.9,
+        1.0
+      ],
+      "colsample_bytree": [
+        0.6,
+        0.8,
+        1.0
+      ]
+    },
+    "space_size": 4800,
+    "n_iter": 40,
+    "scoring": "average_precision",
+    "seed": 42,
+    "search_n_jobs": -1,
+    "estimator_n_jobs": 1,
+    "cv": "the 5 materialised folds from src.train.materialise_folds (StratifiedKFold, shuffle=True, random_state=42)",
+    "treatment": "scale_pos_weight=1.0 (fixed; T29, D49)",
+    "seconds": 50.1,
+    "best_score_optimistic": 0.4460153160186124,
+    "best_score_sd": 0.011043321063311734,
+    "candidate_scores": {
+      "min": 0.4080410969445306,
+      "median": 0.438928216557367,
+      "max": 0.4460153160186124,
+      "all": [
+        0.44021191305590524,
+        0.44421023691724476,
+        0.4306626162290961,
+        0.43126187776222596,
+        0.439677987231633,
+        0.4423605231722747,
+        0.437074784906065,
+        0.4423773937735843,
+        0.4285787427162669,
+        0.4261688830740026,
+        0.444917082113251,
+        0.44285306429121807,
+        0.4447625064404875,
+        0.44196210008872044,
+        0.43985688789867494,
+        0.43668373605772787,
+        0.4324976846105456,
+        0.438689485476476,
+        0.4426624147430531,
+        0.4407245472260632,
+        0.43764829038171216,
+        0.43154955075170803,
+        0.44221825459818237,
+        0.4417010477783053,
+        0.43392156604612814,
+        0.4383491113320434,
+        0.43723226780492874,
+        0.44347684047635355,
+        0.42451251071004725,
+        0.445269475658974,
+        0.4460153160186124,
+        0.43498662026679485,
+        0.4080410969445306,
+        0.438421239988484,
+        0.43475568490307237,
+        0.42604451207603145,
+        0.44103426311338617,
+        0.4449486843376406,
+        0.439166947638258,
+        0.43355679452832946
+      ],
+      "fold_sd_of_best": 0.011043321063311734,
+      "fold_sd_ddof": 1,
+      "sklearn_std_test_score_ddof0": 0.009877446637968119,
+      "standard_error_of_best": 0.0049387233189840596,
+      "within_one_se_of_best": 14,
+      "within_one_fold_sd_of_best": 28
+    },
+    "top_candidates": [
+      {
+        "params": {
+          "subsample": 1.0,
+          "n_estimators": 300,
+          "min_child_weight": 10,
+          "max_depth": 5,
+          "learning_rate": 0.08,
+          "colsample_bytree": 0.6
+        },
+        "mean_test_score": 0.4460153160186124,
+        "fold_sd": 0.011043321063311734,
+        "sklearn_std_test_score_ddof0": 0.009877446637968119
+      },
+      {
+        "params": {
+          "subsample": 1.0,
+          "n_estimators": 800,
+          "min_child_weight": 5,
+          "max_depth": 5,
+          "learning_rate": 0.02,
+          "colsample_bytree": 0.8
+        },
+        "mean_test_score": 0.445269475658974,
+        "fold_sd": 0.013246793982487836,
+        "sklearn_std_test_score_ddof0": 0.011848292731511183
+      },
+      {
+        "params": {
+          "subsample": 1.0,
+          "n_estimators": 600,
+          "min_child_weight": 3,
+          "max_depth": 4,
+          "learning_rate": 0.05,
+          "colsample_bytree": 0.8
+        },
+        "mean_test_score": 0.4449486843376406,
+        "fold_sd": 0.011695720324537957,
+        "sklearn_std_test_score_ddof0": 0.01046097027659711
+      },
+      {
+        "params": {
+          "subsample": 0.8,
+          "n_estimators": 400,
+          "min_child_weight": 5,
+          "max_depth": 3,
+          "learning_rate": 0.05,
+          "colsample_bytree": 0.6
+        },
+        "mean_test_score": 0.444917082113251,
+        "fold_sd": 0.012857402515512548,
+        "sklearn_std_test_score_ddof0": 0.01150001041550514
+      },
+      {
+        "params": {
+          "subsample": 0.8,
+          "n_estimators": 600,
+          "min_child_weight": 3,
+          "max_depth": 4,
+          "learning_rate": 0.05,
+          "colsample_bytree": 0.8
+        },
+        "mean_test_score": 0.4447625064404875,
+        "fold_sd": 0.012639161849920711,
+        "sklearn_std_test_score_ddof0": 0.01130481003001788
+      }
+    ]
+  },
+  "best_params": {
+    "params": {
+      "subsample": 1.0,
+      "n_estimators": 300,
+      "min_child_weight": 10,
+      "max_depth": 5,
+      "learning_rate": 0.08,
+      "colsample_bytree": 0.6
+    },
+    "note": "estimator parameters with the pipeline prefix stripped; T31 rebuilds the model from these through src.tune.make_estimator, not from prose"
+  },
+  "arms": {
+    "untuned_untreated": {
+      "note": "T28's shipped settings with no imbalance weight - the model to beat (T29's `none` arm)",
+      "summary": {
+        "roc_auc": {
+          "mean": 0.7993034924812709,
+          "sd": 0.007879002977689717
+        },
+        "pr_auc": {
+          "mean": 0.4443653091601174,
+          "sd": 0.013147649433690446
+        },
+        "brier": {
+          "mean": 0.08206254643236696,
+          "sd": 0.001303645485895342
+        },
+        "mean_pred": {
+          "mean": 0.11683470159769058,
+          "sd": 0.001567322312934576
+        },
+        "accuracy_at_half": {
+          "mean": 0.8942713221789619,
+          "sd": 0.002495040975602435
+        }
+      },
+      "params": {
+        "colsample_bytree": 0.8,
+        "learning_rate": 0.05,
+        "max_depth": 3,
+        "min_child_weight": 5,
+        "n_estimators": 400,
+        "subsample": 0.9
+      },
+      "scale_pos_weight": 1.0,
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7936420571372742,
+          "pr_auc": 0.43857308266536676,
+          "brier": 0.08257743632895803,
+          "mean_pred": 0.11595094949007034,
+          "accuracy_at_half": 0.8927287807575338,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.8101128963733716,
+          "pr_auc": 0.4354292361173832,
+          "brier": 0.08259094145080176,
+          "mean_pred": 0.11583004891872406,
+          "accuracy_at_half": 0.8930052529720763,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7924336790214923,
+          "pr_auc": 0.4309159341865861,
+          "brier": 0.0836960304974633,
+          "mean_pred": 0.11605246365070343,
+          "accuracy_at_half": 0.8918993641139066,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7951274030693997,
+          "pr_auc": 0.45816858054733595,
+          "brier": 0.08068649874364306,
+          "mean_pred": 0.11678121238946915,
+          "accuracy_at_half": 0.897829393059588,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.8052014268048167,
+          "pr_auc": 0.4587397122839154,
+          "brier": 0.08076182514096865,
+          "mean_pred": 0.11955883353948593,
+          "accuracy_at_half": 0.8958938199917047,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        }
+      ]
+    },
+    "tuned_untreated": {
+      "note": "the search's winner, refitted through the ordinary loop; the configuration T31 persists",
+      "summary": {
+        "roc_auc": {
+          "mean": 0.7990190362563324,
+          "sd": 0.008562978393974515
+        },
+        "pr_auc": {
+          "mean": 0.4460153160186124,
+          "sd": 0.011043321063311734
+        },
+        "brier": {
+          "mean": 0.08182351314331686,
+          "sd": 0.0011198671792237605
+        },
+        "mean_pred": {
+          "mean": 0.11659518778324127,
+          "sd": 0.001825128757163326
+        },
+        "accuracy_at_half": {
+          "mean": 0.8938012314996685,
+          "sd": 0.0015977647591564107
+        }
+      },
+      "params": {
+        "colsample_bytree": 0.6,
+        "learning_rate": 0.08,
+        "max_depth": 5,
+        "min_child_weight": 10,
+        "n_estimators": 300,
+        "subsample": 1.0
+      },
+      "scale_pos_weight": 1.0,
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7969572269814413,
+          "pr_auc": 0.44354752846058426,
+          "brier": 0.082306001875243,
+          "mean_pred": 0.11565180122852325,
+          "accuracy_at_half": 0.8928670168648051,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.8097105277181951,
+          "pr_auc": 0.4377568751215429,
+          "brier": 0.08200162072470182,
+          "mean_pred": 0.11517524719238281,
+          "accuracy_at_half": 0.8931434890793475,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7870622125927647,
+          "pr_auc": 0.4338568755367747,
+          "brier": 0.08335074235796075,
+          "mean_pred": 0.115627720952034,
+          "accuracy_at_half": 0.8924523085429914,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7970605370468457,
+          "pr_auc": 0.4588444143135174,
+          "brier": 0.08061520421467418,
+          "mean_pred": 0.11685789376497269,
+          "accuracy_at_half": 0.8964468408682428,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.8043046769424153,
+          "pr_auc": 0.4560708866606429,
+          "brier": 0.08084399654400452,
+          "mean_pred": 0.11966327577829361,
+          "accuracy_at_half": 0.8940965021429559,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        }
+      ]
+    },
+    "tuned_weighted": {
+      "note": "the same tuned settings with T29's weight restored, to test whether T29's finding survives tuning",
+      "summary": {
+        "roc_auc": {
+          "mean": 0.796115673980246,
+          "sd": 0.008188113533528517
+        },
+        "pr_auc": {
+          "mean": 0.44145139548592766,
+          "sd": 0.015293916644186585
+        },
+        "brier": {
+          "mean": 0.15353076300869697,
+          "sd": 0.0019512752387292572
+        },
+        "mean_pred": {
+          "mean": 0.3629443049430847,
+          "sd": 0.0022370242845352957
+        },
+        "accuracy_at_half": {
+          "mean": 0.8197579513091645,
+          "sd": 0.0068745293348410315
+        }
+      },
+      "params": {
+        "colsample_bytree": 0.6,
+        "learning_rate": 0.08,
+        "max_depth": 5,
+        "min_child_weight": 10,
+        "n_estimators": 300,
+        "subsample": 1.0
+      },
+      "scale_pos_weight": 7.548334,
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7905691041565821,
+          "pr_auc": 0.4333151043444224,
+          "brier": 0.1538376152422361,
+          "mean_pred": 0.3603154420852661,
+          "accuracy_at_half": 0.8154547967929223,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.8057192231000502,
+          "pr_auc": 0.4285259362191193,
+          "brier": 0.15132803177752427,
+          "mean_pred": 0.3619900643825531,
+          "accuracy_at_half": 0.8278960464473321,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7867410355561002,
+          "pr_auc": 0.4292504563573961,
+          "brier": 0.1565971061620067,
+          "mean_pred": 0.36513933539390564,
+          "accuracy_at_half": 0.8103400608238872,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7941287729471174,
+          "pr_auc": 0.4577068138987628,
+          "brier": 0.15263227101051377,
+          "mean_pred": 0.36184751987457275,
+          "accuracy_at_half": 0.8224802986312734,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.8034202341413798,
+          "pr_auc": 0.4584586666099375,
+          "brier": 0.15325879085120392,
+          "mean_pred": 0.365429162979126,
+          "accuracy_at_half": 0.8226185538504078,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        }
+      ]
+    }
+  },
+  "library": {
+    "xgboost": "3.2.0",
+    "scikit-learn": "1.7.2"
+  },
+  "elapsed_seconds": 68.2,
+  "checks": [
+    {
+      "check": "the search ran on the project's five folds",
+      "passed": true,
+      "detail": "search replayed the 5 materialised splits ([7234, 7234, 7234, 7233, 7233] held-out rows, n_splits=5)"
+    },
+    {
+      "check": "every chosen parameter reappears in the fitted estimator",
+      "passed": true,
+      "detail": "6 chosen parameters reappear in the refitted best estimator; wrong: none"
+    },
+    {
+      "check": "the imbalance treatment was fixed, not tuned",
+      "passed": true,
+      "detail": "space axes: ['colsample_bytree', 'learning_rate', 'max_depth', 'min_child_weight', 'n_estimators', 'subsample']; weights applied: {'untuned_untreated': 1.0, 'tuned_untreated': 1.0, 'tuned_weighted': 7.548334} (T29's literal 7.548334 for the comparison arm)"
+    },
+    {
+      "check": "each fit ran on one core, so candidate costs are comparable",
+      "passed": true,
+      "detail": "n_jobs=1 inside every fit ({'untuned_untreated': 1, 'tuned_untreated': 1, 'tuned_weighted': 1}); the search itself used n_jobs=-1"
+    },
+    {
+      "check": "the search records its own budget, metric and seed",
+      "passed": true,
+      "detail": "scoring 'average_precision', n_iter 40, seed 42, 40 distinct candidates of 40 drawn"
+    },
+    {
+      "check": "the feature set is still T25's twelve columns",
+      "passed": true,
+      "detail": "12 features -> 40 matrix columns, identical to T25's shipped set; forbidden columns present: none"
+    },
+    {
+      "check": "SMOTE is absent, as T29 closed it",
+      "passed": true,
+      "detail": "pipeline steps [('preprocess', 'model')]; no resampling arm"
+    },
+    {
+      "check": "the untuned arm reproduces T29's control bit-identically",
+      "passed": true,
+      "detail": "5 folds compared against models/imbalance_results.json (arms.none): max drift 0.0e+00"
+    },
+    {
+      "check": "the tuned arm's scores are refits, not copied from the search",
+      "passed": true,
+      "detail": "5 folds re-derived; max drift from the search's own split scores 0.0e+00; refit mean 0.446015 vs best_score_ 0.446015"
+    },
+    {
+      "check": "the tuned model beats the untuned one on CV PR-AUC",
+      "passed": true,
+      "detail": "tuned 0.4460 +/- 0.0110 vs untuned 0.4444 +/- 0.0131; delta +0.00165 +/- 0.00286, 4/5 folds improve"
+    },
+    {
+      "check": "the record alone rebuilds the tuned model bit-identically",
+      "passed": true,
+      "detail": "rebuilt from the file reproduces 5 folds with max drift 0.0e+00; parameters applied: True"
+    },
+    {
+      "check": "the written record matches the run that produced it",
+      "passed": true,
+      "detail": "best params, budget, metric and seed on disk match the run; tuned PR-AUC on disk 0.446015"
+    }
+  ],
+  "checks_passed": 12,
+  "checks_total": 12,
+  "checks_ok": true
+}

@@ -299,3 +299,137 @@ uncalibrated — they score the average client between 0.34 and 0.42 when the tr
 report ranking metrics and recalibrate before applying the €1.50 break-even. And I checked the one thing
 that could embarrass the feature selection: dropping five features costs a linear model about four
 thousandths of ROC-AUC, and for the model that ships it costs a ten-thousandth, which is noise."
+
+---
+
+## 9. Tuning (T30): what the search found, and what it did not
+
+T28 chose `max_depth=3` from a **fold-1** sweep and recorded it as "a starting point for T30, explicitly
+not tuning". This section is the tuning: six axes, five folds, 40 draws, scored by the same loop as every
+model above.
+
+### 9.1 The space, and why each axis is in it
+
+| axis | values | why these bounds |
+|---|---|---|
+| `n_estimators` | 200, 300, 400, 600, 800 | round count and learning rate trade off; 400/0.05 is one point in the grid, not a privileged one |
+| `learning_rate` | 0.02, 0.03, 0.05, 0.08, 0.1 | 0.02 at 800 rounds measured **4.0 s** on one fold, so the slow end is affordable; 0.1 must be allowed to lose at 400 rounds |
+| `max_depth` | 2, 3, 4, 5 | T28's one-fold probe already showed depth **6** overfits the 40 sparse one-hot columns, so 6 is excluded on measured evidence, not preference |
+| `min_child_weight` | 1, 3, 5, 10 | 1 is the library default, 5 is the shipped value, 10 is the regularised end |
+| `subsample` | 0.7, 0.8, 0.9, 1.0 | row bagging, from none to strong |
+| `colsample_bytree` | 0.6, 0.8, 1.0 | 40 correlated one-hot columns make column bagging plausible |
+
+**4,800 points, 40 drawn** — 0.83% of the space, `scoring="average_precision"` (D04), seed 42. The budget
+is stated as a budget: this is a search, not an optimum, and a better configuration found later is a
+larger `n_iter`, not a mistake here. The **search** runs `n_jobs=-1`; every individual fit stays
+`n_jobs=1`, so two candidates' runtimes are measured on the same number of cores.
+
+Two things are held out of the space rather than tuned: the **feature set** (T25's twelve columns, D44)
+and the **imbalance treatment** (fixed at `scale_pos_weight=1`, T29's finding). A search is free to trade
+calibration for ranking; letting it re-choose the treatment would reopen an answered question by the back
+door. The weight is evaluated afterwards as a third arm instead.
+
+### 9.2 The winner, and the three arms
+
+| arm | PR-AUC | ROC-AUC | Brier | mean p | accuracy @ 0.5 | `scale_pos_weight` |
+|---|---|---|---|---|---|---|
+| `untuned_untreated` | 0.4444 ± 0.0131 | **0.7993 ± 0.0079** | 0.0821 | 0.1168 | 89.43% | 1 |
+| `tuned_untreated` | **0.4460 ± 0.0110** | 0.7990 ± 0.0086 | **0.0818** | 0.1166 | 89.38% | 1 |
+| `tuned_weighted` | 0.4415 ± 0.0153 | 0.7961 ± 0.0082 | 0.1535 | 0.3629 | 81.98% | 7.548334 |
+
+Winner: **`subsample=1.0, n_estimators=300, min_child_weight=10, max_depth=5, learning_rate=0.08,
+colsample_bytree=0.6`** — 300 rounds at 0.08 rather than 400 at 0.05, a deeper tree with heavier leaf
+regularisation, and no row bagging at all.
+
+Paired per fold against the untuned configuration:
+
+| arm | Δ PR-AUC | Δ ROC-AUC | Δ Brier (negative = better) |
+|---|---|---|---|
+| `tuned_untreated` | **+0.00165 ± 0.00286**, 4/5 folds improve | −0.00028 ± 0.00332, 2/5 | −0.00024 ± 0.00026, 4/5 |
+| `tuned_weighted` | −0.00291 ± 0.00300, **0/5** | −0.00319 ± 0.00190, **0/5** | +0.07147 ± 0.00165, **0/5** |
+
+### 9.3 The finding is not the gain — it is the size of the gain
+
+The done-condition is met: the tuned model beats the untuned one on CV PR-AUC, in four of five folds. The
+honest reading is what that is worth:
+
+* **+0.00165 is 0.58 standard errors.** It is the same order as the fold-to-fold noise it is measured
+  against, and smaller than the 0.0039 ROC-AUC loss T26 called *statistically visible and practically
+  negligible* for a different comparison.
+* **40 candidates span 0.4080 to 0.4460, and 14 of them sit within one standard error (0.0049) of the
+  winner.** The median candidate is 0.4389, so the search's whole useful range is about a
+  hundredth of a point of PR-AUC — the same hundredth the arms already differed by.
+* **The shipped configuration was 4th of 40**, at 0.4449 ± 0.0129 against the winner's 0.4460: inside the
+  noise, 0.0012 behind. T28's hand-chosen settings were not wrong; they were near the top of what this
+  space offers, which is the reason tuning bought so little.
+* ROC-AUC moves the *other* way (−0.00028, 2/5 folds) and Brier is flat. So the gain is specific to the
+  positive-class metric and is not a uniformly better model.
+
+What the search genuinely changed is the **configuration and the record**: where T28 had one fold's
+opinion that depth 3 beats depth 4 and 6, this run has five folds saying a deeper tree with
+`min_child_weight=10` is at least as good — and a machine-readable `models/best_params.json` from which T31
+can rebuild the model instead of reading a sentence. **A deeper tree with heavier leaf regularisation is a
+different model from a shallower one with light regularisation; that they score the same is a finding, not
+a null result.**
+
+### 9.4 The selection bias is stated, not hidden
+
+The winner was chosen on **these five folds**, and T32 reports on **the same five folds**. Its CV score is
+therefore **optimistic by construction**, and `search.best_score_` (0.446015) is never quoted as a result:
+
+* the arms table is rebuilt by refitting the chosen parameters through `train.cross_validate_factory`, and
+  a check requires those per-fold numbers to equal the search's own per-split scores to **0.0e+00** — so
+  the table is a refit that agrees, not a copy;
+* the record carries all 40 candidate scores and both bands (14 within one SE, 28 within one fold-sd), so
+  a reader can see how much of the winner's edge is the edge of being best-of-40 on this data;
+* **T32's held-out half is the only thing that can discipline this number**, and §9.3 is written so that a
+  held-out PR-AUC anywhere near 0.4460 is a confirmation rather than a surprise.
+
+### 9.5 Two defects the verification caught
+
+* **`std_test_score` is a population sd.** scikit-learn computes `cv_results_["std_test_score"]` with
+  `ddof=0`; this project states `ddof=1` everywhere else (T26's `SD_DDOF`, chosen because on five folds
+  they differ by 12%). The first version of the record quoted sklearn's number next to the arms' sample
+  sds — **0.0099 against 0.0110** for the winner, an 11.8% error in a column nobody would have questioned.
+  The module now recomputes the fold sd from the per-split scores with `ddof=1` and keeps sklearn's value
+  alongside, labelled.
+* **Brier is computed in float32, and average precision collapses tied scores.** Both surfaced in the
+  independent verifier rather than in this module: scikit-learn converts the target to a **bool**
+  indicator, and XGBoost's probabilities are float32, so `bool − float32` keeps the whole Brier
+  computation in float32 and the recorded value carries float32 round-off (a float64 recomputation differs
+  by up to **1.38e-10**). Average precision has the mirror-image issue: the arms' folds contain **18-115
+  bit-identical predicted probabilities** each (float32 again — 18 of 7,233 on `tuned_weighted` fold 5,
+  **115** on `untuned_untreated` fold 1), and at a tied score no threshold exists between the rows, so a
+  staircase evaluated **per row** differs from scikit-learn's **tie-collapsed** one by up to **5.22e-07**
+  with no model change. Collapsing the ties makes the two agree to **1.11e-16** — one float64 ulp. Both
+  conventions are measured in the verifier rather than argued about, and both the Brier and the AP
+  tolerances are stated explicitly. Neither affects a published figure at four decimals; both would have
+  been invisible in a "checks pass" line.
+
+### 9.6 Verification
+
+* `python -m src.tune` exits **0** with **12/12** checks, **68.2 s** (search 50.1 s): the search replayed
+  the project's materialised folds; every chosen parameter reappears in the fitted estimator; the treatment
+  was fixed and every arm applied the weight it claims (`1.0 / 1.0 / 7.548334`); every fit ran on one core;
+  the budget, metric and seed are recorded and the 40 candidates are distinct; the feature set is still
+  twelve columns into 40; SMOTE appears nowhere; the untuned arm reproduces **T29's `none` arm
+  bit-identically (max drift 0.0e+00)**; the tuned arm's scores equal the search's own split scores
+  (0.0e+00); the tuned model beats the untuned one; the record alone rebuilds the model bit-identically;
+  and the file on disk matches the run.
+* **131 independent checks** in a separate script that refits all three arms and the top five candidates
+  from `train.csv`, building its own folds, its own pipelines and its own metrics, without importing
+  `src.tune` or `src.train`: every per-fold PR-AUC, ROC-AUC, Brier, mean-p and accuracy, every arm mean
+  and sd, every paired delta, all five leaderboard entries, the 40-candidate distribution and both bands,
+  the space size, and T29's verdict surviving tuning. Its AUC, AP and Brier functions are validated
+  against scikit-learn **before** they are used to check anything.
+
+*Interpretation for the viva:* "I tuned it properly rather than claiming the defaults were tuned: 40
+random draws over six axes, five folds, scored on PR-AUC. The tuned model does win - 0.4460 against
+0.4444, in four folds of five. But I am not going to sell that as a discovery: the gain is 0.0016 at 0.58
+standard errors, and 14 of the 40 candidates are within one standard error of the winner. What the search
+actually told me is that the configuration I had hand-picked was already the fourth best of forty, and
+that hyperparameters are not where this problem's performance lives - the feature set and the model
+family were. It also gave me the configuration as a file, so the model can be rebuilt rather than
+described. And because the winner was chosen on the same folds I report, I say plainly that its CV score
+is optimistic and that the held-out number is the one that counts."
+

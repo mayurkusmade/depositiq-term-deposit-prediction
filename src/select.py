@@ -132,6 +132,19 @@ GUARDED: dict[str, str] = {
 # Measured as strongly associated in the EDA (D38, T18-T21); the rule must never remove one of these.
 ANCHORS: tuple[str, ...] = ("poutcome", "contact", "housing")
 
+# The stage-2 outcome, frozen so that every model task can ask for the shipped columns without re-running
+# a run that takes minutes. This is a **pin, not a second source of truth**: `report()` recomputes the
+# decision and `validate()` fails if the measurement lands anywhere other than here. Downstream code that
+# wants the feature set gets it from `shipped_features()`, which reads this tuple - so the list is still
+# derived rather than typed into a model file.
+SHIPPED_DROPPED: tuple[str, ...] = ("job", "education", "default", "loan", "balance_band")
+
+
+def shipped_features() -> list[str]:
+    """The 12 features T26 onward trains on: the declared set minus the measured drops, in order."""
+    kept = [feature for feature in features.FEATURES if feature not in SHIPPED_DROPPED]
+    return columns_for(kept)
+
 FIGURE_PATH: Path = config.FIGURES_DIR / "06_feature_importance.png"
 
 
@@ -541,6 +554,13 @@ def validate(table: pd.DataFrame, mi_table: pd.DataFrame, perm_table: pd.DataFra
         sorted(table.loc[table["decision"] == "keep", "feature"]) ==
         sorted(set(features.FEATURES) - expected),
         f"{int((table['decision'] == 'keep').sum())} kept")
+
+    # The pin T26 reads. A fresh measurement that lands somewhere else is not a nuisance: it means the
+    # shipped feature set and the experiment that justified it have stopped describing the same thing.
+    add("the frozen shipped decision matches this run",
+        set(table.loc[table["decision"] == "drop", "feature"]) == set(SHIPPED_DROPPED),
+        f"SHIPPED_DROPPED={list(SHIPPED_DROPPED)}, measured="
+        f"{sorted(table.loc[table['decision'] == 'drop', 'feature'])}")
 
     # The hand-off to T26: the kept subset must build a working matrix with exactly the width the
     # ablation measured, or the shipped column list and the experiment describe different things.

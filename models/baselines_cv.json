@@ -1,0 +1,485 @@
+{
+  "task": "T26",
+  "variant": "full",
+  "training_rows": 36168,
+  "positives": 4231,
+  "base_rate": 0.11698186241981863,
+  "features": [
+    "age",
+    "day",
+    "previous_capped",
+    "balance_arsinh",
+    "marital",
+    "housing",
+    "contact",
+    "month",
+    "poutcome",
+    "campaign_bucket",
+    "recency_band",
+    "previously_contacted"
+  ],
+  "dropped_features": [
+    "job",
+    "education",
+    "default",
+    "loan",
+    "balance_band"
+  ],
+  "matrix_columns": 40,
+  "folds": 5,
+  "fold_seed": 42,
+  "sd_ddof": 1,
+  "estimators": {
+    "dummy_prior": {
+      "role": "floor",
+      "note": "predicts the training fold's positive rate for every row (D28's two floors)",
+      "params": {
+        "constant": null,
+        "random_state": null,
+        "strategy": "prior"
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.5,
+          "pr_auc": 0.11694774675145148,
+          "brier": 0.10327097309982079,
+          "mean_pred": 0.11699039192645327,
+          "accuracy_at_half": 0.8830522532485485,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.5,
+          "pr_auc": 0.11694774675145148,
+          "brier": 0.10327097309982079,
+          "mean_pred": 0.11699039192645327,
+          "accuracy_at_half": 0.8830522532485485,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.5,
+          "pr_auc": 0.1170859828587227,
+          "brier": 0.10337687241636326,
+          "mean_pred": 0.11695583051081776,
+          "accuracy_at_half": 0.8829140171412773,
+          "n_iter": -1,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.5,
+          "pr_auc": 0.11696391538780589,
+          "brier": 0.10328335838821415,
+          "mean_pred": 0.11698634871263174,
+          "accuracy_at_half": 0.8830360846121941,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.5,
+          "pr_auc": 0.11696391538780589,
+          "brier": 0.10328335838821412,
+          "mean_pred": 0.11698634871263174,
+          "accuracy_at_half": 0.8830360846121941,
+          "n_iter": -1,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        }
+      ],
+      "summary": {
+        "roc_auc": {
+          "mean": 0.5,
+          "sd": 0.0
+        },
+        "pr_auc": {
+          "mean": 0.11698186142744749,
+          "sd": 5.876439263078321e-05
+        },
+        "brier": {
+          "mean": 0.10329710707848663,
+          "sd": 4.501814016816891e-05
+        },
+        "mean_pred": {
+          "mean": 0.11698186235779755,
+          "sd": 1.469199526511866e-05
+        },
+        "accuracy_at_half": {
+          "mean": 0.8830181385725526,
+          "sd": 5.8764392630795296e-05
+        }
+      },
+      "artifact": "models\\baseline_dummy.joblib"
+    },
+    "logreg_balanced": {
+      "role": "baseline",
+      "note": "the task's required baseline; scaling comes from the T24 preprocessor",
+      "params": {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "dual": false,
+        "fit_intercept": true,
+        "intercept_scaling": 1,
+        "l1_ratio": null,
+        "max_iter": 2000,
+        "multi_class": "deprecated",
+        "n_jobs": null,
+        "penalty": "l2",
+        "random_state": 42,
+        "solver": "lbfgs",
+        "tol": 0.0001,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7568841215281016,
+          "pr_auc": 0.39320317161096163,
+          "brier": 0.18520055975365635,
+          "mean_pred": 0.4139973897659913,
+          "accuracy_at_half": 0.7549073818081283,
+          "n_iter": 42,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 2,
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7792962129051073,
+          "pr_auc": 0.39714624264283876,
+          "brier": 0.18340638625706968,
+          "mean_pred": 0.41642654289296854,
+          "accuracy_at_half": 0.7623721316007741,
+          "n_iter": 35,
+          "train_rows": 28934,
+          "train_positives": 3385,
+          "train_rate": 0.1169903919264533
+        },
+        {
+          "fold": 3,
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7493950318579893,
+          "pr_auc": 0.3852062672172497,
+          "brier": 0.18783170850479786,
+          "mean_pred": 0.41682622034862576,
+          "accuracy_at_half": 0.7399778822228366,
+          "n_iter": 39,
+          "train_rows": 28934,
+          "train_positives": 3384,
+          "train_rate": 0.11695583051081772
+        },
+        {
+          "fold": 4,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.768455132525768,
+          "pr_auc": 0.41881614497619407,
+          "brier": 0.18269670084231662,
+          "mean_pred": 0.4145877190515358,
+          "accuracy_at_half": 0.7552882621318955,
+          "n_iter": 43,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        },
+        {
+          "fold": 5,
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7661554702019209,
+          "pr_auc": 0.40982486795261847,
+          "brier": 0.18677856051604558,
+          "mean_pred": 0.41849054944478237,
+          "accuracy_at_half": 0.7480989907369003,
+          "n_iter": 40,
+          "train_rows": 28935,
+          "train_positives": 3385,
+          "train_rate": 0.11698634871263176
+        }
+      ],
+      "summary": {
+        "roc_auc": {
+          "mean": 0.7640371938037774,
+          "sd": 0.011428060758640054
+        },
+        "pr_auc": {
+          "mean": 0.4008393388799725,
+          "sd": 0.013418720413338464
+        },
+        "brier": {
+          "mean": 0.1851827831747772,
+          "sd": 0.0021736960520448044
+        },
+        "mean_pred": {
+          "mean": 0.4160656843007808,
+          "sd": 0.0018062965240262308
+        },
+        "accuracy_at_half": {
+          "mean": 0.7521289297001069,
+          "sd": 0.008463343392994881
+        }
+      },
+      "artifact": "models\\baseline_logreg.joblib"
+    }
+  },
+  "reduction_check": {
+    "arms": {
+      "all17": {
+        "features": 17,
+        "columns": 65
+      },
+      "shipped12": {
+        "features": 12,
+        "columns": 40
+      }
+    },
+    "folds": [
+      {
+        "fold": 1,
+        "all17": {
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7634331363031452,
+          "pr_auc": 0.39759356736094525,
+          "brier": 0.18332418871737252,
+          "mean_pred": 0.41168542220279836,
+          "accuracy_at_half": 0.7578103400608239,
+          "columns": 65,
+          "n_iter": 46
+        },
+        "shipped12": {
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7568841215281016,
+          "pr_auc": 0.39320317161096163,
+          "brier": 0.18520055975365635,
+          "mean_pred": 0.4139973897659913,
+          "accuracy_at_half": 0.7549073818081283,
+          "columns": 40,
+          "n_iter": 42
+        }
+      },
+      {
+        "fold": 2,
+        "all17": {
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7814609914274845,
+          "pr_auc": 0.40028047699407915,
+          "brier": 0.18122133545911484,
+          "mean_pred": 0.41242033933355815,
+          "accuracy_at_half": 0.7619574232789604,
+          "columns": 65,
+          "n_iter": 44
+        },
+        "shipped12": {
+          "rows": 7234,
+          "positives": 846,
+          "roc_auc": 0.7792962129051073,
+          "pr_auc": 0.39714624264283876,
+          "brier": 0.18340638625706968,
+          "mean_pred": 0.41642654289296854,
+          "accuracy_at_half": 0.7623721316007741,
+          "columns": 40,
+          "n_iter": 35
+        }
+      },
+      {
+        "fold": 3,
+        "all17": {
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7535730136609764,
+          "pr_auc": 0.38809969624569024,
+          "brier": 0.18555025203337552,
+          "mean_pred": 0.4127617006090576,
+          "accuracy_at_half": 0.7477191042300249,
+          "columns": 65,
+          "n_iter": 45
+        },
+        "shipped12": {
+          "rows": 7234,
+          "positives": 847,
+          "roc_auc": 0.7493950318579893,
+          "pr_auc": 0.3852062672172497,
+          "brier": 0.18783170850479786,
+          "mean_pred": 0.41682622034862576,
+          "accuracy_at_half": 0.7399778822228366,
+          "columns": 40,
+          "n_iter": 39
+        }
+      },
+      {
+        "fold": 4,
+        "all17": {
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7695627680487218,
+          "pr_auc": 0.41752223520961146,
+          "brier": 0.18089878593415895,
+          "mean_pred": 0.41153843859252304,
+          "accuracy_at_half": 0.7551500069127609,
+          "columns": 65,
+          "n_iter": 46
+        },
+        "shipped12": {
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.768455132525768,
+          "pr_auc": 0.41881614497619407,
+          "brier": 0.18269670084231662,
+          "mean_pred": 0.4145877190515358,
+          "accuracy_at_half": 0.7552882621318955,
+          "columns": 40,
+          "n_iter": 43
+        }
+      },
+      {
+        "fold": 5,
+        "all17": {
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7715987076290085,
+          "pr_auc": 0.4110245568588252,
+          "brier": 0.1842810422610274,
+          "mean_pred": 0.41481706412847913,
+          "accuracy_at_half": 0.7525231577492051,
+          "columns": 65,
+          "n_iter": 42
+        },
+        "shipped12": {
+          "rows": 7233,
+          "positives": 846,
+          "roc_auc": 0.7661554702019209,
+          "pr_auc": 0.40982486795261847,
+          "brier": 0.18677856051604558,
+          "mean_pred": 0.41849054944478237,
+          "accuracy_at_half": 0.7480989907369003,
+          "columns": 40,
+          "n_iter": 40
+        }
+      }
+    ],
+    "summary": {
+      "roc_auc": {
+        "all17_mean": 0.7679257234138674,
+        "shipped12_mean": 0.7640371938037774,
+        "delta_mean": -0.003888529610089875,
+        "delta_sd": 0.002251875330552587,
+        "folds_improving": 0
+      },
+      "pr_auc": {
+        "all17_mean": 0.4029041065338303,
+        "shipped12_mean": 0.4008393388799725,
+        "delta_mean": -0.0020647676538577352,
+        "delta_sd": 0.0021947699188206117,
+        "folds_improving": 1
+      }
+    }
+  },
+  "elapsed_seconds": 4.8,
+  "checks": [
+    {
+      "check": "the fold split is deterministic and shared by every estimator",
+      "passed": true,
+      "detail": "folds 5, validation sizes/positives (7234, 846) ... (7233, 846)"
+    },
+    {
+      "check": "every estimator scored the same target rows",
+      "passed": true,
+      "detail": "5 folds x 36168 validation rows, 4231 positives"
+    },
+    {
+      "check": "the estimators differ only in the estimator",
+      "passed": true,
+      "detail": "identical preprocessing across 2 estimators, differing estimators: ['DummyClassifier', 'LogisticRegression']"
+    },
+    {
+      "check": "the preprocessor is fitted per fold, never on the pooled frame",
+      "passed": true,
+      "detail": "fold mean matched to 0.0e+00; pooled mean is 4.739e-02 away (folds themselves differ by up to 4.739e-02)"
+    },
+    {
+      "check": "every fold built the 40-column matrix from the 12 kept features",
+      "passed": true,
+      "detail": "[40] columns over 12 features, 36,168 rows, forbidden columns present: []"
+    },
+    {
+      "check": "no prediction is missing or outside [0, 1]",
+      "passed": true,
+      "detail": "probabilities span [0.0455, 0.9943]"
+    },
+    {
+      "check": "the dummy reproduces D28's three floors exactly",
+      "passed": true,
+      "detail": "ROC-AUC 0.5000, PR-AUC = the base rate 0.1170, Brier = p(1-p), accuracy 88.3018% vs always-'no' 88.3018%; problems: none"
+    },
+    {
+      "check": "the logistic baseline beats both floors in every fold",
+      "passed": true,
+      "detail": "PR-AUC above the base rate in all 5 folds (0.4008 vs 0.1170); failures: PR none, ROC none"
+    },
+    {
+      "check": "no leaky or target column reached the matrix",
+      "passed": true,
+      "detail": "['duration', 'pdays', 'y'] were in the frame handed to the model and are absent from its 40 columns"
+    },
+    {
+      "check": "the saved artifacts reload and predict identically",
+      "passed": true,
+      "detail": "baseline_logreg.joblib reloads as a 2-step pipeline, predicts 500 rows identically (max delta 0.0e+00), 40 columns"
+    },
+    {
+      "check": "the shipped feature set is T25's frozen decision",
+      "passed": true,
+      "detail": "12 features; frozen drops ['job', 'education', 'default', 'loan', 'balance_band']"
+    },
+    {
+      "check": "the logistic model converged in every fold",
+      "passed": true,
+      "detail": "n_iter [42, 35, 39, 43, 40] against max_iter 2000"
+    },
+    {
+      "check": "the reduction check re-runs the baseline, not a second experiment",
+      "passed": true,
+      "detail": "5 paired folds, shipped arm identical to the baseline (drift: none), 65 -> 40 columns"
+    },
+    {
+      "check": "the CV record on disk matches the run",
+      "passed": true,
+      "detail": "baselines_cv.json: 36,168 rows, 40 columns, 2 estimators x 5 folds"
+    }
+  ],
+  "checks_passed": 14,
+  "checks_total": 14,
+  "checks_ok": true
+}

@@ -1,0 +1,142 @@
+{
+  "task": "T31",
+  "variant": "full",
+  "chosen": "XGBoost (xgboost_gbdt), untreated, at T30's tuned point",
+  "rationale": "see docs/06_model_comparison.md; summaries: best PR-AUC/ROC-AUC of the phase, mean prediction on the base rate without recalibration, and the untreated form chosen by T29's measurement",
+  "artifact": {
+    "path": "models\\final_model.joblib",
+    "bytes": 180520,
+    "sha256": "7a40752f75a264a0933bae2dc42feb28385b6ab75de36c32782c8a7ab8f2ed5f",
+    "compress": 3,
+    "format": "joblib: sklearn Pipeline(preprocess=ColumnTransformer, model=XGBClassifier)"
+  },
+  "parameters": {
+    "subsample": 1.0,
+    "n_estimators": 300,
+    "min_child_weight": 10,
+    "max_depth": 5,
+    "learning_rate": 0.08,
+    "colsample_bytree": 0.6
+  },
+  "pinned": {
+    "tree_method": "hist",
+    "eval_metric": "aucpr",
+    "random_state": 42,
+    "n_jobs": 1,
+    "scale_pos_weight": 1.0,
+    "boosted_rounds": 300
+  },
+  "features": [
+    "age",
+    "day",
+    "previous_capped",
+    "balance_arsinh",
+    "marital",
+    "housing",
+    "contact",
+    "month",
+    "poutcome",
+    "campaign_bucket",
+    "recency_band",
+    "previously_contacted"
+  ],
+  "matrix_columns": 40,
+  "training_rows": 36168,
+  "positives": 4231,
+  "base_rate": 0.11698186241981863,
+  "fold_seed": 42,
+  "cross_validation": {
+    "source": "models\\best_params.json",
+    "arm": "tuned_untreated",
+    "pr_auc": {
+      "mean": 0.4460153160186124,
+      "sd": 0.011043321063311734
+    },
+    "roc_auc": {
+      "mean": 0.7990190362563324,
+      "sd": 0.008562978393974515
+    },
+    "brier": {
+      "mean": 0.08182351314331686,
+      "sd": 0.0011198671792237605
+    },
+    "mean_pred": {
+      "mean": 0.11659518778324127,
+      "sd": 0.001825128757163326
+    },
+    "note": "5-fold stratified CV on the training half only. The test half has not been scored; T32 owns that number, and the CV figure here is optimistic because T30 chose the configuration on these same folds."
+  },
+  "usage": {
+    "input": "DataFrame with the twelve `features` columns (features.engineer -> select.select_features)",
+    "output": "predict_proba(...)[:, 1] = P(subscribe); the pipeline carries its own preprocessing",
+    "threshold": "none baked in: T34 applies D17's 7.50% break-even after recalibration"
+  },
+  "library": {
+    "xgboost": "3.2.0",
+    "scikit-learn": "1.7.2",
+    "pandas": "2.3.3",
+    "numpy": "2.3.3"
+  },
+  "fit_seconds": 0.8,
+  "checks": [
+    {
+      "check": "the artifact carries exactly the parameters T30 selected",
+      "passed": true,
+      "detail": "6 parameters match models/best_params.json and are applied to the persisted estimator; wrong: none"
+    },
+    {
+      "check": "the settings the search never varied survived persistence",
+      "passed": true,
+      "detail": "tree_method/eval_metric/seed/n_jobs/treatment survived the pickle: {'tree_method': 'hist', 'eval_metric': 'aucpr', 'random_state': 42, 'n_jobs': 1, 'scale_pos_weight': 1.0}; wrong: none"
+    },
+    {
+      "check": "the artifact is a two-step pipeline with the selected number of rounds",
+      "passed": true,
+      "detail": "steps ['preprocess', 'model']; XGBClassifier with 300 boosted rounds (selected 300)"
+    },
+    {
+      "check": "the fitted preprocessing is still the 40-column T24 matrix",
+      "passed": true,
+      "detail": "40 matrix columns from 12 features; forbidden columns: none"
+    },
+    {
+      "check": "the reloaded pipeline reproduces the fitted one bit-identically",
+      "passed": true,
+      "detail": "max |in-memory - reloaded| over 1000 rows = 0.0e+00"
+    },
+    {
+      "check": "the file loads and predicts in a separate process",
+      "passed": true,
+      "detail": "a new Python process loaded the file and scored 1000 rows, max drift 0.0e+00"
+    },
+    {
+      "check": "predict_proba returns finite probabilities for one row or many",
+      "passed": true,
+      "detail": "(1000, 2) with rows in [0.005045, 0.994955], columns summing to 1 within 0.0e+00; single row -> (1, 2)"
+    },
+    {
+      "check": "the artifact predicts deterministically",
+      "passed": true,
+      "detail": "two consecutive calls return identical arrays"
+    },
+    {
+      "check": "the artifact was fitted on the training half and never saw the test half",
+      "passed": true,
+      "detail": "fitted on 36,168 rows / 4,231 positives, all of the training half; test-half loads in this module: none"
+    },
+    {
+      "check": "the card's checksum and size describe the file on disk",
+      "passed": true,
+      "detail": "final_model.joblib is 180,520 bytes, sha256 7a40752f75a264a0..."
+    },
+    {
+      "check": "the card's CV numbers are T30's, not retyped",
+      "passed": true,
+      "detail": "card PR-AUC 0.446015 +/- 0.011043 equals T30's tuned arm; ROC-AUC 0.799019"
+    }
+  ],
+  "checks_passed": 11,
+  "checks_total": 11,
+  "checks_ok": true,
+  "elapsed_seconds": 3.0
+}

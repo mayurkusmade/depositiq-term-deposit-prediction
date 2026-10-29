@@ -433,3 +433,128 @@ family were. It also gave me the configuration as a file, so the model can be re
 described. And because the winner was chosen on the same folds I report, I say plainly that its CV score
 is optimistic and that the held-out number is the one that counts."
 
+
+---
+
+## 10. The metric table (T32): three cuts, because one of them would lie
+
+Every table before this one reported **threshold-free** metrics only. T32 asks for precision, recall and
+F1, and those three exist **at a cut** — so the honest question is not "what is the F1" but "at whose
+threshold".
+
+T29 already measured why 0.5 is the wrong default: weighting rewrites the loss and moves the mean predicted
+probability from **0.117** to **0.39**, so a fixed 0.5 cut lands near the *weighted* model's own optimum by
+accident. A table read at 0.5 ranks models by where their calibration sits. Three cuts are therefore
+reported, and only one of them is the headline:
+
+| cut | definition | status |
+|---|---|---|
+| **nested** | F1-maximising cut chosen on the **other four folds'** out-of-fold scores | the operating point when the cut must be learned from data |
+| **break-even** | D17's **7.50%** — a call pays for itself above that subscription rate | the business cut, and the only one **not fitted to the data** |
+| **0.5** | the conventional cut | reported **as the number this reasoning rejects** |
+
+### 10.1 The table, mean ± sd over five folds
+
+| model | PR-AUC | ROC-AUC | cut | precision | recall | F1 |
+|---|---|---|---|---|---|---|
+| `dummy_prior` | 0.1170 ± 0.0001 | 0.5000 ± 0.0000 | 0.1170 | 0.0936 ± 0.0523 | 0.8000 ± 0.4472 | 0.1675 ± 0.0937 |
+| `logreg_balanced` | 0.4008 ± 0.0134 | 0.7640 ± 0.0114 | 0.6388 | 0.4321 ± 0.0161 | 0.4273 ± 0.0364 | 0.4292 ± 0.0232 |
+| `random_forest` | 0.4346 ± 0.0146 | 0.7906 ± 0.0089 | 0.5794 | 0.4341 ± 0.0182 | 0.4999 ± 0.0294 | 0.4641 ± 0.0148 |
+| **`xgboost_tuned`** | **0.4460 ± 0.0110** | **0.7990 ± 0.0086** | **0.2103** | **0.4591 ± 0.0130** | **0.5202 ± 0.0133** | **0.4877 ± 0.0110** |
+
+The shipped model wins PR-AUC, ROC-AUC, precision, recall and F1 — the first table in this document where a
+single build leads every column. Its cut varies by fold (**0.1994–0.2168**) because each fold's cut comes
+from the other four, which is the price of not scoring a fold at a threshold fitted to itself.
+
+The dummy's ±0.4472 recall is not noise: a **constant** score has no ranking, so any cut lands either above
+all of it (flag nothing) or on it (flag everything) — **four folds** take one branch and **one** the other,
+which is what makes the recall **0.8000 ± 0.4472** and the precision **0.0936 ± 0.0523**. It is reported
+unchanged rather than smoothed, because it is the clearest illustration of what a threshold does to a model
+with no ordering: the same estimator scores **0.2094** and **0.0000** on the same task depending only on
+whether the cut fell above or below its one value.
+
+### 10.2 The reversal, measured on two models this time
+
+T29's reversal compared two *treatments* of one estimator. Here it compares two **models**:
+
+| cut | `random_forest` F1 | `xgboost_tuned` F1 | who wins |
+|---|---|---|---|
+| **0.5** | **0.4565** ± 0.0125 | 0.3509 ± 0.0164 | the forest, by **10.6 points** |
+| **nested** | 0.4641 ± 0.0148 | **0.4877** ± 0.0110 | the shipped model, by **2.4 points** |
+
+The mechanism is arithmetic and visible in the flag rates: the forest's mean prediction is **0.3404**, so a
+0.5 cut sits inside its distribution and flags **17.89%** of rows (2.9× the base rate, by construction); the shipped model's mean prediction is
+**0.1166**, so 0.5 sits near its **95th percentile** and flags **4.67%** — it is scoring itself at a bar
+almost nothing clears. **Neither model changed between the two rows.** A report that quoted one cut would be
+reporting the cut.
+
+### 10.3 At the business cut, the baseline is "call everyone"
+
+| model | precision | recall | F1 | rows flagged |
+|---|---|---|---|---|
+| `dummy_prior` (= call the whole list) | 0.1170 ± 0.0001 | 1.0000 ± 0.0000 | 0.2095 ± 0.0001 | 100.00% |
+| `logreg_balanced` | 0.1171 ± 0.0001 | 1.0000 ± 0.0000 | 0.2097 ± 0.0001 | 99.87% |
+| `random_forest` | 0.1181 ± 0.0004 | 0.9981 ± 0.0013 | 0.2111 ± 0.0007 | 98.91% |
+| **`xgboost_tuned`** | **0.2218 ± 0.0061** | **0.7790 ± 0.0086** | **0.3453 ± 0.0081** | **41.10%** |
+
+This is the row that makes the business argument, and it is not the row a naive reading would pick. At
+**7.50%** every weighted model flags essentially the whole list — their scores sit far above 0.075 — so their
+"precision" is the base rate and their F1 is the dummy's. The shipped model flags **41.10%** of the list and
+finds **77.90%** of the subscribers in it at **22.18%** precision, which is **1.90× the precision of calling
+everyone** for **41%** of the calls — and at the nested cut the precision is **3.92×** the base rate, for
+**13%** of the calls.
+
+Two operating points, two different questions: the **nested** cut calls **13.26%** of the list and reaches
+**52.02%** of subscribers; the **break-even** cut calls **41.10%** and reaches **77.90%**. Both sit above
+break-even in expectation, so choosing between them is a question about call capacity and the marginal value
+of the next call — **T34's job with the cost model**, not a metric's job. What this table establishes is that
+both are available from one calibrated score, which is exactly what the weighted builds could not offer.
+
+### 10.4 Verification
+
+* `python -m src.metrics` exits **0** with **11/11** checks in **30.8 s** (forest 24.9 s, XGBoost 3.7 s,
+  logistic 0.6 s, dummy 0.3 s): every model ran the identical five folds (the three distinct
+  `(rows, positives)` combinations five stratified folds can produce); the shipped row reproduces **T30's
+  tuned arm bit-identically** (**0.0e+00**); every fold's cut is re-derived from the other four and matches;
+  no fold's cut equals the all-folds cut in *every* fold, so the leave-one-out procedure is distinguishable
+  from the leaky one on this data; the nested cut is never 0.5; every F1 is the harmonic mean of its own
+  precision and recall; precision, recall and F1 match scikit-learn on the same predictions to **5.6e-17**;
+  the 7.50% cut flags **39.74–41.84%** of rows against an **11.69%** positive rate, so it is a boundary
+  rather than a truncation; the shipped model beats the floor at the same rule; the summary rows are the
+  mean and the **sample** sd (D50) of the folds; the table is CV-only, with a source scan for test-half
+  loads that cannot match its own text; and the CSV on disk is the table the run produced.
+* **151 independent checks** in a separate script that refits all four models and every fold from
+  `train.csv` with its own pipelines, importing neither `src.metrics`, `src.train` nor
+  `src.imbalance.choose_threshold` — the cut is found by a hand-written scan over distinct scores. It
+  recomputes all 40 per-fold ROC-AUC and PR-AUC values, all 60 precision/recall/F1 triples at both cuts,
+  the flag counts, the summary rows, and the reversal in §10.2.
+* **A defect the verifier reported against the wrong artefact, which is now recorded.** Its first run
+  failed every value comparison by **5e-7** — because it was reading `reports/metrics_cv.csv`, which stores
+  six decimals, and testing against **1e-12**. The numbers were right and the check was pointed at a
+  rounded view of them. It now verifies against `models/metrics_cv.json` (full precision) and checks the
+  CSV *separately* at its own precision, which is the only arrangement where a stale CSV would still be
+  caught: a file left behind by an earlier run would agree on most cells and differ exactly where a number
+  moved.
+
+### 10.5 What T33–T36 inherit
+
+* **`reports/metrics_cv.csv` is CV only** (28 rows: four models × five folds, plus a `mean` and an `sd` row
+  per model). T33's held-out figures belong in their own file so the gap between the two is computable
+  rather than arguable.
+* **Two cuts are live, and they answer different questions.** The nested cut (**0.2103** on average) is the
+  least-cost-per-subscription point; the break-even cut (**0.075**) is the highest-volume point that still
+  pays for itself. T34 chooses between them with the cost model; nothing here has been frozen into the
+  artifact.
+* **The 0.5 column stays in the file as the rejected number.** If a later phase quotes F1 at 0.5 without
+  saying so, this section is the evidence that the cut, not the model, produced the ordering.
+
+*Interpretation for the viva:* "Precision, recall and F1 only mean something at a threshold, so I did not
+pick 0.5 — I picked each fold's cut using the other four folds, so no row is judged at a threshold fitted to
+itself. That was worth doing twice over: at 0.5 the forest looks ten points better than my shipped model,
+and at a properly chosen cut the shipped model is better. Neither model changed — only the cut did, because
+the forest's probabilities are three times too high and the shipped model's are calibrated, so 0.5 is a
+lenient bar for one and a near-impossible one for the other. And the row I would actually show a bank is the
+7.5% break-even: call 41% of the list and reach 78% of the eventual subscribers at 22% precision, which is
+nearly twice the precision of calling everyone, while the tighter cut reaches half the subscribers from 13%
+of the calls at almost four times the base rate. Both thresholds are available from the same score, which is
+the practical reason the calibrated model was worth insisting on."

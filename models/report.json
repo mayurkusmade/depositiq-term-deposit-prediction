@@ -1,0 +1,66 @@
+{
+  "task": "T40",
+  "report": "docs\\report.md",
+  "words": 7289,
+  "lines": 831,
+  "figures": 9,
+  "distinct_figures": 9,
+  "records_cited": 12,
+  "numeric_tokens": 497,
+  "admissible_values": 52848,
+  "unmatched": [],
+  "criteria": [
+    {
+      "number": 1,
+      "title": "Problem definition and business understanding",
+      "source": "01_problem_definition.md"
+    },
+    {
+      "number": 2,
+      "title": "Dataset and data understanding",
+      "source": "02_data_dictionary.md"
+    },
+    {
+      "number": 3,
+      "title": "Preprocessing and cleaning",
+      "source": "src/clean.py"
+    },
+    {
+      "number": 4,
+      "title": "Exploratory analysis",
+      "source": "04_eda_insights.md"
+    },
+    {
+      "number": 5,
+      "title": "Feature engineering and selection",
+      "source": "05_leakage_audit.md"
+    },
+    {
+      "number": 6,
+      "title": "Model selection and implementation",
+      "source": "06_modeling.md"
+    },
+    {
+      "number": 7,
+      "title": "Evaluation and validation",
+      "source": "07_threshold.md"
+    },
+    {
+      "number": 8,
+      "title": "Business insights and recommendations",
+      "source": "08_recommendations.md"
+    },
+    {
+      "number": 9,
+      "title": "Documentation and reproducibility",
+      "source": ""
+    }
+  ],
+  "html_bytes": 64663,
+  "pdf_bytes": 2794041,
+  "pdf_pages": 27,
+  "pdf_renderer": "chrome.exe",
+  "checks_passed": 30,
+  "checks_total": 30,
+  "checks_ok": true
+}

@@ -1,8 +1,8 @@
 # Project Status
 
 **Title:** DepositIQ: Predicting Term Deposit Subscription to Optimize Bank Telemarketing Campaigns
-**Last updated:** 2026-10-30 03:15
-**Overall completion:** 85% (39 / 46 tasks)
+**Last updated:** 2026-10-30 04:05
+**Overall completion:** 87% (40 / 46 tasks)
 **Working location:** `depositiq-term-deposit-prediction/` (GitHub: `mayurkusmade/depositiq-term-deposit-prediction`)
 
 ## Rubric Coverage
@@ -17,8 +17,8 @@
 | 6 | Model Selection & Implementation | 15 | 6 / 6 ✅ | T26–T31 |
 | 7 | Model Evaluation & Validation | 15 | 5 / 5 ✅ | T32–T36 |
 | 8 | Business Insights & Recommendations | 10 | 3 / 3 ✅ | T37–T39 |
-| 9 | Documentation & Presentation | 10 | 6 / 13 | T01–T06, T40–T46 |
-| | **Total** | **100** | **39 / 46** | |
+| 9 | Documentation & Presentation | 10 | 7 / 13 | T01–T06, T41–T46 |
+| | **Total** | **100** | **40 / 46** | |
 
 > Note: the rubric has nine criteria, listed above. Phase 10 (T45–T46, viva preparation) is not a
 > separate criterion — those two tasks are counted inside criterion 9 — so the per-criterion
@@ -28,29 +28,24 @@
 
 ## NEXT TASK
 
-**T40 | Phase 9 – Deliverables | The final report.** Open: `docs/report.md` (+ PDF).
-**Phase 8 is closed: all nine rubric criteria now have their evidence on disk**, and this task assembles it
-into one document a marker can read top to bottom. **Done when:** every rubric criterion is covered from
-saved numbers alone, the narrative order is problem → data → method → evaluation → recommendation, and a
-reader who has not seen the notebooks can follow it.
-**Carry in:** six constraints. **(1) No new numbers** (D06): everything in the report already exists in
-`models/*.json`, `reports/*.csv` or one of the eleven documents in `docs/`, and any figure genuinely new -
-a percentage, a ratio - is produced by `src/playbook.py` or a sibling and written to a file. The report's
-job is selection and order, not analysis. **(2) The nine criteria are the report's skeleton**, so each
-criterion opens with its own evidence rather than the report following the project's chronology: 1 problem
-(`docs/01`), 2 data (`docs/02`), 3 preprocessing (D43/D51, `src/clean.py` 21 checks), 4 EDA (`docs/04`),
-5 features (T22–T25, D42), 6 modelling (`docs/06*`), 7 evaluation (`docs/07*`), 8 business
-(`docs/08*`), 9 documentation (this report). **(3) The scope sentence travels with the headline** (D18):
-p* = **7.50%** is below the **11.6982%** base rate, so this converts a fixed budget better, it does not cut
-spend. Any euro figure quoted without that sentence is a claim the project does not make. **(4) The three
-prohibitions are stated where the result is**: `duration` never as an input (D05/D57), no accuracy as a
-headline (D48), and no causal reading of `month` (D19/D20). **(5) Prices are assumptions** (D17): C =
-**1.50 EUR**, V = **20.00 EUR**, and every euro in the report is linear in V, so the sentence that says so
-belongs next to the first number, not in a footnote. **(6) The held-out half is spent once** (D53/D54):
-report its numbers as *reported*, never as a basis for a choice made after seeing them, and say plainly
-that the 9,043 rows are from the same campaign.
-**Output:** `docs/report.md` plus a rendered PDF; diagrams drawn from `reports/figures/` rather than new
-plots, so no figure appears in the report that is not in a record.
+**T41 | Phase 9 – Deliverables | The slide deck.** Open: `docs/presentation.pptx` (or an outline plus an export).
+**Phase 9 is a third done and the report it must summarise now exists**: `docs/report.md` is **7,289 words**
+over **27 rendered pages**, covers all nine criteria in rubric order, and its **497 decimal tokens** all trace
+to a record or a supporting document. **Done when:** at most 15 slides, business-first narrative, and a
+results table taken from the actual runs rather than retyped from the report.
+**Carry in:** five constraints. **(1) ≤ 15 slides, and slide 1 is the decision**, not the dataset: who is
+called, at what price, with what measured gain. **(2) The scope sentence travels with the first euro figure**
+(D18) — p* = **7.50%** sits below the **11.6982%** base rate, so the deck sells a better use of a fixed call
+budget and never a budget cut. **(3) Every slide's number comes from a record**; the deck's figures are
+**43,621.00 EUR** on the training half and **10,988.50 EUR** held out, **41.10%** of the list called for
+**77.90%** of subscribers, top-decile lift **4.3652×**, and PR-AUC **0.4460** cross-validated against
+**0.4616** held out. **(4) The three prohibitions get a slide-time form too** — `duration` never an input,
+accuracy never a headline, `month` never a cause — because a deck is where a nuance is most likely to be
+dropped for space. **(5) The held-out half is reported, not re-used** (D53/D54): no slide may imply a choice
+was made after seeing it.
+**Output:** `docs/presentation.pptx` if a writer is available, otherwise `docs/presentation_outline.md` with
+the per-slide copy and a rendered PDF, and `models/presentation.json` recording which record each number on
+each slide came from.
 
 ---
 
@@ -138,6 +133,7 @@ stops being evidence |
 | D38 | 2026-10-28 | The numeric correlation matrix and the categorical Cramér's V tables are **two halves of one feature ranking**, and neither is quoted as a ranking on its own | `duration` is the strongest number in the matrix (+0.3967) and unusable (D05); the strongest *usable* numeric is −0.1526; `poutcome` at V = 0.3102 is the strongest association anywhere in the data and does not appear in the heatmap at all, because Pearson cannot see a categorical column. Any statement of the form "the top predictors are …" therefore has to name which half it came from |
 
 | D60 | 2026-10-30 | **The playbook is eight recommendations held as data in `src/playbook.py`, each figure a file-plus-key-path pair re-read from disk, ordered data quality → pricing → ranking → instrumentation, with the D18 scope sentence ahead of any euro figure and `duration` permitted only in the recommendation that forbids it** | Three reasons the recommendations are not prose. **A sentence cannot be checked; a record can.** Every one of the **46** cited figures is resolved by `resolve()` and re-read in `validate()`, so a mistyped key path, a stale model or a number carried over from an older run fails the command rather than being marked — and a figure with no record behind it cannot be written at all, which is what the `derived()` function is for: the ten quantities the document needs (net per 1,000 calls on each half, cost per subscription both ways, held-out recall and precision, the always-`no` accuracy, the campaign/client split) are computed from records, not dictated. **Eight, not the required six**, because two of the eight are prohibitions rather than actions - R4 on `duration` and R7 against re-opening the feature set - and a prohibition is only credible next to the number it declines: **+0.1788** PR-AUC and **20,340.00 EUR** that would be banked by a model that has seen the answer, and a **0.4460** baseline that a future re-tune must beat to be worth doing. **The order is by leverage, not by importance**: R1 first because `contact=unknown` covers **28.72%** of clients at a **-1.0150** contribution, so one required field changes how nearly three clients in ten are scored, and no other recommendation touches that many rows for so little work; R5 second because it decides the cut, and every euro in the document is linear in an **assumed** V = **20.00 EUR**; R2/R3 after it, because how the list is worked only matters once the price is real. **Why R3 is written as a refusal:** calls saved peaks at **18.89%** coverage while the price puts the cut at **41.10%**, and the block between them converts at **8.96%** for **+2,350.50 EUR** - profitable, so pruning to the peak is an optimisation that loses money. The honest form is therefore "do not stop where calls saved peaks", with the held-out half stated beside it: **1,547** calls at **7.76%** for **+79.50 EUR** is a rounding error, so on fresh data the same policy may well flip, and the recommendation says so. **Why the scope sentence leads:** p* = **7.50%** sits below the **11.6982%** base rate, so the campaign already pays; the measured gain is **+13,253.00 EUR (+43.6%)** on **21,302 fewer calls**, which is a fixed-budget improvement. A playbook that omitted this would license a spend cut the model never justified (D18). **Scope:** one classic telemarketing campaign, prices assumed, no causal month effect, three clients and eight recommendations are not a validation set |
+| D61 | 2026-10-30 | **The final report is checked three ways — structure, coverage, provenance — and rendered to PDF by a headless browser already on the machine, so the deliverable adds no dependency** | Three reasons the report is generated rather than typed. **Its risk is transcription, not arithmetic.** Every other document was written beside the module that computed its figures; this one synthesises twelve records and eleven documents, so a misquoted 0.4460 is the failure mode and no test would ever run again to catch it. The provenance check therefore parses **every decimal in the document** — **497 tokens** — and requires each to exist in a `models/*.json` record, a `reports/*.csv` column, or a supporting document; thousands separators are stripped before matching because a comma splits `43,621.00` into a fragment that matches nothing, which is the same tokenizer defect T39 hit. **It caught three real errors, and they were mine:** `77.87%` reached subscribers in two places where the records say **77.90%** (3,296 / 4,231) — copied from an older progress note rather than from `lift_results.json`, which is exactly the drift the check exists for; and a pair of balance-band rates (**5.36%**, **16.44%**) that appear in no record and no document, replaced with the quoted **−0.00023 ± 0.00085** ablation and the **3,001 rows (8.30%)** of negative balances that *are* on file. **The four constraints are asserted, not trusted:** the D18 scope sentence must precede the first `EUR` total (it does, at byte 1,790 against 2,281), the price assumptions must be declared in the same breath, and each of the three prohibitions must appear inside the section where its result is presented — a prohibition stated only in the summary is one a reader will not connect to anything. **The renderer is deliberately small and the PDF is not a new dependency:** a ~120-line markdown subset (headings, tables, lists, code, images, bold/italic) and Chromium's own `--print-to-pdf`, which exists on every Windows and macOS machine — so the deliverable **27 pages, 2,794,041 bytes, 9 embedded figures** — is reproducible without adding a single pin to `requirements.txt`. A missing browser is reported as a failed check, never as a silent HTML-only run. **Scope:** the report selects and orders evidence; it computes nothing new, and its only derived claims (**3.95×** the base rate, the counts behind each percentage) are recomputed by the independent verifier from the records |
 
 ---
 
@@ -204,7 +200,7 @@ Tick only after the deliverable is verified to exist and run.
 - [x] T39 | Rubric 8 | Business recommendations and campaign playbook | Output: `docs/08_recommendations.md` | **done 2026-10-30** (`src/playbook.py` writes `reports/playbook.csv` and `models/playbook.json`; the eight recommendations live in the module as data and each figure is a **file-plus-key-path pair re-read from disk**, so **46 figures** across **9 records** resolve and **12/12** checks pass, including one that re-reads every figure and compares it with the value the document cites - a stale record fails the build instead of shipping; `duration` appearing anywhere except **R4** also fails, so the prohibition is enforced mechanically; **scope first** (D18): calling everyone nets **30,368.00 EUR** and the cut nets **43,621.00 EUR**, so the model is worth **+13,253.00 EUR (+43.6%)** and **21,302 fewer calls** - an improvement on a campaign that already pays, not a rescue of one that does not; **R1 is a data-quality action**, because `contact=unknown` covers **28.72%** of clients, is worth **-1.0150** log-odds, and scores them at **4.11%** against **14.83%** for `cellular`, with **no lift claimed** - filling the field changes how those clients are scored, it does not relabel them; **R3 refuses the obvious optimisation**: calls saved peaks at **18.89%** coverage (**15,188** calls saved) but the **8,033** calls past it still convert at **8.96%** for **+2,350.50 EUR**, so the cut is sized by **capacity** - and the held-out half prices that same block at **1,547** calls and **7.76%** for only **+79.50 EUR**, which the document states as the thinnest recommendation rather than hiding; **R4** carries the `duration` gap (**+0.1788** PR-AUC, **20,340.00 EUR**, dead at dial time); **R7** keeps the 40-column XGBoost on **0.4460** against **0.4346** and **0.4008** PR-AUC, with tuning worth **+0.0016**; **R8** reads `month` as a calendar (**17.55%** of importance, March **+1.3736** at **50.90%**, May **-0.2999** at **6.68%** on **30.59%** of the file) and names the 2008-2010 confound; campaign-side features carry **55.75%** of importance against **44.25%** for the client's own, which is why the playbook is mostly about *how* the bank calls; `python -m src.playbook` exits **0** in **9.4 s**, and **78 independent checks** recompute every table cell and every derived euro without importing the module and trace **63 numeric tokens** in the document to the records with **0 unmatched**)
 
 ### Phase 9 — Deliverables
-- [ ] T40 | Rubric 9 | Write the final report | Output: `docs/report.md` (+ PDF) | Done when: all nine rubric criteria are covered using only real numbers from saved runs
+- [x] T40 | Rubric 9 | Write the final report | Output: `docs/report.md` (+ PDF) | **done 2026-10-30** (`src/report.py` → `docs/report.md`, `docs/report.html`, `docs/report.pdf` and `models/report.json`; **7,289 words over 27 rendered pages**, covering the nine criteria **in rubric order**, each section naming the document or module that carries its evidence; **9 figures embedded**, every one a file under `reports/figures/` that a record already produced; **12 records cited and re-parsed**; and **497 decimal tokens** all matched against a value in a `models/*.json` record, a `reports/*.csv` column or one of the eleven supporting documents — **0 unmatched**; the **D18 scope sentence sits at byte 1,790, before the first `EUR` total at 2,281**, with the price assumptions declared in the same paragraph; the three prohibitions are asserted where their results are (`duration` in §5.4, accuracy in §7.6, causal `month` in §8.1); `python -m src.report` exits **0** with **30/30** checks in **3.4 s**, and **45 independent checks** recompute the headline euros from the records without importing the module — every one of the fourteen quoted totals matched to the cent, every percentage re-derived from its counts; **three defects caught by that trace and fixed** — `77.87%` twice where the record says **77.90%**, and a balance-band pair that existed in no record at all)
 - [ ] T41 | Rubric 9 | Build the slide deck | Output: `docs/presentation.pptx` (or outline + export) | Done when: ≤ 15 slides, business-first narrative, results table taken from actual runs
 - [ ] T42 | Rubric 9 | Finalise README and repo hygiene | Output: `README.md` | Done when: a clean clone can reproduce the results by following the README alone
 - [ ] T43 | Rubric 9 | Build the interactive demo | Output: `app/app.py` (Streamlit) | Done when: it runs locally, accepts client attributes, and returns a probability with the top SHAP drivers
@@ -2043,6 +2039,55 @@ figures, which is why the fix belongs in the tokenizer and not in the prose.
 **Uncommitted:** `src/playbook.py`, `reports/playbook.csv`, `models/playbook.json`,
 `docs/08_recommendations.md`, `PROGRESS.md`.
 **Next:** T40 — the final report, assembling the nine criteria from the records already on disk.
+
+---
+
+### 2026-10-30 — Session 42  (T40 complete, Phase 9 started)
+
+**Completed:** **T40** — `src/report.py`, `docs/report.md`, `docs/report.html`, `docs/report.pdf` and
+`models/report.json`; criterion 9 is **7 / 13** and the project is **40 / 46**.
+
+**The report is a selection problem, and the risk is transcription.** Eight phases produced twelve records and
+eleven documents; T40 assembles them into one document a marker reads top to bottom, in rubric order rather
+than project chronology, so each criterion opens with its own evidence instead of the report following the
+order the work happened to be done in. Nothing in it is a new measurement: **497 decimal tokens**, every one
+matched to a value held in a record or a supporting document.
+
+**The shape.** **§0** states the decision and the scope sentence before the first euro total. **§1–§8** are
+the eight analytic criteria, each ~900 words with its tables and its figure. **§9** is the reproducibility
+claim: the module table with checks and runtimes, the three-layer verification discipline, and the command
+sequence. **§10** lists seven limitations — the assumed prices, the held-out half being the same campaign, the
+random rather than temporal split, the tuning gain below its own error bar, the `month` confound, the
+unobserved counterfactual, and the absent fairness audit. **Appendices A–C** index the figures, the records,
+and the checks themselves.
+
+**What it says, in one paragraph.** The model ranks clients well enough that calling **41.10%** of the list
+reaches **77.90%** of subscribers — **43,621.00 EUR** on the training half and **10,988.50 EUR** held out,
+against **30,368.00** and **7,595.50** for calling everyone. The cut is the price, **0.0750 = 1.50 / 20.00**,
+not a fitted argmax. The top decile converts at **4.3652×**. And the most important feature is a field that
+was left blank on **28.72%** of clients, which is a data-quality finding wearing a modelling costume.
+
+**Verified:** `python -m src.report` exits **0** with **30/30** checks in **3.4 s** — nine sections in order,
+nine sections naming their evidence, 9 figures present on disk, 12 records parsing, 497 tokens traced, the
+scope sentence before the first `EUR`, all three prohibitions inside their own sections, and a PDF that is
+**27 pages** of real content with **9 embedded images**. A separate verifier that imports neither the module
+nor `pdfminer` runs **45 checks** of its own, matching all fourteen quoted euro totals to the records to the
+cent and re-deriving every percentage from its counts.
+
+**Three defects, all caught by the trace.** (1) **`77.87%`** reached subscribers, in the threshold table and
+again in the prose — the records say **77.90%** (3,296 / 4,231), and the wrong figure had been copied forward
+from a progress note instead of from `lift_results.json`. (2) and (3) Two balance-band rates, **5.36%** and
+**16.44%**, that appear in no record and no document: they were replaced with the recorded ablation
+(**−0.00023 ± 0.00085**) and the **3,001 rows (8.30%)** carrying a negative balance, both of which are on
+file. This is the case the record-or-nothing rule was written for, and the first one where the offender was
+this session's own prose rather than a hand-typed figure in a data structure.
+
+**Blocked:** the push, as recorded in Open Questions item 10 — six commits local, `origin/main` at
+`caefa9a`, and the credential helper needs an interactive sign-in the agent shell cannot drive.
+**Uncommitted:** `src/report.py`, `docs/report.md`, `docs/report.html`, `docs/report.pdf`,
+`models/report.json`, `PROGRESS.md`.
+**Next:** T41 — the slide deck, at most 15 slides, drawing every figure from the records the report already
+traced.
 
 ---
 

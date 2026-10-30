@@ -124,12 +124,12 @@ def evidence_text(block: str) -> str:
 def source_numbers() -> set[str]:
     """Numbers the bank may quote: records, tables, the report and the analysis documents.
 
-    `viva_qa.md` is excluded because a document cannot be its own source. `demo_script.md` is excluded
-    because it is downstream of this bank, the same reason `src/report.py` excludes both from the report's
-    sources.
+    `viva_qa.md` is excluded because a document cannot be its own source. `demo_script.md` and
+    `report_academic.md` are excluded because they are downstream of this bank, the same reason
+    `src/report.py` excludes them from the report's sources.
     """
     allowed = record_numbers(exclude=RECORD_PATH)
-    downstream = {VIVA_MD.name, "demo_script.md"}
+    downstream = {VIVA_MD.name, "demo_script.md", "report_academic.md"}
     sources = [config.DOCS_DIR / "report.md"]
     sources.extend(path for path in sorted(config.DOCS_DIR.glob("*.md"))
                    if path.name not in downstream and path.name != "report.md")

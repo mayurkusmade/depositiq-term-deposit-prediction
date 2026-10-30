@@ -29,3 +29,4 @@ Thumbs.db
 
 # Rendered report HTML (regenerable from docs/report.md by `python -m src.report`)
 docs/report.html
+docs/report_academic.html

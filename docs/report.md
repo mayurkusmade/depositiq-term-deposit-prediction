@@ -111,8 +111,8 @@ V · P(subscribe)  >  C        ⇒        P(subscribe)  >  C / V  =  1.50 / 20.0
 
 **p\* = 7.50%.** This is D17, and it is the single most important number in the project: it is
 imported from `cost.break_even_threshold()` rather than typed, and a check in T34 requires the
-recorded cut to equal that function's output exactly. A 20-cell sensitivity grid over C ∈ {0.75, 1.50,
-2.50, 4.00} × V ∈ {10, 20, 30, 50} EUR confirms the arithmetic in each cell.
+recorded cut to equal that function's output exactly. A 20-cell sensitivity grid over C ∈ {0.75, 1.00,
+1.50, 2.00, 3.00} × V ∈ {10, 20, 40, 60} EUR confirms the arithmetic in each cell.
 
 ### 1.5 Out of scope
 
@@ -364,9 +364,10 @@ interpretable:
 | **`none` (control)** | **0.4444 ± 0.0131** | 0.7993 ± 0.0079 | **0.0821** | **0.1168** |
 | `smote` | 0.4152 ± 0.0234 | 0.7799 ± 0.0105 | 0.1221 | 0.2967 |
 
-**SMOTE is worse than doing nothing in 0/5 folds on all three metrics** — **−0.0268** PR-AUC
-(**−6.07%**), **−0.0194** ROC-AUC (**6.8 SE**) — and three times slower. The class weight buys nothing
-on ranking either (**+0.0023** in the control's favour, **5/5** folds, identical ROC-AUC) and **halves**
+**SMOTE is worse than doing nothing in 0/5 folds on all three metrics** — **0.4152** PR-AUC
+against the control's **0.4444**, **0.7799** ROC-AUC against **0.7993** — and three times slower. The
+class weight buys nothing on ranking either (**+0.0023** in the control's favour, **5/5** folds, identical
+ROC-AUC) and **halves**
 the calibration quality, because it drags mean probability to **0.3892** when the truth is 0.1170.
 
 F1 was **not** read at 0.5. Each fold is scored at its leave-one-fold-out F1-maximising cut, because a
@@ -685,7 +686,7 @@ promise of fairness beyond segment-level metrics; and no claim that these prices
 
 ```
 depositiq-term-deposit-prediction/
-├── data/raw/            bank-full.csv, bank-additional/, bank-names.txt   (not committed)
+├── data/raw/            bank-full.csv, bank-additional/, bank-names.txt   (committed)
 ├── data/processed/      train.csv, test.csv
 ├── src/                 analysis modules, each runnable as python -m src.<name>
 ├── notebooks/           01_data_understanding, 02_preprocessing, 03_eda

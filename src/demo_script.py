@@ -156,7 +156,7 @@ def numbers_in(path: Path) -> set[str]:
 
 def source_numbers() -> set[str]:
     allowed = record_numbers(exclude=RECORD_PATH)
-    downstream = {SCRIPT_MD.name, "viva_qa.md"}
+    downstream = {SCRIPT_MD.name, "viva_qa.md", "report_academic.md"}
     sources = [config.DOCS_DIR / "report.md"]
     sources.extend(path for path in sorted(config.DOCS_DIR.glob("*.md"))
                    if path.name not in downstream and path.name != "report.md")

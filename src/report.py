@@ -106,9 +106,12 @@ MIN_PDF_PAGES: int = 8
 
 # Documents admitted as sources for the provenance trace. `report.md` is excluded: the trace exists to
 # prove the report did not invent a number, so quoting the report against itself would be vacuous.
-# Downstream deliverables (the viva bank and the demo script) are excluded too: they quote the report, so
-# admitting them would let a number circulate between two documents with no record behind it.
-DOWNSTREAM_DOCS: frozenset[str] = frozenset({"viva_qa.md", "demo_script.md"})
+# Downstream deliverables (the viva bank, the demo script and the alternate academic report) are excluded
+# too: they quote the report, so admitting them would let a number circulate between two documents with no
+# record behind it.
+DOWNSTREAM_DOCS: frozenset[str] = frozenset(
+    {"viva_qa.md", "demo_script.md", "report_academic.md"}
+)
 SOURCE_DOCS: tuple[Path, ...] = tuple(
     path for path in sorted(config.DOCS_DIR.glob("*.md"))
     if path.name != REPORT_MD.name and path.name not in DOWNSTREAM_DOCS
@@ -308,7 +311,8 @@ thead { background: #0b3d63; color: #ffffff; }
 th { text-align: left; padding: 1.8mm 2mm; font-weight: 600; }
 td { padding: 1.5mm 2mm; border-bottom: 0.4pt solid #d8e0e6; vertical-align: top; }
 tbody tr:nth-child(even) { background: #f6f8fa; }
-figure { margin: 4mm 0 5mm 0; page-break-inside: avoid; text-align: center; }
+figure { margin: 4mm 0 5mm 0; page-break-inside: avoid; page-break-after: avoid;
+         text-align: center; }
 img { max-width: 100%; max-height: 155mm; border: 0.4pt solid #d8e0e6; }
 blockquote { margin: 3mm 0; padding: 2mm 4mm; border-left: 2.5pt solid #0b3d63;
              background: #f4f7fa; }
